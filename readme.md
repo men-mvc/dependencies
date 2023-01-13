@@ -12,5 +12,6 @@ Inside the root folder
 
 ### Adding a package to another package as dependency locally
 - `lerna add @men-mvc/config --scope=@men-mvc/cache` - this adds `@men-mvc/config` to `@men-mvc/cache`
+- use `--dev` flag to add the dependency as dev
 - Then run `lerna run build`
 - **Note** - when Lerna publishes the package, it will also update the version of the dependency to the latest one
