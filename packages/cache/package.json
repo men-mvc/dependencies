@@ -20,8 +20,7 @@
     "dev": "echo \"dev command is not required for cache package\"",
     "format": "prettier --config .prettierrc . --write",
     "test": "CORE_TEST=1 jest --testPathPattern=tests --runInBand --forceExit",
-    "jest": "CORE_TEST=1 jest",
-    "postinstall": "npm run build"
+    "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
     "@men-mvc/config": "^0.13.0",

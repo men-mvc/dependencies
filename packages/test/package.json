@@ -19,7 +19,6 @@
     "build": "rm -f -r lib && npx tsc",
     "dev": "echo \"dev command is not required for test package\"",
     "format": "prettier --config .prettierrc . --write",
-    "postinstall": "npm run build",
     "test": "echo \"test package does not have any tests to run\""
   },
   "dependencies": {

@@ -19,8 +19,7 @@
     "dev": "echo \"dev command is not required for config package\"",
     "format": "prettier --config .prettierrc . --write",
     "test": "CORE_TEST=1 jest --testPathPattern=tests --runInBand --forceExit",
-    "jest": "CORE_TEST=1 jest",
-    "postinstall": "npm run build"
+    "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
     "dotenv": "^16.0.3",
