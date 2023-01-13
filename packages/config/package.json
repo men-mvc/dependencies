@@ -10,9 +10,6 @@
   "files": [
     "lib"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "rm -f -r lib && npx tsc",
     "format": "prettier --config .prettierrc . --write",
@@ -39,5 +36,6 @@
     "typescript": "^4.9.4"
   },
   "author": "men-mvc <iljimae.ic@gmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "gitHead": "551c9017f4f51a55e8aaecd36204a64a3980f11c"
 }
