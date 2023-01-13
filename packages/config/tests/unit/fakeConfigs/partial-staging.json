@@ -1,0 +1,8 @@
+{
+  "app": {
+    "name": "Men MVC Partial Staging"
+  },
+  "auth": {
+    "secret": "private-partial-staging-auth-secret"
+  }
+}
