@@ -8,6 +8,9 @@
     "test": "tests"
   },
   "files": ["lib"],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "rm -f -r lib && npx tsc",
     "format": "prettier --config .prettierrc . --write",
