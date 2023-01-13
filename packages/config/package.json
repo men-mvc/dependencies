@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/config",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "",
   "main": "lib/index.js",
   "directories": {
@@ -37,5 +37,5 @@
   },
   "author": "men-mvc <iljimae.ic@gmail.com>",
   "license": "ISC",
-  "gitHead": "551c9017f4f51a55e8aaecd36204a64a3980f11c"
+  "gitHead": "57949c77f2fea37d5836e1b64429aa28d763ea28"
 }
