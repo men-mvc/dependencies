@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/cache",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "",
   "type": "commonjs",
   "main": "lib/index.js",
