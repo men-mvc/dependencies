@@ -9,3 +9,7 @@ Inside the root folder
 
 ### Running tests
 - `lerna run test`
+
+### Adding a package to another package as dependency locally
+- `lerna add @men-mvc/config --scope=@men-mvc/cache` - this adds `@men-mvc/config` to `@men-mvc/cache`
+- Then run `lerna run build`

@@ -24,7 +24,7 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "@men-mvc/config": "file:packages/config",
+    "@men-mvc/config": "^0.9.0",
     "memory-cache": "^0.2.0",
     "redis": "^4.5.1"
   },
