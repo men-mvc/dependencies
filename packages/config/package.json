@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "rm -f -r lib && npx tsc",
+    "dev": "echo \"dev command is not required for config package\"",
     "format": "prettier --config .prettierrc . --write",
     "test": "CORE_TEST=1 jest --testPathPattern=tests --runInBand --forceExit",
     "jest": "CORE_TEST=1 jest",
