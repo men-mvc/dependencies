@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/cache",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "",
   "type": "commonjs",
   "main": "lib/index.js",
@@ -24,7 +24,7 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "@men-mvc/config": "^0.10.0",
+    "@men-mvc/config": "^0.11.0",
     "memory-cache": "^0.2.0",
     "redis": "^4.5.1"
   },
