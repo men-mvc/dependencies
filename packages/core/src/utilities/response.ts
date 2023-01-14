@@ -28,7 +28,7 @@ export const errorResponse = <T>(
     message: string;
     details?: T | null;
   };
-  console.error('I ma here');
+
   if (typeof error === 'string') {
     responseData = {
       message: error
