@@ -4,7 +4,8 @@ import { faker } from '@faker-js/faker';
 import {
   successResponse,
   errorResponse,
-  notFoundResponse
+  notFoundResponse,
+  emptyResponse
 } from '../../../src/utilities/response';
 
 class FakeExpressResponse {
@@ -70,6 +71,15 @@ describe(`Response Utility`, () => {
           message: `User not found.`
         }
       });
+    });
+  });
+
+  describe(`emptyResponse`, () => {
+    it(`should return empty data with 204 status code`, () => {
+      const resMock = mockExpressResponse();
+      emptyResponse(resMock);
+      assertResponseStatus(resMock, StatusCodes.NO_CONTENT);
+      assertResponseJson(resMock, null);
     });
   });
 
