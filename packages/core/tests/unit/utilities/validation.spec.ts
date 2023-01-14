@@ -109,4 +109,18 @@ describe(`Validation Utility`, () => {
           })
       });
   });
+
+  describe(`failValidationForField`, () => {
+    it(`should throw ValidationError with expected errors`, () => {
+      try {
+        failValidationForField(`email`, `Email is required.`);
+        throw new Error(`ValidationError was not thrown.`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown.`);
+        }
+        expect(e.errors['email']).toBe(`Email is required.`);
+      }
+    });
+  });
 });
