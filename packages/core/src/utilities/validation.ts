@@ -46,7 +46,10 @@ export const validateRequestAsync = async <T>(
   await schema.validateAsync(data, options);
 };
 
-export const failValidationForField = (field: string, errorMessage: string) => {
+export const failValidationForField = (
+  field: string,
+  errorMessage: string
+): never => {
   throw new ValidationError({
     [field]: errorMessage
   });
@@ -54,10 +57,33 @@ export const failValidationForField = (field: string, errorMessage: string) => {
 
 // TODO: add validator for file extension
 
+const isUploadedFile = (value: unknown): value is UploadedFile =>
+  value instanceof UploadedFile;
+
+// TODO: should be able to add more types from env variable.
+const isImageFile = (file: UploadedFile): boolean =>
+  ['image/gif', 'image/jpeg', 'image/png'].includes(
+    file.mimetype.toLowerCase()
+  );
+
+const validateImageFile = (field: string, value: unknown, error: string) => {
+  if (!isUploadedFile(value)) {
+    // input value is not a file
+    return failValidationForField(field, error);
+  }
+  if (!isImageFile(value)) {
+    failValidationForField(field, error);
+  }
+};
+
 /**
  * This function can be used to validate both multiple-file upload and single upload
  */
-export const validateFile = <T>(value: T, field: string, message?: string) => {
+export const validateFile = <T>(
+  value: T | null,
+  field: string,
+  message?: string
+) => {
   const error = message ?? `Input value(s) must be file(s).`;
   if (!value) {
     // if the value is empty, it does not validate if the input is file or not
@@ -65,12 +91,12 @@ export const validateFile = <T>(value: T, field: string, message?: string) => {
   }
   if (Array.isArray(value)) {
     const values = value as unknown[];
-    for (let value of values) {
-      if (!(value instanceof UploadedFile)) {
+    for (let element of values) {
+      if (!isUploadedFile(element)) {
         failValidationForField(field, error);
       }
     }
-  } else if (!(value instanceof UploadedFile)) {
+  } else if (!isUploadedFile(value)) {
     // single file upload
     failValidationForField(field, error);
   }
@@ -79,23 +105,20 @@ export const validateFile = <T>(value: T, field: string, message?: string) => {
 /**
  * This function can be used to validate both multiple-file upload and single upload
  */
-export const validateImageFiles = <T>(
-  value: T,
+export const validateImage = <T>(
+  value: T | null,
   field: string,
   message?: string
 ) => {
   const error = message ?? `Invalid image file(s).`;
-  if (!value || !Array.isArray(value)) {
-    failValidationForField(field, error);
+  if (!value) {
+    // when the input field is empty, it will pass.
+    return;
   }
-  const values = value as unknown[];
-  for (let value of values) {
-    if (!(value instanceof UploadedFile)) {
-      failValidationForField(field, error);
-    }
-    const file: UploadedFile = value as UploadedFile;
-    if (!['image/gif', 'image/jpeg', 'image/png'].includes(file.mimetype)) {
-      failValidationForField(field, error);
-    }
+  if (Array.isArray(value)) {
+    // multiple files
+    value.map((file) => validateImageFile(field, file, error));
+  } else {
+    validateImageFile(field, value, error);
   }
 };

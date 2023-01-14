@@ -10,8 +10,10 @@ import {
   failValidationForField,
   validateRequestAsync,
   validateFile,
-  UploadedFile
+  UploadedFile,
+  validateImage
 } from '../../../src';
+import { DeepPartial } from '../../../lib';
 
 describe(`Validation Utility`, () => {
   describe(`resolveValidationError`, () => {
@@ -141,7 +143,7 @@ describe(`Validation Utility`, () => {
       expect(validateFile(generateUploadedFile(), 'photos')).toBeUndefined();
     });
 
-    it(`should throw ValidationError when the input is not empty and not file`, () => {
+    it(`should throw ValidationError when the input value is not file`, () => {
       try {
         validateFile(`I am not a file`, 'photo');
         throw new Error(`ValidationError was not thrown`);
@@ -176,14 +178,113 @@ describe(`Validation Utility`, () => {
         expect(e.errors['photo']).toBe(`Please upload a photo.`);
       }
     });
-
-    const generateUploadedFile = (): UploadedFile => {
-      return new UploadedFile({
-        filepath: faker.datatype.uuid(),
-        size: faker.datatype.number(2),
-        originalFilename: `${faker.datatype.uuid()}.png`,
-        mimetype: `image/png`
-      });
-    };
   });
+
+  describe(`validateImage`, () => {
+    it(`should pass validation when input value is empty`, () => {
+      expect(validateImage(null, 'photo')).toBeUndefined();
+    });
+
+    it(`should pass validation for an image file`, () => {
+      expect(validateImage(generateUploadedFile(), 'photo')).toBeUndefined();
+    });
+
+    it(`should pass validation for multiple image files`, () => {
+      expect(
+        validateImage([generateUploadedFile(), generateUploadedFile()], 'photo')
+      ).toBeUndefined();
+    });
+
+    it(`should throw ValidationError when the input value is not file`, () => {
+      try {
+        validateImage(`I am not a file`, 'photo');
+        throw new Error(`ValidationError was not thrown`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown`);
+        }
+        expect(e.errors['photo']).toBe(`Invalid image file(s).`);
+      }
+    });
+
+    it(`should throw ValidationError when the input file is not image`, () => {
+      try {
+        validateImage(
+          generateUploadedFile({
+            originalFilename: `${faker.datatype.uuid()}.pdf`,
+            mimetype: `document/pdf`
+          }),
+          'photo'
+        );
+        throw new Error(`ValidationError was not thrown`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown`);
+        }
+        expect(e.errors['photo']).toBe(`Invalid image file(s).`);
+      }
+    });
+
+    it(`should throw ValidationError when the input value is array and any of the elements is not file`, () => {
+      try {
+        validateImage([generateUploadedFile(), `I am not a file`], 'photos');
+        throw new Error(`ValidationError was not thrown`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown`);
+        }
+        expect(e.errors['photos']).toBe(`Invalid image file(s).`);
+      }
+    });
+
+    it(`should throw ValidationError when any of the input files is not image`, () => {
+      try {
+        validateImage(
+          [
+            generateUploadedFile(),
+            generateUploadedFile({
+              originalFilename: `${faker.datatype.uuid()}.pdf`,
+              mimetype: `document/pdf`
+            })
+          ],
+          'photos'
+        );
+        throw new Error(`ValidationError was not thrown`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown`);
+        }
+        expect(e.errors['photos']).toBe(`Invalid image file(s).`);
+      }
+    });
+
+    it(`should show the custom error message when the validation fails`, () => {
+      try {
+        validateImage(
+          `I am not a file`,
+          'photo',
+          `Please upload an image file.`
+        );
+        throw new Error(`ValidationError was not thrown`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown`);
+        }
+        expect(e.errors['photo']).toBe(`Please upload an image file.`);
+      }
+    });
+  });
+
+  const generateUploadedFile = (
+    data: DeepPartial<UploadedFile> = {}
+  ): UploadedFile => {
+    const defaultData: UploadedFile = {
+      filepath: faker.datatype.uuid(),
+      size: faker.datatype.number(2),
+      originalFilename: `${faker.datatype.uuid()}.png`,
+      mimetype: `image/png`
+    };
+
+    return new UploadedFile({ ...defaultData, ...data });
+  };
 });
