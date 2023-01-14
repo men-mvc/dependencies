@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/cache",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "description": "",
   "type": "commonjs",
   "main": "lib/index.js",
@@ -23,7 +23,7 @@
     "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
-    "@men-mvc/config": "^0.14.0",
+    "@men-mvc/config": "^0.15.0",
     "memory-cache": "^0.2.0",
     "redis": "^4.5.1"
   },
