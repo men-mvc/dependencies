@@ -1,11 +1,10 @@
-### Building packages
+### Building & publishing packages
 Inside the root folder
 - `npm i` if you are setting up the project for the first time or have added a new npm package
-- `lerna run build`
-
-### Publishing packages
-- `lerna publish --registry=https://npm.pkg.github.com/`
-- To force publishing, use `--force-publish` flag
+- `lerna run test`
+- If all the tests are passed, run `lerna run build`
+- Commit and push all the changes to git repository
+- `lerna publish --registry=https://npm.pkg.github.com/`. Use  `--force-publish` if needed force publishing.
 
 ### Running tests
 - `lerna run test`
