@@ -7,10 +7,11 @@ import {
   notFoundResponse,
   emptyResponse,
   validationErrorResponse,
-  unauthorisedErrorResponse
+  unauthorisedErrorResponse,
+  insufficientPermissionsResponse
 } from '../../../src/utilities/response';
 import { ValidationError } from '../../../src/types/validationError';
-import { ErrorCodes } from '../../../src/types';
+import { ErrorCodes, InsufficientPermissionError } from '../../../src/types';
 
 class FakeExpressResponse {
   status = (status: number) => {
@@ -126,6 +127,23 @@ describe(`Response Utility`, () => {
       assertResponseJson(resMock, {
         error: {
           message: `Credentials are invalid.`
+        }
+      });
+    });
+  });
+
+  describe(`insufficientPermissionsResponse`, () => {
+    it(`should return response data in correct structure with 403 status code`, () => {
+      const resMock = mockExpressResponse();
+      insufficientPermissionsResponse(
+        resMock,
+        new InsufficientPermissionError()
+      );
+      assertResponseStatus(resMock, StatusCodes.FORBIDDEN);
+      assertResponseJson(resMock, {
+        error: {
+          message: `Insufficient permissions.`,
+          code: ErrorCodes.INSUFFICIENT_PERMISSIONS
         }
       });
     });
