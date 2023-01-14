@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
-import { requestHandler } from '../../../src/utilities/request';
-import { asyncRequestHandler } from '../../../lib';
+import { faker } from '@faker-js/faker';
+import {
+  requestHandler,
+  asyncRequestHandler,
+  extractBearerToken
+} from '../../../src/utilities/request';
 
 describe(`Request Utility`, () => {
   describe(`requestHandler`, () => {
@@ -92,6 +96,55 @@ describe(`Request Utility`, () => {
       );
       expect(handlerFuncResult).toBeUndefined();
       expect(mockHandlerFunc.mock.calls.length).toBe(1);
+    });
+  });
+
+  describe(`extractBearerToken`, () => {
+    it(`should return null when Authorization header is empty`, () => {
+      const req = {
+        header: (header) => ``
+      } as Request;
+
+      const token = extractBearerToken(req);
+      expect(token).toBeNull();
+    });
+
+    it(`should return null when Authorization header value has more than two segments`, () => {
+      const req = {
+        header: (header) =>
+          `Bearer ${faker.datatype.uuid()} ${faker.datatype.uuid()}`
+      } as Request;
+
+      const token = extractBearerToken(req);
+      expect(token).toBeNull();
+    });
+
+    it(`should return null when Authorization header value has less than two segments`, () => {
+      const req = {
+        header: (header) => `Bearer`
+      } as Request;
+
+      const token = extractBearerToken(req);
+      expect(token).toBeNull();
+    });
+
+    it(`should return null when the first segment iof the Authorization header value is not Bearer`, () => {
+      const req = {
+        header: (header) => `Bxarer`
+      } as Request;
+
+      const token = extractBearerToken(req);
+      expect(token).toBeNull();
+    });
+
+    it(`should return the token`, () => {
+      const fakeToken = faker.datatype.uuid();
+      const req = {
+        header: (header) => `Bearer ${fakeToken}`
+      } as Request;
+
+      const token = extractBearerToken(req);
+      expect(token).toBe(fakeToken);
     });
   });
 });
