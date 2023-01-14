@@ -6,7 +6,8 @@ import {
   errorResponse,
   notFoundResponse,
   emptyResponse,
-  validationErrorResponse
+  validationErrorResponse,
+  unauthorisedErrorResponse
 } from '../../../src/utilities/response';
 import { ValidationError } from '../../../src/types/validationError';
 import { ErrorCodes } from '../../../src/types';
@@ -101,6 +102,30 @@ describe(`Response Utility`, () => {
           code: ErrorCodes.VALIDATION_ERROR,
           message: `Validation failed.`,
           details: errors
+        }
+      });
+    });
+  });
+
+  describe(`unauthorisedErrorResponse`, () => {
+    it(`should return default message with 401 status code when message is not provided`, () => {
+      const resMock = mockExpressResponse();
+      unauthorisedErrorResponse(resMock);
+      assertResponseStatus(resMock, StatusCodes.UNAUTHORIZED);
+      assertResponseJson(resMock, {
+        error: {
+          message: `Unauthorised.`
+        }
+      });
+    });
+
+    it(`should return provided message with 401 status code`, () => {
+      const resMock = mockExpressResponse();
+      unauthorisedErrorResponse(resMock, `Credentials are invalid.`);
+      assertResponseStatus(resMock, StatusCodes.UNAUTHORIZED);
+      assertResponseJson(resMock, {
+        error: {
+          message: `Credentials are invalid.`
         }
       });
     });
