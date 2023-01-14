@@ -1,3 +1,4 @@
+import path from 'path';
 import { getEnvVariable } from '@men-mvc/config';
 import {
   ObjectSchema,
@@ -56,8 +57,6 @@ export const failValidationForField = (
   });
 };
 
-// TODO: add validator for file extension
-
 const isUploadedFile = (value: unknown): value is UploadedFile =>
   value instanceof UploadedFile;
 
@@ -68,7 +67,6 @@ const isImageFile = (file: UploadedFile): boolean => {
     ''
   );
   if (additionalImageMimesCsv) {
-    // TODO: test including case-insensitive
     const additionalMimes = additionalImageMimesCsv
       .split(',')
       .map((mime) => mime.toLowerCase());
@@ -132,5 +130,41 @@ export const validateImage = <T>(
     value.map((file) => validateImageFile(field, file, error));
   } else {
     validateImageFile(field, value, error);
+  }
+};
+
+// TODO
+export const validateFileExtension = (
+  value: unknown,
+  field: string,
+  allowedExtensions: string[], // including .
+  message?: string
+) => {
+  if (!value) {
+    return;
+  }
+  if (allowedExtensions.length < 1) {
+    return;
+  }
+  const error = message ?? `File does not have the valid extension.`;
+  const validate = (singleVal: unknown): boolean => {
+    if (!isUploadedFile(singleVal)) {
+      return false;
+    }
+    // TODO: test case in-sensitive
+    return allowedExtensions.some(
+      (ext) =>
+        ext.toLowerCase() ===
+        path.extname(singleVal.originalFilename).toLowerCase()
+    );
+  };
+  if (Array.isArray(value)) {
+    for (let file of value) {
+      if (!validate(file)) {
+        failValidationForField(field, error);
+      }
+    }
+  } else if (!validate(value)) {
+    failValidationForField(field, error);
   }
 };

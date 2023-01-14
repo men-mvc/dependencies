@@ -189,7 +189,6 @@ export class FileUploader implements IFileUploader {
     return path.join(destDir, targetFilename);
   };
 
-  // TODO: test.
   storeFiles = async ({
     uploadedFiles,
     directory

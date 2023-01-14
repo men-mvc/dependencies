@@ -3,6 +3,7 @@ import joi, {
   ValidationErrorItem
 } from 'joi';
 import { faker } from '@faker-js/faker';
+import { setEnvVariable } from '@men-mvc/config';
 import {
   resolveValidationError,
   ValidationError,
@@ -11,10 +12,10 @@ import {
   validateRequestAsync,
   validateFile,
   UploadedFile,
-  validateImage
+  validateImage,
+  validateFileExtension,
+  DeepPartial
 } from '../../../src';
-import { DeepPartial } from '../../../lib';
-import { setEnvVariable } from '@men-mvc/config';
 
 describe(`Validation Utility`, () => {
   describe(`resolveValidationError`, () => {
@@ -298,6 +299,118 @@ describe(`Validation Utility`, () => {
           throw new Error(`ValidationError was not thrown`);
         }
         expect(e.errors['photo']).toBe(`Please upload an image file.`);
+      }
+    });
+  });
+
+  // TODO:
+  describe(`validateFileExtension`, () => {
+    const allowedExtensions: string[] = [`.pdf`, `.PNG`, `.txt`];
+
+    it(`should pass validation when input value is empty`, () => {
+      expect(
+        validateFileExtension(null, 'doc', allowedExtensions)
+      ).toBeUndefined();
+    });
+
+    it(`should pass validation when file has valid extension`, () => {
+      expect(
+        validateFileExtension(generateUploadedFile(), 'doc', allowedExtensions)
+      ).toBeUndefined();
+    });
+
+    it(`should pass validation when files has valid extension`, () => {
+      expect(
+        validateFileExtension(
+          [
+            generateUploadedFile(),
+            generateUploadedFile({
+              originalFilename: `${faker.datatype.uuid()}.TXT`,
+              mimetype: `document/text`
+            })
+          ],
+          'doc',
+          allowedExtensions
+        )
+      ).toBeUndefined();
+    });
+
+    it(`should pass validation when allowedExtensions array is empty`, () => {
+      expect(
+        validateFileExtension(generateUploadedFile(), 'doc', [])
+      ).toBeUndefined();
+    });
+
+    it(`should throw ValidationError when the input value is not file`, () => {
+      try {
+        validateFileExtension(`I am not a file`, 'photo', allowedExtensions);
+        throw new Error(`ValidationError was not thrown`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown`);
+        }
+        expect(e.errors['photo']).toBe(
+          `File does not have the valid extension.`
+        );
+      }
+    });
+
+    it(`should throw ValidationError when the input value is array and any of the elements is not file`, () => {
+      try {
+        validateFileExtension(
+          [generateUploadedFile(), `I am not a file`],
+          'photos',
+          allowedExtensions
+        );
+        throw new Error(`ValidationError was not thrown`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown`);
+        }
+        expect(e.errors['photos']).toBe(
+          `File does not have the valid extension.`
+        );
+      }
+    });
+
+    it(`should throw ValidationError when any of the input files does not have allowed extension`, () => {
+      try {
+        validateFileExtension(
+          [
+            generateUploadedFile(),
+            generateUploadedFile({
+              originalFilename: `${faker.datatype.uuid()}.bmp`,
+              mimetype: `image/bmp`
+            })
+          ],
+          'photos',
+          allowedExtensions
+        );
+        throw new Error(`File does not have the valid extension.`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown`);
+        }
+        expect(e.errors['photos']).toBe(
+          `File does not have the valid extension.`
+        );
+      }
+    });
+
+    it(`should show the custom error message when the validation fails`, () => {
+      try {
+        validateFileExtension(
+          `I am not a file`,
+          'photo',
+          allowedExtensions,
+          'File is invalid.'
+        );
+        throw new Error(`ValidationError was not thrown`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown`);
+        }
+        expect(e.errors['photo']).toBe(`File is invalid.`);
       }
     });
   });
