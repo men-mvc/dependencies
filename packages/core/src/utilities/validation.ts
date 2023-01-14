@@ -57,16 +57,22 @@ export const failValidationForField = (field: string, errorMessage: string) => {
 /**
  * This function can be used to validate both multiple-file upload and single upload
  */
-export const validateFiles = <T>(value: T, field: string, message?: string) => {
+export const validateFile = <T>(value: T, field: string, message?: string) => {
   const error = message ?? `Input value(s) must be file(s).`;
-  if (!value || !Array.isArray(value)) {
-    failValidationForField(field, error);
+  if (!value) {
+    // if the value is empty, it does not validate if the input is file or not
+    return;
   }
-  const values = value as unknown[];
-  for (let value of values) {
-    if (!(value instanceof UploadedFile)) {
-      failValidationForField(field, error);
+  if (Array.isArray(value)) {
+    const values = value as unknown[];
+    for (let value of values) {
+      if (!(value instanceof UploadedFile)) {
+        failValidationForField(field, error);
+      }
     }
+  } else if (!(value instanceof UploadedFile)) {
+    // single file upload
+    failValidationForField(field, error);
   }
 };
 
