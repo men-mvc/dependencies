@@ -3,7 +3,8 @@ import { StatusCodes } from 'http-status-codes';
 import { faker } from '@faker-js/faker';
 import {
   successResponse,
-  errorResponse
+  errorResponse,
+  notFoundResponse
 } from '../../../src/utilities/response';
 
 class FakeExpressResponse {
@@ -54,6 +55,19 @@ describe(`Response Utility`, () => {
       assertResponseJson(resMock, {
         error: {
           message: `Unauthorised`
+        }
+      });
+    });
+  });
+
+  describe(`notFoundResponse`, () => {
+    it(`should return data in the correct structure with 404 status code`, () => {
+      const resMock = mockExpressResponse();
+      notFoundResponse(resMock, `User not found.`);
+      assertResponseStatus(resMock, StatusCodes.NOT_FOUND);
+      assertResponseJson(resMock, {
+        error: {
+          message: `User not found.`
         }
       });
     });

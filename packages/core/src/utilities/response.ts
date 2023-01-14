@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import {
   ErrorResponse,
+  ErrorResponseData,
   ValidationError,
   ValidationErrorResponse
 } from '../types';
@@ -19,13 +20,7 @@ export const successResponse = <T>(
 
 export const errorResponse = <T>(
   res: Response,
-  error:
-    | {
-        message: string;
-        code?: string;
-        details?: T | null;
-      }
-    | string,
+  error: ErrorResponseData<T> | string,
   status: number
 ) => {
   let responseData: {
@@ -33,6 +28,7 @@ export const errorResponse = <T>(
     message: string;
     details?: T | null;
   };
+  console.error('I ma here');
   if (typeof error === 'string') {
     responseData = {
       message: error
@@ -53,9 +49,7 @@ export const errorResponse = <T>(
 };
 
 export const notFoundResponse = (res: Response, error: string) => {
-  return res.status(StatusCodes.NOT_FOUND).json({
-    error
-  });
+  return errorResponse(res, error, StatusCodes.NOT_FOUND);
 };
 
 export const emptyResponse = (
