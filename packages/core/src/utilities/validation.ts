@@ -10,14 +10,14 @@ export const resolveValidationError = (
   valError: JoiValidationError | undefined
 ): ValidationError => {
   if (!valError) {
-    return new ValidationError([]);
+    return new ValidationError({});
   }
 
-  return new ValidationError(
-    valError.details.map((error) => ({
-      [error.context?.key as string]: error.message
-    }))
-  );
+  let errors: { [key: string]: string } = {};
+  valError.details.map((error) => {
+    errors[error.context?.key as string] = error.message;
+  });
+  return new ValidationError(errors);
 };
 
 export const validateRequest = <T>(
@@ -47,11 +47,9 @@ export const validateRequestAsync = async <T>(
 };
 
 export const failValidationForField = (field: string, errorMessage: string) => {
-  throw new ValidationError([
-    {
-      [field]: errorMessage
-    }
-  ]);
+  throw new ValidationError({
+    [field]: errorMessage
+  });
 };
 
 // TODO: add validator for file extension
