@@ -46,16 +46,14 @@ export class FileUploader implements IFileUploader {
     }
   };
 
+  // TODO: unit test.
   private isPayloadTooLarge = (
     files: FileArray | null | undefined
   ): boolean => {
-    return this.getTotalUploadedFileSize(files) > getUploadFilesizeLimit();
+    return this._getTotalUploadedFileSize(files) > getUploadFilesizeLimit();
   };
 
-  // TODO: unit test this.
-  private getTotalUploadedFileSize = (
-    files: FileArray | null | undefined
-  ): number => {
+  _getTotalUploadedFileSize = (files: FileArray | null | undefined): number => {
     if (!files) {
       return 0;
     }

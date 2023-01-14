@@ -4,7 +4,7 @@ import { getAppEnv } from './utilities';
 export abstract class BaseConfigUtility {
   protected static config: BaseConfig | null = null;
 
-  abstract getConfig: () => BaseConfig; // TODO: should this be async function?
+  abstract getConfig: () => BaseConfig;
 
   protected validate = (config: BaseConfig) => {
     if (!config) {
