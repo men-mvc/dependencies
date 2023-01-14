@@ -14,6 +14,7 @@ import {
   validateImage
 } from '../../../src';
 import { DeepPartial } from '../../../lib';
+import { setEnvVariable } from '@men-mvc/config';
 
 describe(`Validation Utility`, () => {
   describe(`resolveValidationError`, () => {
@@ -193,6 +194,32 @@ describe(`Validation Utility`, () => {
       expect(
         validateImage([generateUploadedFile(), generateUploadedFile()], 'photo')
       ).toBeUndefined();
+    });
+
+    it(`should pass validation when the image file's mime matches one of the additional values in env var`, () => {
+      setEnvVariable(
+        `UPLOADED_FILE_IMAGE_MIMES`,
+        `image/svg+xml,application/svg+xml`
+      );
+      expect(
+        validateImage(
+          generateUploadedFile({
+            filepath: `${faker.datatype.uuid()}.svg`,
+            mimetype: `Image/Svg+Xml`
+          }),
+          'photo'
+        )
+      ).toBeUndefined();
+      expect(
+        validateImage(
+          generateUploadedFile({
+            filepath: `${faker.datatype.uuid()}.svg`,
+            mimetype: `Application/Svg+Xml`
+          }),
+          'photo'
+        )
+      ).toBeUndefined();
+      setEnvVariable(`UPLOADED_FILE_IMAGE_MIMES`, ``);
     });
 
     it(`should throw ValidationError when the input value is not file`, () => {

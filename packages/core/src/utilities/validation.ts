@@ -1,3 +1,4 @@
+import { getEnvVariable } from '@men-mvc/config';
 import {
   ObjectSchema,
   ValidationError as JoiValidationError,
@@ -60,11 +61,22 @@ export const failValidationForField = (
 const isUploadedFile = (value: unknown): value is UploadedFile =>
   value instanceof UploadedFile;
 
-// TODO: should be able to add more types from env variable.
-const isImageFile = (file: UploadedFile): boolean =>
-  ['image/gif', 'image/jpeg', 'image/png'].includes(
-    file.mimetype.toLowerCase()
+const isImageFile = (file: UploadedFile): boolean => {
+  let imageMimeTypes: string[] = ['image/gif', 'image/jpeg', 'image/png'];
+  const additionalImageMimesCsv: string = getEnvVariable(
+    'UPLOADED_FILE_IMAGE_MIMES',
+    ''
   );
+  if (additionalImageMimesCsv) {
+    // TODO: test including case-insensitive
+    const additionalMimes = additionalImageMimesCsv
+      .split(',')
+      .map((mime) => mime.toLowerCase());
+    imageMimeTypes = imageMimeTypes.concat(additionalMimes);
+  }
+
+  return imageMimeTypes.includes(file.mimetype.toLowerCase());
+};
 
 const validateImageFile = (field: string, value: unknown, error: string) => {
   if (!isUploadedFile(value)) {
