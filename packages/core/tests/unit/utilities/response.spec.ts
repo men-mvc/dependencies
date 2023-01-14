@@ -5,7 +5,6 @@ import {
   successResponse,
   errorResponse
 } from '../../../src/utilities/response';
-import { number } from 'joi';
 
 class FakeExpressResponse {
   status = (status: number) => {
