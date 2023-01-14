@@ -5,8 +5,11 @@ import {
   successResponse,
   errorResponse,
   notFoundResponse,
-  emptyResponse
+  emptyResponse,
+  validationErrorResponse
 } from '../../../src/utilities/response';
+import { ValidationError } from '../../../src/types/validationError';
+import { ErrorCodes } from '../../../src/types';
 
 class FakeExpressResponse {
   status = (status: number) => {
@@ -80,6 +83,26 @@ describe(`Response Utility`, () => {
       emptyResponse(resMock);
       assertResponseStatus(resMock, StatusCodes.NO_CONTENT);
       assertResponseJson(resMock, null);
+    });
+  });
+
+  describe(`validationErrorResponse`, () => {
+    it(`should return errors in correct structure with 422 status code`, () => {
+      const errors = {
+        name: `Name is required.`,
+        email: `Email is required.`
+      };
+      const validationError = new ValidationError(errors);
+      const resMock = mockExpressResponse();
+      validationErrorResponse(resMock, validationError);
+      assertResponseStatus(resMock, StatusCodes.UNPROCESSABLE_ENTITY);
+      assertResponseJson(resMock, {
+        error: {
+          code: ErrorCodes.VALIDATION_ERROR,
+          message: `Validation failed.`,
+          details: errors
+        }
+      });
     });
   });
 
