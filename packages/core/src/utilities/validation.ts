@@ -133,7 +133,9 @@ export const validateImage = <T>(
   }
 };
 
-// TODO
+/**
+ * This function can be used to validate both multiple-file upload and single upload
+ */
 export const validateFileExtension = (
   value: unknown,
   field: string,
@@ -151,7 +153,6 @@ export const validateFileExtension = (
     if (!isUploadedFile(singleVal)) {
       return false;
     }
-    // TODO: test case in-sensitive
     return allowedExtensions.some(
       (ext) =>
         ext.toLowerCase() ===
