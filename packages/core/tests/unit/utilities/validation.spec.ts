@@ -6,7 +6,9 @@ import { faker } from '@faker-js/faker';
 import {
   resolveValidationError,
   ValidationError,
-  validateRequest
+  validateRequest,
+  failValidationForField,
+  validateRequestAsync
 } from '../../../src';
 
 describe(`Validation Utility`, () => {
@@ -43,11 +45,7 @@ describe(`Validation Utility`, () => {
   describe(`validateRequest`, () => {
     it(`should throw ValidationError when validation fails`, () => {
       try {
-        const schema = joi.object().keys({
-          name: joi.string().required().messages({
-            'string.empty': `Name is required.`
-          })
-        });
+        const schema = createFakeValidationSchema();
         validateRequest(schema, { name: `` });
         throw new Error(`Expected error was not thrown`);
       } catch (e) {
@@ -59,13 +57,56 @@ describe(`Validation Utility`, () => {
     });
 
     it(`should not throw error when validation fails`, () => {
-      const schema = joi.object().keys({
+      const schema = createFakeValidationSchema();
+      const result = validateRequest(schema, { name: faker.name.fullName() });
+      expect(result).toBeUndefined();
+    });
+
+    const createFakeValidationSchema = (): joi.ObjectSchema =>
+      joi.object().keys({
         name: joi.string().required().messages({
           'string.empty': `Name is required.`
         })
       });
-      const result = validateRequest(schema, { name: faker.name.fullName() });
+  });
+
+  describe(`validateRequestAsync`, () => {
+    it(`should throw ValidationError when validation fails`, async () => {
+      try {
+        const schema = createFakeValidationSchema();
+        await validateRequestAsync(schema, { email: faker.internet.email() });
+        throw new Error(`ValidationError was not thrown.`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`ValidationError was not thrown.`);
+        }
+        expect(e.errors[`email`]).toBe(`Account does not exist.`);
+      }
+    });
+
+    it(`should not throw error when the validation passes`, async () => {
+      const schema = createFakeValidationSchema();
+      const result = await validateRequestAsync(schema, {
+        email: `waiyanhein@test.com`
+      });
       expect(result).toBeUndefined();
     });
+
+    const createFakeValidationSchema = (): joi.ObjectSchema =>
+      joi.object().keys({
+        email: joi
+          .string()
+          .required()
+          .external(async (value) => {
+            const result = await ((): Promise<boolean> => {
+              return new Promise<boolean>((resolve) =>
+                resolve(value === `waiyanhein@test.com`)
+              );
+            })();
+            if (!result) {
+              failValidationForField('email', 'Account does not exist.');
+            }
+          })
+      });
   });
 });
