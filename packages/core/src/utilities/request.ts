@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 
 export const requestHandler = (
   fn: (req: Request, res: Response, next: NextFunction) => Response | void
@@ -52,6 +51,3 @@ export const extractBearerToken = (request: Request): string | null => {
 
   return tokens[1] ? tokens[1] : null;
 };
-
-export const generateRequestId = (): string =>
-  `request-id_${uuidv4()}_${new Date().getTime().toString()}`;
