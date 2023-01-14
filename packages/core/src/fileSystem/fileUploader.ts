@@ -76,7 +76,7 @@ export class FileUploader implements IFileUploader {
   };
 
   public parseFormData = async <T>(req: Request): Promise<DeepPartial<T>> => {
-    let fields: { [key: string]: any } = {};
+    let fields: { [key: string]: unknown } = {};
     if (req.files) {
       if (Array.isArray(req.files) || typeof req.files !== 'object') {
         // do not support array payload
@@ -213,12 +213,11 @@ export class FileUploader implements IFileUploader {
     return path.extname(filepath).toLowerCase();
   };
 
-  // TODO: remove any
   /**
    * // TODO: create a package for this.
    * this function should only be called when isNestedField is true
    */
-  private parseNestedField = (fieldName: string, fieldValue: any) => {
+  private parseNestedField = (fieldName: string, fieldValue: unknown) => {
     if (fieldName[fieldName.length - 1] !== CLOSE_BRACKET) {
       // if the field does not end with ], the payload is invalid
       throw new InvalidPayloadFormatException();
