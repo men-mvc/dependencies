@@ -1,8 +1,13 @@
-import {
+import joi, {
   ValidationError as JoiValidationError,
   ValidationErrorItem
 } from 'joi';
-import { resolveValidationError, ValidationError } from '../../../src';
+import { faker } from '@faker-js/faker';
+import {
+  resolveValidationError,
+  ValidationError,
+  validateRequest
+} from '../../../src';
 
 describe(`Validation Utility`, () => {
   describe(`resolveValidationError`, () => {
@@ -32,6 +37,35 @@ describe(`Validation Utility`, () => {
       context: {
         key
       }
+    });
+  });
+
+  describe(`validateRequest`, () => {
+    it(`should throw ValidationError when validation fails`, () => {
+      try {
+        const schema = joi.object().keys({
+          name: joi.string().required().messages({
+            'string.empty': `Name is required.`
+          })
+        });
+        validateRequest(schema, { name: `` });
+        throw new Error(`Expected error was not thrown`);
+      } catch (e) {
+        if (!(e instanceof ValidationError)) {
+          throw new Error(`Error is not instance of ValidationError.`);
+        }
+        expect(e.errors['name']).toBe(`Name is required.`);
+      }
+    });
+
+    it(`should not throw error when validation fails`, () => {
+      const schema = joi.object().keys({
+        name: joi.string().required().messages({
+          'string.empty': `Name is required.`
+        })
+      });
+      const result = validateRequest(schema, { name: faker.name.fullName() });
+      expect(result).toBeUndefined();
     });
   });
 });
