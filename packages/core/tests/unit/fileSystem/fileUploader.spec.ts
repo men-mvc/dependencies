@@ -1,13 +1,18 @@
+import sinon from 'sinon';
 import {
   UploadedFile as ExpressUploadedFile,
   FileArray
 } from 'express-fileupload';
 import { faker } from '@faker-js/faker';
 import _ from 'lodash';
+import path from 'path';
 import { FileUploader } from '../../../src/fileSystem/fileUploader';
 import * as fileSystemUtilities from '../../../src/fileSystem/utilities';
-import { UploadedFile, DeepPartial } from '../../../src';
-import sinon from 'sinon';
+import {
+  UploadedFile,
+  DeepPartial,
+  getAppStorageDirectory
+} from '../../../src';
 
 const fileUploader = new FileUploader();
 describe('FileUploader Utility', function () {
@@ -112,6 +117,21 @@ describe('FileUploader Utility', function () {
         ]
       };
       expect(fileUploader._isPayloadTooLarge(files)).toBeFalsy();
+    });
+  });
+
+  describe(`getTempUploadDirectory`, () => {
+    it(`should return expected temp storage dir path`, () => {
+      const fakeUuid = faker.datatype.uuid();
+      const getTempDirIdStub = sinon.stub(fileUploader, `_getTempDirId`);
+      getTempDirIdStub.returns(fakeUuid);
+      const expectedDirPath = path.join(
+        path.join(getAppStorageDirectory(), 'temp'),
+        fakeUuid
+      );
+      const actualDirPath = fileUploader.getTempUploadDirectory();
+      expect(actualDirPath).toBe(expectedDirPath);
+      getTempDirIdStub.restore();
     });
   });
 

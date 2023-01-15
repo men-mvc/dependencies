@@ -35,7 +35,7 @@ export class FileUploader implements IFileUploader {
   public getTempUploadDirectory(): string {
     const tempDirectory = path.join(getAppStorageDirectory(), 'temp');
 
-    return path.join(tempDirectory, this.getTempDirId());
+    return path.join(tempDirectory, this._getTempDirId());
   }
 
   // TODO: unit test.
@@ -150,7 +150,6 @@ export class FileUploader implements IFileUploader {
     return path.join(destDirectory, destDir).toLowerCase();
   };
 
-  // TODO: unit test that rename is called.
   storeFile = async ({
     uploadedFile,
     filename,
@@ -290,7 +289,7 @@ export class FileUploader implements IFileUploader {
     return result;
   };
 
-  private getTempDirId = (): string => {
+  _getTempDirId = (): string => {
     if (!FileUploader.tempDirId) {
       FileUploader.tempDirId = generateUuid();
     }
