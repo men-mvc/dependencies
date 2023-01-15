@@ -44,30 +44,6 @@ export class FileUploader implements IFileUploader {
     }
   };
 
-  _isPayloadTooLarge = (files: FileArray | null | undefined): boolean => {
-    return this._getTotalUploadedFileSize(files) > getUploadFilesizeLimit();
-  };
-
-  _getTotalUploadedFileSize = (files: FileArray | null | undefined): number => {
-    if (!files) {
-      return 0;
-    }
-    let totalUploadedFileSize: number = 0;
-    for (let field in files) {
-      const file = files[field];
-      if (!file) {
-        continue;
-      }
-      if (Array.isArray(file)) {
-        totalUploadedFileSize += _.sum(file.map((f) => f.size));
-      } else {
-        totalUploadedFileSize += file.size;
-      }
-    }
-
-    return totalUploadedFileSize;
-  };
-
   public parseFormData = async <T>(req: Request): Promise<DeepPartial<T>> => {
     let fields: { [key: string]: unknown } = {};
     if (req.files) {
@@ -116,16 +92,40 @@ export class FileUploader implements IFileUploader {
     return fields as T;
   };
 
-  _makeUploadedFileCompatible = (
-    originalFile: OriginalUploadedFile
-  ): UploadedFile => {
-    return new UploadedFile({
-      originalFilename: originalFile.name,
-      filepath: originalFile.tempFilePath,
-      size: originalFile.size,
-      mimetype: originalFile.mimetype,
-      hash: originalFile.md5
-    });
+  public storeFile = async ({
+    uploadedFile,
+    filename,
+    directory
+  }: StoreFileParams): Promise<string> => {
+    const destDir = this.buildDestinationDir(directory);
+    if (!(await this.getLocalStorage().exits(destDir))) {
+      await this.getLocalStorage().mkdir(destDir);
+    }
+
+    const targetFilepath = this.getTargetFilepath(
+      uploadedFile,
+      destDir,
+      filename
+    );
+    await this.getLocalStorage().rename(uploadedFile.filepath, targetFilepath);
+
+    return targetFilepath;
+  };
+
+  public storeFiles = async ({
+    uploadedFiles,
+    directory
+  }: StoreFilesParams): Promise<string[]> => {
+    const paths: string[] = [];
+    for (let i = 0; i < uploadedFiles.length; i++) {
+      const path = await this.storeFile({
+        uploadedFile: uploadedFiles[i],
+        directory
+      });
+      paths.push(path);
+    }
+
+    return paths;
   };
 
   private isNestedField = (fieldName: string): boolean => {
@@ -148,24 +148,12 @@ export class FileUploader implements IFileUploader {
     return path.join(destDirectory, destDir).toLowerCase();
   };
 
-  storeFile = async ({
-    uploadedFile,
-    filename,
-    directory
-  }: StoreFileParams): Promise<string> => {
-    const destDir = this.buildDestinationDir(directory);
-    if (!(await this.getLocalStorage().exits(destDir))) {
-      await this.getLocalStorage().mkdir(destDir);
+  private getFileExtension = (filepath: string | null) => {
+    if (!filepath) {
+      return ``;
     }
 
-    const targetFilepath = this.getTargetFilepath(
-      uploadedFile,
-      destDir,
-      filename
-    );
-    await this.getLocalStorage().rename(uploadedFile.filepath, targetFilepath);
-
-    return targetFilepath;
+    return path.extname(filepath).toLowerCase();
   };
 
   private getTargetFilepath = (
@@ -181,32 +169,7 @@ export class FileUploader implements IFileUploader {
     return path.join(destDir, targetFilename);
   };
 
-  storeFiles = async ({
-    uploadedFiles,
-    directory
-  }: StoreFilesParams): Promise<string[]> => {
-    const paths: string[] = [];
-    for (let i = 0; i < uploadedFiles.length; i++) {
-      const path = await this.storeFile({
-        uploadedFile: uploadedFiles[i],
-        directory
-      });
-      paths.push(path);
-    }
-
-    return paths;
-  };
-
-  private getFileExtension = (filepath: string | null) => {
-    if (!filepath) {
-      return ``;
-    }
-
-    return path.extname(filepath).toLowerCase();
-  };
-
   /**
-   * // TODO: create a package for this.
    * this function should only be called when isNestedField is true
    */
   private parseNestedField = (fieldName: string, fieldValue: unknown) => {
@@ -287,6 +250,14 @@ export class FileUploader implements IFileUploader {
     return result;
   };
 
+  private getLocalStorage = (): LocalStorage => {
+    if (!FileUploader.storage) {
+      FileUploader.storage = new LocalStorage();
+    }
+
+    return FileUploader.storage;
+  };
+
   _getTempDirId = (): string => {
     if (!FileUploader.tempDirId) {
       FileUploader.tempDirId = generateUuid();
@@ -295,11 +266,39 @@ export class FileUploader implements IFileUploader {
     return FileUploader.tempDirId;
   };
 
-  private getLocalStorage = (): LocalStorage => {
-    if (!FileUploader.storage) {
-      FileUploader.storage = new LocalStorage();
+  _isPayloadTooLarge = (files: FileArray | null | undefined): boolean => {
+    return this._getTotalUploadedFileSize(files) > getUploadFilesizeLimit();
+  };
+
+  _getTotalUploadedFileSize = (files: FileArray | null | undefined): number => {
+    if (!files) {
+      return 0;
+    }
+    let totalUploadedFileSize: number = 0;
+    for (let field in files) {
+      const file = files[field];
+      if (!file) {
+        continue;
+      }
+      if (Array.isArray(file)) {
+        totalUploadedFileSize += _.sum(file.map((f) => f.size));
+      } else {
+        totalUploadedFileSize += file.size;
+      }
     }
 
-    return FileUploader.storage;
+    return totalUploadedFileSize;
+  };
+
+  _makeUploadedFileCompatible = (
+    originalFile: OriginalUploadedFile
+  ): UploadedFile => {
+    return new UploadedFile({
+      originalFilename: originalFile.name,
+      filepath: originalFile.tempFilePath,
+      size: originalFile.size,
+      mimetype: originalFile.mimetype,
+      hash: originalFile.md5
+    });
   };
 }
