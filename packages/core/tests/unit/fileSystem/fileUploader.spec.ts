@@ -5,7 +5,9 @@ import {
 import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import { FileUploader } from '../../../src/fileSystem/fileUploader';
+import * as fileSystemUtilities from '../../../src/fileSystem/utilities';
 import { UploadedFile, DeepPartial } from '../../../src';
+import sinon from 'sinon';
 
 const fileUploader = new FileUploader();
 describe('FileUploader Utility', function () {
@@ -49,6 +51,67 @@ describe('FileUploader Utility', function () {
         ]
       };
       expect(fileUploader._getTotalUploadedFileSize(files)).toBe(27);
+    });
+  });
+
+  // TODO:
+  describe(`_isPayloadTooLarge`, () => {
+    const fakeUploadFilesizeLimit = 10;
+    let getUploadFilesizeLimitStub: sinon.SinonStub;
+    beforeAll(() => {
+      getUploadFilesizeLimitStub = sinon.stub(
+        fileSystemUtilities,
+        `getUploadFilesizeLimit`
+      );
+      getUploadFilesizeLimitStub.returns(fakeUploadFilesizeLimit);
+    });
+    afterAll(() => {
+      getUploadFilesizeLimitStub.restore();
+    });
+
+    it(`should return true when total size of uploaded files is greater than limit`, () => {
+      const files: FileArray = {
+        photo: generateExpressUploadedFile({
+          size: 4
+        }),
+        gallery: [
+          generateExpressUploadedFile({
+            size: 4
+          }),
+          generateExpressUploadedFile({
+            size: 3
+          })
+        ]
+      };
+      expect(fileUploader._isPayloadTooLarge(files)).toBeTruthy();
+    });
+
+    it(`should return false when total size of uploaded files is equal to limit`, () => {
+      const files: FileArray = {
+        gallery: [
+          generateExpressUploadedFile({
+            size: 5
+          }),
+          generateExpressUploadedFile({
+            size: 5
+          })
+        ]
+      };
+      expect(fileUploader._isPayloadTooLarge(files)).toBeFalsy();
+    });
+
+    it(`should return false when total size of uploaded files is less than limit`, () => {
+      const files: FileArray = {
+        gallery: [
+          generateExpressUploadedFile({
+            size: 5
+          }),
+          generateExpressUploadedFile({
+            size: 4
+          })
+        ]
+      };
+      expect(fileUploader._isPayloadTooLarge(files)).toBeFalsy();
     });
   });
 

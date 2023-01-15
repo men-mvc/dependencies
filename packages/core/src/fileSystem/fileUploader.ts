@@ -46,10 +46,7 @@ export class FileUploader implements IFileUploader {
     }
   };
 
-  // TODO: unit test.
-  private isPayloadTooLarge = (
-    files: FileArray | null | undefined
-  ): boolean => {
+  _isPayloadTooLarge = (files: FileArray | null | undefined): boolean => {
     return this._getTotalUploadedFileSize(files) > getUploadFilesizeLimit();
   };
 
@@ -80,7 +77,7 @@ export class FileUploader implements IFileUploader {
         // do not support array payload
         throw new InvalidPayloadFormatException();
       }
-      if (this.isPayloadTooLarge(req.files)) {
+      if (this._isPayloadTooLarge(req.files)) {
         throw new UploadMaxFileSizeException();
       }
 
