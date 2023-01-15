@@ -1,7 +1,7 @@
 {
   "name": "@men-mvc/config",
   "version": "0.16.0",
-  "description": "",
+  "description": "Config package for Men MVC framework.",
   "main": "lib/index.js",
   "directories": {
     "lib": "lib",

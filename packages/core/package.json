@@ -1,7 +1,7 @@
 {
   "name": "@men-mvc/core",
   "version": "0.16.0",
-  "description": "",
+  "description": "Core package for Men MVC framework.",
   "directories": {
     "test": "tests"
   },
