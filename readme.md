@@ -1,3 +1,6 @@
+## Men MVC
+This is the repository for storing the packages/ dependencies for the Men MVC framework.
+
 ### Building & publishing packages
 Inside the root folder
 - `npm i` if you are setting up the project for the first time or have added a new npm package
