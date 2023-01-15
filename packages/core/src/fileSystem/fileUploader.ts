@@ -37,7 +37,6 @@ export class FileUploader implements IFileUploader {
     return path.join(tempDirectory, this._getTempDirId());
   }
 
-  // TODO: unit test.
   public clearTempUploadDirectory = async (): Promise<void> => {
     const tempDir = this.getTempUploadDirectory();
     if (await this.getLocalStorage().exits(tempDir)) {
