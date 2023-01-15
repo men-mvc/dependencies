@@ -1,3 +1,4 @@
+![Alt text](logo.png?raw=true "Title")
 ## Men MVC
 This is the repository for storing the packages/ dependencies for the Men MVC framework.
 
