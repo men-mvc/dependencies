@@ -6,6 +6,7 @@ import {
 import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import path from 'path';
+import fs from 'fs';
 import { FileUploader } from '../../../src/fileSystem/fileUploader';
 import * as fileSystemUtilities from '../../../src/fileSystem/utilities';
 import {
@@ -13,6 +14,7 @@ import {
   DeepPartial,
   getAppStorageDirectory
 } from '../../../src';
+import { delay, deleteStorageDirectory } from '../../utilities';
 
 const fileUploader = new FileUploader();
 describe('FileUploader Utility', function () {
@@ -59,7 +61,6 @@ describe('FileUploader Utility', function () {
     });
   });
 
-  // TODO:
   describe(`_isPayloadTooLarge`, () => {
     const fakeUploadFilesizeLimit = 10;
     let getUploadFilesizeLimitStub: sinon.SinonStub;
@@ -133,6 +134,69 @@ describe('FileUploader Utility', function () {
       expect(actualDirPath).toBe(expectedDirPath);
       getTempDirIdStub.restore();
     });
+  });
+
+  describe(`clearTempUploadDirectory`, () => {
+    it(`should delete the temp dir and its content for the same session`, async () => {
+      const tempDir = await createTempDirAndContents();
+      await fileUploader.clearTempUploadDirectory();
+      await delay();
+      expect(fs.existsSync(tempDir)).toBeFalsy();
+      deleteStorageDirectory();
+    });
+
+    it(`should not delete the temp dirs for the other sessions`, async () => {
+      const tempDir = await createTempDirAndContents();
+      const otherTempDirs = await createTempDirsForOtherSessions();
+      await fileUploader.clearTempUploadDirectory();
+      await delay();
+      expect(fs.existsSync(tempDir)).toBeFalsy();
+      expect(otherTempDirs.length > 0).toBeTruthy();
+      otherTempDirs.map((otherTempDir) => {
+        expect(fs.existsSync(otherTempDir)).toBeTruthy();
+        expect(
+          fs.existsSync(path.join(otherTempDir, `tempfile.txt`))
+        ).toBeTruthy();
+      });
+      deleteStorageDirectory();
+    });
+
+    const createTempDirAndContents = async (): Promise<string> => {
+      const tempDir = fileUploader.getTempUploadDirectory();
+      await fs.promises.mkdir(tempDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(tempDir, `tempfile1.txt`),
+        faker.lorem.paragraphs(3)
+      );
+      fs.writeFileSync(
+        path.join(tempDir, `tempfile2.txt`),
+        faker.lorem.paragraphs(4)
+      );
+      return tempDir;
+    };
+
+    const createTempDirsForOtherSessions = async (): Promise<string[]> => {
+      const tempDirs: string[] = [
+        path.join(getAppStorageDirectory(), 'temp', faker.datatype.uuid()),
+        path.join(getAppStorageDirectory(), 'temp', faker.datatype.uuid())
+      ];
+      await Promise.all(
+        tempDirs.map((dir) =>
+          Promise.all([fs.promises.mkdir(dir, { recursive: true })])
+        )
+      );
+      await Promise.all(
+        tempDirs.map((dir) => {
+          return new Promise<string>((resolve) => {
+            const filepath = path.join(dir, `tempfile.txt`);
+            fs.writeFileSync(filepath, faker.lorem.paragraphs(3));
+            resolve(filepath);
+          });
+        })
+      );
+
+      return tempDirs;
+    };
   });
 
   const generateExpressUploadedFile = (

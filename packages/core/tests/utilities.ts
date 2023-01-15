@@ -2,7 +2,7 @@ import rimraf from 'rimraf';
 import { DeepPartial, getAppStorageDirectory, UploadedFile } from '../src';
 import { faker } from '@faker-js/faker';
 
-export const delay = (milliseconds: number): Promise<boolean> => {
+export const delay = (milliseconds: number = 500): Promise<boolean> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(true);

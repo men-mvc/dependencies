@@ -31,7 +31,6 @@ export class FileUploader implements IFileUploader {
   private static tempDirId: string;
   private static storage: LocalStorage;
 
-  // TODO: unit test.
   public getTempUploadDirectory(): string {
     const tempDirectory = path.join(getAppStorageDirectory(), 'temp');
 
