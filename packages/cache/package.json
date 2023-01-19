@@ -5,7 +5,7 @@
   "type": "commonjs",
   "main": "lib/index.js",
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com/men-mvc"
   },
   "directories": {
     "lib": "lib",

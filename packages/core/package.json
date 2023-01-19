@@ -6,7 +6,7 @@
     "test": "tests"
   },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com/men-mvc"
   },
   "type": "commonjs",
   "main": "lib/index.js",
