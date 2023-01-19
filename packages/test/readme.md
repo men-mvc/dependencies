@@ -1,1 +1,1 @@
-### Test module for [MEN MVC](https://menmvc.com) framework 
+### Test module for [MEN MVC](http://www.menmvc.com.s3-website.eu-west-2.amazonaws.com/) framework 
