@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/cache",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "description": "Cache package for Men MVC framework.",
   "private": false,
   "type": "commonjs",
@@ -27,7 +27,7 @@
     "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
-    "@men-mvc/config": "^0.31.0",
+    "@men-mvc/config": "^0.32.0",
     "memory-cache": "^0.2.0",
     "redis": "^4.5.1"
   },
@@ -47,5 +47,5 @@
   },
   "author": "Wai Yan Hein <waiyanhein.uk@gmail.com>",
   "license": "MIT",
-  "gitHead": "c37e430310b087c135d51f812077170afa060cb4"
+  "gitHead": "a6794dca4a86b0b9b1442827709d52186cbe2d47"
 }
