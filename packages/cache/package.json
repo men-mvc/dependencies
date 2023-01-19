@@ -1,5 +1,5 @@
 {
-  "name": "men-mvc/cache",
+  "name": "@men-mvc/cache",
   "version": "0.34.0",
   "description": "Cache package for Men MVC framework.",
   "private": false,
