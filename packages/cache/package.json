@@ -4,6 +4,9 @@
   "description": "Cache package for Men MVC framework.",
   "type": "commonjs",
   "main": "lib/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "lib": "lib",
     "test": "tests"

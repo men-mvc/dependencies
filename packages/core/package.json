@@ -5,6 +5,9 @@
   "directories": {
     "test": "tests"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "commonjs",
   "main": "lib/index.js",
   "scripts": {
