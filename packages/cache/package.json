@@ -1,5 +1,5 @@
 {
-  "name": "@men-mvc/cache",
+  "name": "men-mvc/cache",
   "version": "0.34.0",
   "description": "Cache package for Men MVC framework.",
   "private": false,
@@ -44,5 +44,5 @@
   },
   "author": "Wai Yan Hein <waiyanhein.uk@gmail.com>",
   "license": "MIT",
-  "gitHead": "1ab109162e53dd18099e4efb8da372433fa79794"
+  "gitHead": "2b5c45bf803151824907240069d2431a8c3ebfcf"
 }
