@@ -6,9 +6,6 @@
   "directories": {
     "test": "tests"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/men-mvc"
-  },
   "type": "commonjs",
   "main": "lib/index.js",
   "repository": {
@@ -60,5 +57,5 @@
   },
   "author": "Wai Yan Hein <waiyanhein.uk@gmail.com>",
   "license": "MIT",
-  "gitHead": "a6794dca4a86b0b9b1442827709d52186cbe2d47"
+  "gitHead": "30d25cbde9a2553a4ea0925192518da5fc091093"
 }
