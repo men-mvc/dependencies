@@ -4,7 +4,7 @@ Inside the root folder
 - `lerna run test`
 - If all the tests are passed, run `lerna run build`
 - Commit and push all the changes to git repository
-- `lerna publish --registry=https://npm.pkg.github.com/`. Use  `--force-publish` if needed force publishing.
+- `lerna publish --registry=https://registry.npmjs.org`. Use  `--force-publish` if needed force publishing.
 
 ### Running tests
 - `lerna run test`
