@@ -10,6 +10,10 @@
   },
   "type": "commonjs",
   "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/men-mvc/dependencies.git"
+  },
   "scripts": {
     "build": "rm -f -r lib && npx tsc",
     "dev": "echo \"dev command is not required for core package\"",
