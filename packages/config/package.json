@@ -4,6 +4,9 @@
   "description": "Config package for Men MVC framework.",
   "private": false,
   "main": "lib/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "lib": "lib",
     "test": "tests"

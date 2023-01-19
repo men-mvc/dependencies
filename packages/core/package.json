@@ -3,6 +3,9 @@
   "version": "0.34.0",
   "description": "Core package for Men MVC framework.",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "directories": {
     "test": "tests"
   },
