@@ -10,7 +10,6 @@ export abstract class BaseConfigUtility {
     if (!config) {
       throw new Error(`Config has not been initialised.`);
     }
-    // TODO: add test.
     if (config.mail?.authType && config.mail.authType !== 'OAuth2') {
       throw new Error(`Mail auth type can only be "OAuth2".`);
     }
