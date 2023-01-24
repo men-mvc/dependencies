@@ -11,7 +11,7 @@
   "MAIL_PORT": "2324",
   "MAIL_SERVICE": "envMailService",
   "MAIL_SECURE": true,
-  "MAIL_AUTH_TYPE": "authType",
+  "MAIL_AUTH_TYPE": "OAuth2",
   "MAIL_TLS_CIPHERS": "tls_ciphers",
   "MAIL_CLIENT_ID": "fake-mail-client-id",
   "MAIL_CLIENT_SECRET": "fake-mail-client-secret",

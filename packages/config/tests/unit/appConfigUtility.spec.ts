@@ -150,11 +150,30 @@ describe(`AppConfigUtility`, () => {
       assertConfigUsesEnvVars(appConfigUtility.getConfig());
     });
 
+    it(`should throw error when invalid auth type value is set`, () => {
+      try {
+        fakeGetAppEnv(`staging`);
+        fakeGetAppLevelConfigDir();
+        fakeGetEnvVariables({
+          MAIL_AUTH_TYPE: 'invalid-oauth'
+        });
+        appConfigUtility.getConfig();
+        throw new Error(`Expected error was not thrown.`);
+      } catch (e) {
+        expect(
+          e instanceof Error &&
+            e.message === `Mail auth type can only be "OAuth2".`
+        ).toBeTruthy();
+      }
+    });
+
     it(`should not allow to use non-local filesystem driver for test`, () => {
       try {
+        appConfigUtility.resetConfig();
         fakeGetAppEnv(`test`); // beta does not exist.
         fakeGetAppLevelConfigDir();
         fakeGetEnvVariables({
+          MAIL_AUTH_TYPE: 'OAuth2',
           FILESYSTEM_STORAGE_DRIVER: 's3' // tests can only use local
         });
         appConfigUtility.getConfig();
