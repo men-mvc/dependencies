@@ -1,25 +1,56 @@
 import nodemailer from 'nodemailer';
-import { config } from '@men-mvc/config';
-import { SendMailOptions } from './types';
+import { BaseConfig, config } from '@men-mvc/config';
+import { SendMailOptions, TransportOptions } from './types';
 import { MailSender } from './mailSender';
 
+// exposing the function just to be able to mock in the test.
+export const getConfig = (): BaseConfig => config;
+
 export class NodemailerMailSender implements MailSender {
-  private getClient = (): nodemailer.Transporter => {
-    return nodemailer.createTransport({
-      host: config.mail.host,
-      port: config.mail.port,
-      secure: true, // TODO: there should be a way to override this flag
-      auth: {
-        user: config.mail.address,
-        pass: config.mail.password
-      },
-      service: config.mail.service
-    });
+  // public so that this can be reset in the test.
+  public static transportOptions: TransportOptions | null;
+
+  _getTransportOptions = (): TransportOptions => {
+    if (NodemailerMailSender.transportOptions) {
+      return NodemailerMailSender.transportOptions;
+    }
+    const appConfig = getConfig();
+    console.log(appConfig);
+    NodemailerMailSender.transportOptions = {
+      host: appConfig.mail.host,
+      port: appConfig.mail.port,
+      secure: appConfig.mail.secure,
+      auth:
+        appConfig.mail.authType === 'OAuth2'
+          ? {
+              type: 'OAuth2',
+              user: appConfig.mail.user,
+              clientId: appConfig.mail.clientId,
+              clientSecret: appConfig.mail.clientSecret,
+              refreshToken: appConfig.mail.refreshToken,
+              accessToken: appConfig.mail.accessToken,
+              expires: appConfig.mail.expires
+            }
+          : {
+              user: appConfig.mail.user,
+              pass: appConfig.mail.password
+            },
+      service: appConfig.mail.service,
+      tls: {
+        ciphers: appConfig.mail.tlsCiphers
+      }
+    };
+
+    return NodemailerMailSender.transportOptions;
+  };
+
+  private getTransporter = (): nodemailer.Transporter => {
+    return nodemailer.createTransport(this._getTransportOptions());
   };
 
   public send = async (data: SendMailOptions): Promise<void> => {
     const message: nodemailer.SendMailOptions = {
-      from: config.mail.address,
+      from: this._getTransportOptions().auth.user,
       to: data.to,
       subject: data.subject,
       html: data.body
@@ -27,6 +58,6 @@ export class NodemailerMailSender implements MailSender {
     if (data.attachments && data.attachments.length > 0) {
       message.attachments = data.attachments;
     }
-    await this.getClient().sendMail(message);
+    await this.getTransporter().sendMail(message);
   };
 }

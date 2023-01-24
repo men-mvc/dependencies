@@ -12,7 +12,7 @@
     "emailVerificationLinkDuration": 7200
   },
   "mail": {
-    "address": "",
+    "user": "",
     "password": "",
     "host": "smtp.mailtrap.io",
     "port": 2525,

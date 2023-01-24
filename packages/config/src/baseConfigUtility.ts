@@ -10,7 +10,10 @@ export abstract class BaseConfigUtility {
     if (!config) {
       throw new Error(`Config has not been initialised.`);
     }
-    // TODO: add more rules.
+    // TODO: if the mail auth type is present but not oauth2, throws error
+    /**
+     * ! add more rules.
+     */
     if (
       getAppEnv() === 'test' &&
       config.fileSystem &&

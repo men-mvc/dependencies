@@ -10,22 +10,28 @@ import { getAppEnv, getEnvVariables } from './utilities';
 import { CacheDriver, FileSystemDriver } from './globals';
 
 /**
- * TODO: throw error when the default storage is not local for test.
- * TODO: cache the config in the future.
+ * ! throw error when the default storage is not local for test.
+ * ! cache the config in the future.
  */
 export class AppConfigUtility extends BaseConfigUtility {
-  // TODO: test
+  /**
+   * ! test
+   */
   public resetConfig = () => {
     AppConfigUtility.config = null;
   };
 
   public getConfig = (): BaseConfig => {
     if (!AppConfigUtility.config) {
-      // TODO: cache in the cached file in the future, but do not cache the test env
+      /**
+       * ! cache in the cached file in the future, but do not cache the test env
+       */
       this.syncAppLevelConfig();
       this.syncEnvVars();
       if (!AppConfigUtility.config) {
-        // TODO: add test
+        /**
+         * ! add test
+         */
         throw new Error(`Unable to sync application-level configuration.`);
       }
       this.validate(AppConfigUtility.config);
@@ -128,21 +134,29 @@ export class AppConfigUtility extends BaseConfigUtility {
     }
 
     if (
-      envVars['MAIL_ADDRESS'] ||
+      envVars['MAIL_USER'] ||
       envVars['MAIL_PASSWORD'] ||
       envVars['MAIL_HOST'] ||
       envVars['MAIL_PORT'] ||
-      envVars['MAIL_SERVICE']
+      envVars['MAIL_SERVICE'] ||
+      envVars['MAIL_SECURE'] ||
+      envVars['MAIL_AUTH_TYPE'] ||
+      envVars['MAIL_TLS_CIPHERS'] ||
+      envVars['MAIL_CLIENT_ID'] ||
+      envVars['MAIL_CLIENT_SECRET'] ||
+      envVars['MAIL_REFRESH_TOKEN'] ||
+      envVars['MAIL_ACCESS_TOKEN'] ||
+      envVars['MAIL_EXPIRES']
     ) {
       AppConfigUtility.config.mail = AppConfigUtility.config.mail
         ? AppConfigUtility.config.mail
         : {
-            address: ``,
+            user: ``,
             password: ``,
             service: ``
           };
-      if (envVars['MAIL_ADDRESS']) {
-        AppConfigUtility.config.mail.address = envVars['MAIL_ADDRESS'];
+      if (envVars['MAIL_USER']) {
+        AppConfigUtility.config.mail.user = envVars['MAIL_USER'];
       }
       if (envVars['MAIL_PASSWORD']) {
         AppConfigUtility.config.mail.password = envVars['MAIL_PASSWORD'];
@@ -155,6 +169,32 @@ export class AppConfigUtility extends BaseConfigUtility {
       }
       if (envVars['MAIL_SERVICE']) {
         AppConfigUtility.config.mail.service = envVars['MAIL_SERVICE'];
+      }
+      if (envVars['MAIL_SECURE'] !== '') {
+        AppConfigUtility.config.mail.secure = Boolean(envVars['MAIL_SECURE']);
+      }
+      if (envVars['MAIL_AUTH_TYPE']) {
+        AppConfigUtility.config.mail.authType = envVars['MAIL_AUTH_TYPE'];
+      }
+      if (envVars['MAIL_TLS_CIPHERS']) {
+        AppConfigUtility.config.mail.tlsCiphers = envVars['MAIL_TLS_CIPHERS'];
+      }
+      if (envVars['MAIL_CLIENT_ID']) {
+        AppConfigUtility.config.mail.clientId = envVars['MAIL_CLIENT_ID'];
+      }
+      if (envVars['MAIL_CLIENT_SECRET']) {
+        AppConfigUtility.config.mail.clientSecret =
+          envVars['MAIL_CLIENT_SECRET'];
+      }
+      if (envVars['MAIL_REFRESH_TOKEN']) {
+        AppConfigUtility.config.mail.refreshToken =
+          envVars['MAIL_REFRESH_TOKEN'];
+      }
+      if (envVars['MAIL_ACCESS_TOKEN']) {
+        AppConfigUtility.config.mail.accessToken = envVars['MAIL_ACCESS_TOKEN'];
+      }
+      if (envVars['MAIL_EXPIRES']) {
+        AppConfigUtility.config.mail.expires = Number(envVars['MAIL_EXPIRES']);
       }
     }
 

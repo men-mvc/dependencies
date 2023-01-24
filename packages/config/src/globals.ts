@@ -13,7 +13,7 @@ export const coreTestConfig: BaseConfig = {
     emailVerificationLinkDuration: 60 * 60 * 2
   },
   mail: {
-    address: `test-mail@test.com`,
+    user: `test-mail@test.com`,
     password: `Testing123!`,
     host: `testhost.com`,
     port: 1234,

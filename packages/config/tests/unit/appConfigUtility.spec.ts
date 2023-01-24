@@ -1,14 +1,19 @@
 import sinon, { SinonStub } from 'sinon';
 import fs from 'fs';
 import path from 'path';
-import { appConfigUtility, BaseConfig } from '../../src';
+import {
+  appConfigUtility,
+  BaseConfig,
+  CONFIG_VARIABLES_COUNT
+} from '../../src';
 import * as utilities from '../../src/utilities';
 
 const stagingConfigJson = require('./fakeConfigs/staging.json');
 const partialStagingConfigJson = require('./fakeConfigs/partial-staging.json');
 const defaultConfigJson = require('./fakeConfigs/default.json');
 const fakeConfigDirPath = path.join(__dirname, `fakeConfigs`);
-const fakeEnvVars = require('./fakeConfigs/envVariables.json');
+const fakeEnvVars = require('./fakeConfigs/env-vars.json');
+const completeEnvVars = require('./fakeConfigs/complete-env-vars.json');
 describe(`AppConfigUtility`, () => {
   describe(`getConfig`, () => {
     let getAppEnvStub: SinonStub | null;
@@ -16,9 +21,6 @@ describe(`AppConfigUtility`, () => {
     let getEnvVariablesStub: SinonStub | null;
     beforeEach(() => {
       appConfigUtility.resetConfig();
-      getAppEnvStub = null;
-      getAppLevelConfigDirStub = null;
-      getEnvVariablesStub = null;
     });
     afterEach(() => {
       if (getAppEnvStub) {
@@ -30,6 +32,14 @@ describe(`AppConfigUtility`, () => {
       if (getEnvVariablesStub) {
         getEnvVariablesStub.restore();
       }
+      getAppEnvStub = null;
+      getAppLevelConfigDirStub = null;
+      getEnvVariablesStub = null;
+    });
+
+    it(`should set every prop of the config object with the corresponding .env variable`, () => {
+      fakeGetEnvVariables(completeEnvVars);
+      assertEachConfigFieldIsOverwrittenByEnvVar(appConfigUtility.getConfig());
     });
 
     it(`should return empty object when the app level configuration directory does not exist`, () => {
@@ -198,7 +208,7 @@ describe(`AppConfigUtility`, () => {
       expect(config.auth.passwordResetLinkDuration).toBe(
         parseInt(fakeEnvVars.PASSWORD_RESET_LINK_DURATION)
       );
-      expect(config.mail.address).toBe(fakeEnvVars.MAIL_ADDRESS);
+      expect(config.mail.user).toBe(fakeEnvVars.MAIL_USER);
       expect(config.mail.password).toBe(fakeEnvVars.MAIL_PASSWORD);
       expect(config.mail.host).toBe(fakeEnvVars.MAIL_HOST);
       expect(config.mail.port).toBe(parseInt(fakeEnvVars.MAIL_PORT));
@@ -216,6 +226,33 @@ describe(`AppConfigUtility`, () => {
       expect(config.fileSystem.maxUploadLimit).toBe(
         parseInt(fakeEnvVars.FILESYSTEM_MAX_UPLOAD_LIMIT)
       );
+    };
+
+    const assertEachConfigFieldIsOverwrittenByEnvVar = (config: BaseConfig) => {
+      let setConfigFieldCount = 0;
+      const assertConfigPropRecursively = (configObject: {
+        [key: string]: unknown;
+      }) => {
+        for (let k in configObject) {
+          if (typeof configObject[k] == 'object' && configObject[k] !== null) {
+            const child = configObject[k];
+            if (typeof child === 'object' || child !== null) {
+              assertConfigPropRecursively(child as { [key: string]: unknown });
+            }
+          } else {
+            setConfigFieldCount++;
+            expect(
+              configObject[k] !== undefined &&
+                configObject[k] !== null &&
+                configObject[k] !== ''
+            ).toBeTruthy();
+          }
+        }
+      };
+      assertConfigPropRecursively(
+        config as unknown as { [key: string]: unknown }
+      );
+      expect(setConfigFieldCount).toBe(CONFIG_VARIABLES_COUNT);
     };
   });
 });
