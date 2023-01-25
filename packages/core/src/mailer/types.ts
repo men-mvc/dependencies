@@ -4,7 +4,7 @@ export type MailAttachment = {
 };
 
 export type SendMailOptions = {
-  to: string;
+  to: string | string[];
   subject: string;
   body: string;
   attachments?: MailAttachment[];

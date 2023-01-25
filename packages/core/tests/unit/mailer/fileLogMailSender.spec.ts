@@ -7,9 +7,7 @@ import {
 } from '../../../src/mailer/fileLogMailSender';
 
 describe(`FileLogMailSender`, () => {
-  afterEach(() => {
-    deleteMailLogDirectoryIfExists();
-  });
+  afterEach(() => deleteMailLogDirectoryIfExists());
 
   it(`should create the mailLog directory when the FileLogMailSender instance is created`, () => {
     deleteMailLogDirectoryIfExists();
