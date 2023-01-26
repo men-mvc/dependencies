@@ -1,10 +1,12 @@
 import sinon from 'sinon';
 import util from 'util';
-import { faker } from '@faker-js/faker';
-import ConsoleLogger from '../../../src/logger/consoleLogger';
+import { ConsoleLogMailSender } from '../../../src/mailer/consoleLogMailSender';
+import { generateSendMailData } from './utilities';
 
-const instance = new ConsoleLogger();
-describe(`ConsoleLogger`, () => {
+describe(`ConsoleLogMailSender`, () => {
+  /**
+   * ! code duplication will be gone after we create a separate package for logger.
+   */
   let consoleLogStub: sinon.SinonStub;
   let mockConsoleLogFunc: jest.Mock;
   let inspectStub: sinon.SinonStub;
@@ -20,25 +22,19 @@ describe(`ConsoleLogger`, () => {
     mockConsoleLogFunc.mockRestore();
   });
 
-  describe(`logError`, () => {
-    it(`should inspect and log error`, () => {
-      const error = { error: `Something went wrong!` };
-      instance.logError(error);
-      assertInspectInvoked(error);
-      // TODO: how can we assert the parameter of console log?
-      expect(mockConsoleLogFunc.mock.calls.length).toBe(1);
-    });
+  it(`should inspect and log mail data`, async () => {
+    const mailData = generateSendMailData();
+    const mailSender = new ConsoleLogMailSender();
+    await mailSender.send(mailData);
+
+    assertInspectInvoked(mailData);
+    // TODO: how can we assert the parameter of console log?
+    expect(mockConsoleLogFunc.mock.calls.length).toBe(1);
   });
 
-  describe(`logMessage`, () => {
-    it(`should inspect and log the message`, () => {
-      const message = faker.lorem.paragraphs(2);
-      instance.logMessage(message);
-      assertInspectInvoked(message);
-      expect(mockConsoleLogFunc.mock.calls.length).toBe(1);
-    });
-  });
-
+  /**
+   * ! code duplication will be gone after we create a separate package for logger.
+   */
   const assertInspectInvoked = (data: unknown) => {
     expect(mockInspectFunc.mock.calls.length).toBe(1);
     const inspectCall = mockInspectFunc.mock.calls[0];
@@ -48,9 +44,6 @@ describe(`ConsoleLogger`, () => {
     expect(inspectCall[3]).toBeTruthy();
   };
 
-  /**
-   * ! duplicate code: but duplication will be gone once we create a separate package for logger.
-   */
   const mockUtilInspect = () => {
     inspectStub = sinon.stub(util, `inspect`);
     mockInspectFunc = jest

@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import { faker } from '@faker-js/faker';
 import {
   FileLogMailSender,
   mailLogDirectory
 } from '../../../src/mailer/fileLogMailSender';
+import { generateSendMailData } from './utilities';
 
 describe(`FileLogMailSender`, () => {
   afterEach(() => deleteMailLogDirectoryIfExists());
@@ -20,7 +20,7 @@ describe(`FileLogMailSender`, () => {
     const mailLogFilepath = `${mailLogDirectory}${path.sep}${
       new Date().toISOString().split('T')[0]
     }.txt`;
-    const mailData = generateMailData();
+    const mailData = generateSendMailData();
     await mailSender.send(mailData);
     expect(fs.existsSync(mailLogFilepath)).toBeTruthy();
     const logFileContent = fs.readFileSync(mailLogFilepath).toString();
@@ -34,9 +34,9 @@ describe(`FileLogMailSender`, () => {
     const mailLogFilepath = `${mailLogDirectory}${path.sep}${
       new Date().toISOString().split('T')[0]
     }.txt`;
-    const mailData1 = generateMailData();
+    const mailData1 = generateSendMailData();
     await mailSender.send(mailData1);
-    const mailData2 = generateMailData();
+    const mailData2 = generateSendMailData();
     await mailSender.send(mailData2);
     const logFileContent = fs.readFileSync(mailLogFilepath).toString();
     expect(logFileContent).toBe(
@@ -44,13 +44,6 @@ describe(`FileLogMailSender`, () => {
         mailData1
       )}\n\n\n${new Date().toISOString()}\n${JSON.stringify(mailData2)}\n\n\n`
     );
-  });
-
-  const generateMailData = () => ({
-    subject: faker.lorem.word(2),
-    attachments: [],
-    body: faker.lorem.paragraphs(3),
-    to: faker.internet.email()
   });
 
   const deleteMailLogDirectoryIfExists = () => {
