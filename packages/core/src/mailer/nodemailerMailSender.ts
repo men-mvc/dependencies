@@ -15,7 +15,6 @@ export class NodemailerMailSender implements MailSender {
       return NodemailerMailSender.transportOptions;
     }
     const appConfig = getConfig();
-    console.log(appConfig);
     NodemailerMailSender.transportOptions = {
       host: appConfig.mail.host,
       port: appConfig.mail.port,

@@ -1,9 +1,9 @@
-import { CacheDriver, FileSystemDriver } from './globals';
+import { CacheDriver, FileSystemDriver, MailDriver } from './globals';
 
 /**
- * ! 26 mutable props - when a new prop is added to the BaseConfig, update this variable too
+ * ! 27 mutable props - when a new prop is added to the BaseConfig, update this variable too
  */
-export const CONFIG_VARIABLES_COUNT = 26;
+export const CONFIG_VARIABLES_COUNT = 27;
 
 /**
  * ! find a way to validate there is an ENV variable declared for each prop.
@@ -22,6 +22,7 @@ export interface BaseConfig {
     emailVerificationLinkDuration: number;
   };
   mail: {
+    driver?: MailDriver;
     user: string;
     password: string;
     host?: string;

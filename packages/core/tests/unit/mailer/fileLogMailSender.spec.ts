@@ -7,6 +7,10 @@ import {
 import { generateSendMailData } from './utilities';
 
 describe(`FileLogMailSender`, () => {
+  beforeAll(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
+  });
+
   afterEach(() => deleteMailLogDirectoryIfExists());
 
   it(`should create the mailLog directory when the FileLogMailSender instance is created`, () => {
@@ -15,6 +19,7 @@ describe(`FileLogMailSender`, () => {
     expect(fs.existsSync(mailLogDirectory)).toBeTruthy();
   });
 
+  // TODO: fix date time
   it(`should log mail data in the mailLog directory creating a new log file`, async () => {
     const mailSender = new FileLogMailSender();
     const mailLogFilepath = `${mailLogDirectory}${path.sep}${
