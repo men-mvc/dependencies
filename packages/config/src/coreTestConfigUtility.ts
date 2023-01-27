@@ -3,7 +3,6 @@ import { BaseConfig } from './baseConfig';
 import { coreTestConfig } from './globals';
 
 export class CoreTestConfigUtility extends BaseConfigUtility {
-  // TODO: test singleton
   public getConfig = (): BaseConfig => {
     if (!CoreTestConfigUtility.config) {
       CoreTestConfigUtility.config = coreTestConfig;

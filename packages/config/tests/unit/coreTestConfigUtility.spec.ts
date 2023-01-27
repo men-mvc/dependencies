@@ -12,4 +12,12 @@ describe(`CoreTestConfigUtility`, () => {
       );
     });
   });
+
+  describe(`getInstance`, () => {
+    it(`should always return the same instance`, () => {
+      const instance1 = coreTestConfigUtility.getConfig();
+      const instance2 = coreTestConfigUtility.getConfig();
+      expect(instance1).toBe(instance2);
+    });
+  });
 });
