@@ -150,6 +150,23 @@ describe(`AppConfigUtility`, () => {
       assertConfigUsesEnvVars(appConfigUtility.getConfig());
     });
 
+    it(`should throw error when invalid mail driver is set`, () => {
+      try {
+        fakeGetAppEnv(`staging`);
+        fakeGetAppLevelConfigDir();
+        fakeGetEnvVariables({
+          MAIL_DRIVER: 'invalid-mail-driver'
+        });
+        appConfigUtility.getConfig();
+        throw new Error(`Expected error was not thrown.`);
+      } catch (e) {
+        expect(
+            e instanceof Error &&
+            e.message === `Mail driver is invalid.`
+        ).toBeTruthy();
+      }
+    });
+
     it(`should throw error when invalid auth type value is set`, () => {
       try {
         fakeGetAppEnv(`staging`);
