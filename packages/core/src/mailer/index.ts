@@ -7,3 +7,6 @@ export * from './mailer';
 export * from './nodemailerMailSender';
 export * from './types';
 export * from './mailSender';
+export * from './utilities';
+export * from './consoleLogMailSender';
+export * from './fileLogMailSender';
