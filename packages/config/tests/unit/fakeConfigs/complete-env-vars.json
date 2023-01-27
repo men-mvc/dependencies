@@ -5,6 +5,7 @@
   "AUTH_TOKEN_EXPIRES_IN": "23y",
   "PASSWORD_RESET_LINK_DURATION": "234343",
   "EMAIL_VERIFICATION_LINK_DURATION": "43434",
+  "MAIL_DRIVER": "console_log",
   "MAIL_USER": "env-mail@gmail.com",
   "MAIL_PASSWORD": "mail-password",
   "MAIL_HOST": "mailhost-env.com",

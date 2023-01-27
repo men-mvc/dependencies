@@ -7,7 +7,7 @@ import _ from 'lodash';
 import { BaseConfig } from './baseConfig';
 import { BaseConfigUtility } from './baseConfigUtility';
 import { getAppEnv, getEnvVariables } from './utilities';
-import { CacheDriver, FileSystemDriver } from './globals';
+import { CacheDriver, FileSystemDriver, MailDriver } from './globals';
 
 /**
  * ! throw error when the default storage is not local for test.
@@ -133,7 +133,11 @@ export class AppConfigUtility extends BaseConfigUtility {
       }
     }
 
+    /**
+     * ! if none of the mail .env variable is provided, the mail object itself will be null.
+     */
     if (
+      envVars['MAIL_DRIVER'] ||
       envVars['MAIL_USER'] ||
       envVars['MAIL_PASSWORD'] ||
       envVars['MAIL_HOST'] ||
@@ -155,6 +159,11 @@ export class AppConfigUtility extends BaseConfigUtility {
             password: ``,
             service: ``
           };
+      if (envVars['MAIL_DRIVER']) {
+        AppConfigUtility.config.mail.driver = envVars[
+          'MAIL_DRIVER'
+        ] as MailDriver;
+      }
       if (envVars['MAIL_USER']) {
         AppConfigUtility.config.mail.user = envVars['MAIL_USER'];
       }

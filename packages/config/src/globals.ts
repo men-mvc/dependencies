@@ -36,3 +36,4 @@ export const coreTestConfig: BaseConfig = {
 // TODO: create another package called @men-mvc/types or @men-mvc/globals
 export type CacheDriver = 'redis' | 'in-memory';
 export type FileSystemDriver = 'local'; // TODO: add more driver in the future
+export type MailDriver = '' | 'mail' | 'file_log' | 'console_log';
