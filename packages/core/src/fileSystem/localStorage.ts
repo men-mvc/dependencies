@@ -172,13 +172,13 @@ export class LocalStorage implements IStorage {
   private mkdirPromise = (dirPath: string): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
       fs.promises
-          .mkdir(dirPath, { recursive: true })
-          .then(() => {
-            resolve();
-          })
-          .catch((error) => {
-            reject(error);
-          });
+        .mkdir(dirPath, { recursive: true })
+        .then(() => {
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        });
     });
   };
 }

@@ -2,12 +2,14 @@ import sinon, { SinonStub } from 'sinon';
 import nodemailer from 'nodemailer';
 import { faker } from '@faker-js/faker';
 import {
+  HtmlSendMailOptions,
   NodemailerMailSender,
-  SendMailOptions,
+  SendMailOptions, TemplateSendMailOptions,
   TransportOptions
 } from '../../../src';
 import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
 
+// TODO: test for template
 describe(`NodemailerMailSender`, () => {
   describe(`send`, () => {
     const fakeTransportOptions: TransportOptions = {
@@ -21,17 +23,6 @@ describe(`NodemailerMailSender`, () => {
       service: faker.lorem.word()
     };
 
-    const mailInfo: SendMailOptions = {
-      to: faker.internet.email(),
-      subject: faker.lorem.words(2),
-      attachments: Array.from(Array(3).keys()).map((element) => {
-        return {
-          filename: `${faker.lorem.word()}.png`,
-          path: `storage/${faker.lorem.word()}.png`
-        };
-      }),
-      body: faker.lorem.paragraphs(3)
-    };
     const mailer = new NodemailerMailSender();
     let sendMailMockFunc: jest.Mock;
     let createTransportStub: sinon.SinonStub;
@@ -53,6 +44,7 @@ describe(`NodemailerMailSender`, () => {
     });
 
     it(`should create transport with the right options`, async () => {
+      const mailInfo = generateSendMailOptions() as HtmlSendMailOptions;
       await mailer.send(mailInfo);
 
       expect(createTransportMockFunc.mock.calls.length).toBe(1);
@@ -66,25 +58,59 @@ describe(`NodemailerMailSender`, () => {
       expect(options.service).toBe(fakeTransportOptions.service);
     });
 
-    it(`should invoke the sendMail function passing the correct email content`, async () => {
+    it(`should invoke the sendMail function passing the correct email content without using template`, async () => {
+      const mailInfo = generateSendMailOptions() as HtmlSendMailOptions;
       await mailer.send(mailInfo);
 
-      expect(sendMailMockFunc.mock.calls.length).toBe(1);
-      const sendMailCall = sendMailMockFunc.mock.calls[0];
-      expect(sendMailCall[0].from).toBe(fakeTransportOptions.auth.user);
-      expect(sendMailCall[0].to).toBe(mailInfo.to);
-      expect(sendMailCall[0].subject).toBe(mailInfo.subject);
-      expect(sendMailCall[0].html).toBe(mailInfo.body);
-      expect(sendMailCall[0].attachments.length).toBe(3);
-      if (!mailInfo.attachments || mailInfo.attachments.length < 1) {
-        throw new Error(`Attachments are not tested.`);
+      assertMailSentWithTheRightData(mailInfo);
+    });
+
+    it(`should invoke the sendMail function passing the correct email content using the template with data`, async () => {
+      const template = {
+        view: "smart",
+        data: {
+          name: "Wai Yan Hein"
+        }
       }
-      mailInfo.attachments.map((attachment, index) => {
-        expect(attachment.filename).toBe(
-          sendMailCall[0].attachments[index].filename
-        );
-        expect(attachment.path).toBe(sendMailCall[0].attachments[index].path);
-      });
+      const mailInfo = generateSendMailOptions(template) as TemplateSendMailOptions;
+      await mailer.send(mailInfo);
+
+      const expectedMailBody = `<html>
+<head>
+    <title>Smart Template</title>
+</head>
+<body>
+<p>Hello ${template.data.name}!</p>
+</body>
+</html>
+`
+      assertMailSentWithTheRightData({
+        ...mailInfo,
+        body: expectedMailBody,
+        template: undefined,
+      } as HtmlSendMailOptions)
+    });
+
+    it(`should invoke the sendMail function passing the correct email content using the template without data`, async () => {
+      const mailInfo = generateSendMailOptions({
+        view: "dump",
+      }) as TemplateSendMailOptions;
+      await mailer.send(mailInfo);
+
+      const expectedMailBody = `<html>
+<head>
+    <title>Dump Template</title>
+</head>
+<body>
+<p>Hello world!</p>
+</body>
+</html>
+`
+      assertMailSentWithTheRightData({
+        ...mailInfo,
+        body: expectedMailBody,
+        template: undefined,
+      } as HtmlSendMailOptions)
     });
 
     const mockSendMail = () => {
@@ -106,6 +132,52 @@ describe(`NodemailerMailSender`, () => {
       getTransportOptionsStub.callsFake(
         jest.fn().mockReturnValue(fakeTransportOptions)
       );
+    };
+
+    // to assert email is sent using a template, passed the finalised content of the template to body prop
+    const assertMailSentWithTheRightData = (mailInfo: HtmlSendMailOptions) => {
+      expect(sendMailMockFunc.mock.calls.length).toBe(1);
+      const sendMailCall = sendMailMockFunc.mock.calls[0];
+      expect(sendMailCall[0].from).toBe(fakeTransportOptions.auth.user);
+      expect(sendMailCall[0].to).toBe(mailInfo.to);
+      expect(sendMailCall[0].subject).toBe(mailInfo.subject);
+      expect(sendMailCall[0].html).toBe(mailInfo.body);
+      expect(sendMailCall[0].attachments.length).toBe(3);
+      if (!mailInfo.attachments || mailInfo.attachments.length < 1) {
+        throw new Error(`Attachments are not tested.`);
+      }
+      mailInfo.attachments.map((attachment, index) => {
+        expect(attachment.filename).toBe(
+            sendMailCall[0].attachments[index].filename
+        );
+        expect(attachment.path).toBe(sendMailCall[0].attachments[index].path);
+      });
+    }
+
+    const generateSendMailOptions = (template?: {
+      view: string;
+      data?: Record<string, unknown>;
+    }): SendMailOptions => {
+      const commonOptions = {
+        to: faker.internet.email(),
+        subject: faker.lorem.words(2),
+        attachments: Array.from(Array(3).keys()).map((element) => {
+          return {
+            filename: `${faker.lorem.word()}.png`,
+            path: `storage/${faker.lorem.word()}.png`
+          };
+        })
+      };
+
+      return template
+        ? {
+            ...commonOptions,
+            template
+          }
+        : {
+            ...commonOptions,
+            body: faker.lorem.paragraphs(3)
+          };
     };
   });
 

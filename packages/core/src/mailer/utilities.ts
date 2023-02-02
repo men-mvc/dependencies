@@ -13,23 +13,22 @@ export const getEmailTemplatesDir = () => {
   if (emailTemplatesDir) {
     return emailTemplatesDir;
   }
-  emailTemplatesDir = `${process.cwd()}${path.sep}views${path.sep}emails`;
+  emailTemplatesDir = path.join(process.cwd(), 'views', 'emails');
 
   return emailTemplatesDir;
 };
 
-// TODO: finish -> reference -> https://alexanderpaterson.com/posts/use-handlebars-to-send-great-emails-from-node-applications
+// reference -> https://alexanderpaterson.com/posts/use-handlebars-to-send-great-emails-from-node-applications
 const getEmailTemplate = async (
   templateView: string
 ): Promise<handlebars.TemplateDelegate> => {
   /**
    * ! does not create the directory (views/emails) if it does not exist as the developer is responsible for creating the folder.
    */
-  const source = await readFileAsync(
+  const sourceFileBuffer = await readFileAsync(
     `${getEmailTemplatesDir()}${path.sep}${templateView}.handlebars`
   );
-
-  return handlebars.compile(source);
+  return handlebars.compile(sourceFileBuffer.toString());
 };
 
 export const buildEmailBodyFromTemplate = async (

@@ -9,14 +9,15 @@ type SendMailCommonOptions = {
   attachments?: MailAttachment[];
 };
 
-type HtmlSendMailOptions = SendMailCommonOptions & {
+export type HtmlSendMailOptions = SendMailCommonOptions & {
   body: string;
   template?: never;
 };
-type TemplateSendMailOptions = SendMailCommonOptions & {
+
+export type TemplateSendMailOptions = SendMailCommonOptions & {
   template: {
     view: string;
-    data?: { [key: string]: unknown };
+    data?: Record<string, unknown>;
   };
 };
 
