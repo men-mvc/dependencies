@@ -1,11 +1,19 @@
 import nodemailer from 'nodemailer';
 import { BaseConfig, config } from '@men-mvc/config';
-import { SendMailOptions, TransportOptions } from './types';
+import handlebars from 'handlebars';
+import {
+  isHtmlSendMailOptions,
+  isTemplateSendMailOptions,
+  SendMailOptions,
+  TransportOptions
+} from './types';
 import { MailSender } from './mailSender';
+import { buildEmailBodyFromTemplate } from './utilities';
 
 // exposing the function just to be able to mock in the test.
 export const getConfig = (): BaseConfig => config;
 
+// TODO: add support for PLAIN, LOGIN and CRAM-MD5 auth types
 export class NodemailerMailSender implements MailSender {
   // public so that this can be reset in the test.
   public static transportOptions: TransportOptions | null;
@@ -48,11 +56,20 @@ export class NodemailerMailSender implements MailSender {
   };
 
   public send = async (data: SendMailOptions): Promise<void> => {
+    let html = ``;
+    if (isTemplateSendMailOptions(data)) {
+      html = await buildEmailBodyFromTemplate(
+        data.template.view,
+        data.template.data
+      );
+    } else if (isHtmlSendMailOptions(data)) {
+      html = data.body;
+    }
     const message: nodemailer.SendMailOptions = {
       from: this._getTransportOptions().auth.user,
       to: data.to,
       subject: data.subject,
-      html: data.body
+      html
     };
     if (data.attachments && data.attachments.length > 0) {
       message.attachments = data.attachments;

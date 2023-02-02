@@ -12,6 +12,7 @@ import { CacheDriver, FileSystemDriver, MailDriver } from './globals';
 /**
  * ! throw error when the default storage is not local for test.
  * ! cache the config in the future.
+ * TODO: build a mechanism for publishing the config files from this package into the app project.
  */
 export class AppConfigUtility extends BaseConfigUtility {
   /**

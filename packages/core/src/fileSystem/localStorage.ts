@@ -1,11 +1,14 @@
 import fs, { WriteFileOptions } from 'fs';
 import rimraf from 'rimraf';
+import util from 'util';
 import { IStorage, ReadStreamOptions } from './types';
 
+const readdirAsync = util.promisify(fs.readdir);
+const rmdirAsync = util.promisify(fs.rmdir);
+const rimrafAsync = util.promisify(rimraf);
+
 // TODO: add sync versions of the functions.
-// TODO: use reject for promise func
 // TODO: readDir recursive
-// TODO: create isFile function
 export class LocalStorage implements IStorage {
   public static instance: LocalStorage;
   // TODO: try using this function
@@ -19,7 +22,7 @@ export class LocalStorage implements IStorage {
 
   public readDir = async (dir: string): Promise<string[]> => {
     try {
-      return await this.readDirPromise(dir);
+      return await readdirAsync(dir);
     } catch (e) {
       throw e;
     }
@@ -103,39 +106,18 @@ export class LocalStorage implements IStorage {
     });
   };
 
-  private mkdirPromise = (dirPath: string): Promise<void> => {
-    return new Promise<void>((resolve, reject) => {
-      fs.promises
-        .mkdir(dirPath, { recursive: true })
-        .then(() => {
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  };
-
   public mkdir = async (dirPath: string): Promise<void> => {
-    try {
-      await this.mkdirPromise(dirPath);
-    } catch (e) {
-      throw e;
-    }
+    await this.mkdirPromise(dirPath);
   };
 
   public rmdir = async (
     dirPath: string,
     forceDelete?: boolean
   ): Promise<void> => {
-    try {
-      if (forceDelete) {
-        await this.forceRmdirPromise(dirPath);
-      } else {
-        await this.rmdirPromise(dirPath);
-      }
-    } catch (e) {
-      throw e;
+    if (forceDelete) {
+      await rimrafAsync(dirPath);
+    } else {
+      await rmdirAsync(dirPath);
     }
   };
 
@@ -187,38 +169,16 @@ export class LocalStorage implements IStorage {
     });
   };
 
-  private forceRmdirPromise = (dirPath: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      rimraf(dirPath, (err) => {
-        if (err) {
-          return reject(err);
-        }
-      });
-
-      return resolve();
-    });
-  };
-
-  private rmdirPromise = (dirPath: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      fs.rmdir(dirPath, (err) => {
-        if (err) {
-          return reject(err);
-        }
-
-        return resolve();
-      });
-    });
-  };
-
-  private readDirPromise = (dir: string): Promise<string[]> => {
-    return new Promise((resolve, reject) => {
-      fs.readdir(dir, (err, data) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(data);
-      });
+  private mkdirPromise = (dirPath: string): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      fs.promises
+        .mkdir(dirPath, { recursive: true })
+        .then(() => {
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        });
     });
   };
 }
