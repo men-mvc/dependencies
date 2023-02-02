@@ -1,10 +1,13 @@
 ### Building & publishing packages
 Inside the root folder
+- Make sure that you are on the `main` branch
 - `npm i` if you are setting up the project for the first time or have added a new npm package
 - `lerna run test`
 - If all the tests are passed, run `lerna run build`
 - Commit and push all the changes to git repository
 - `lerna publish --registry=https://registry.npmjs.org` or `npm run publish`. Use  `--force-publish` if needed force publishing.
+- `git tag {{TAG}}`
+- `git push origin --tag`
 
 ### Running tests
 - `lerna run test`
