@@ -24,15 +24,16 @@ export type TemplateSendMailOptions = SendMailCommonOptions & {
 export type SendMailOptions = HtmlSendMailOptions | TemplateSendMailOptions;
 
 export const isTemplateSendMailOptions = (
-  arg: Record<string, unknown>
-): arg is TemplateSendMailOptions =>
-  arg['template'] !== undefined &&
-  arg['template'] !== null &&
-  typeof arg === 'object';
+  sendMailOptions: Record<string, unknown>
+): sendMailOptions is TemplateSendMailOptions =>
+  sendMailOptions['template'] !== undefined &&
+  sendMailOptions['template'] !== null &&
+  typeof sendMailOptions === 'object';
 
 export const isHtmlSendMailOptions = (
-  arg: Record<string, unknown>
-): arg is HtmlSendMailOptions => !isTemplateSendMailOptions(arg);
+  sendMailOptions: Record<string, unknown>
+): sendMailOptions is HtmlSendMailOptions =>
+  !isTemplateSendMailOptions(sendMailOptions);
 
 export type TransportOptions = {
   host?: string;
