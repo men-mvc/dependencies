@@ -4,7 +4,8 @@ import { faker } from '@faker-js/faker';
 import {
   HtmlSendMailOptions,
   NodemailerMailSender,
-  SendMailOptions, TemplateSendMailOptions,
+  SendMailOptions,
+  TemplateSendMailOptions,
   TransportOptions
 } from '../../../src';
 import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
@@ -67,50 +68,50 @@ describe(`NodemailerMailSender`, () => {
 
     it(`should invoke the sendMail function passing the correct email content using the template with data`, async () => {
       const template = {
-        view: "smart",
+        view: 'smart',
         data: {
-          name: "Wai Yan Hein"
+          name: 'Wai Yan Hein'
         }
-      }
-      const mailInfo = generateSendMailOptions(template) as TemplateSendMailOptions;
+      };
+      const mailInfo = generateSendMailOptions(
+        template
+      ) as TemplateSendMailOptions;
       await mailer.send(mailInfo);
 
       const expectedMailBody = `<html>
-<head>
+  <head>
     <title>Smart Template</title>
-</head>
-<body>
-<p>Hello ${template.data.name}!</p>
-</body>
-</html>
-`
+  </head>
+  <body>
+    <p>Hello ${template.data.name}!</p>
+  </body>
+</html>`;
       assertMailSentWithTheRightData({
         ...mailInfo,
         body: expectedMailBody,
-        template: undefined,
-      } as HtmlSendMailOptions)
+        template: undefined
+      } as HtmlSendMailOptions);
     });
 
     it(`should invoke the sendMail function passing the correct email content using the template without data`, async () => {
       const mailInfo = generateSendMailOptions({
-        view: "dump",
+        view: 'dump'
       }) as TemplateSendMailOptions;
       await mailer.send(mailInfo);
 
       const expectedMailBody = `<html>
-<head>
+  <head>
     <title>Dump Template</title>
-</head>
-<body>
-<p>Hello world!</p>
-</body>
-</html>
-`
+  </head>
+  <body>
+    <p>Hello world!</p>
+  </body>
+</html>`;
       assertMailSentWithTheRightData({
         ...mailInfo,
         body: expectedMailBody,
-        template: undefined,
-      } as HtmlSendMailOptions)
+        template: undefined
+      } as HtmlSendMailOptions);
     });
 
     const mockSendMail = () => {
@@ -148,11 +149,11 @@ describe(`NodemailerMailSender`, () => {
       }
       mailInfo.attachments.map((attachment, index) => {
         expect(attachment.filename).toBe(
-            sendMailCall[0].attachments[index].filename
+          sendMailCall[0].attachments[index].filename
         );
         expect(attachment.path).toBe(sendMailCall[0].attachments[index].path);
       });
-    }
+    };
 
     const generateSendMailOptions = (template?: {
       view: string;
