@@ -3,12 +3,35 @@ export type MailAttachment = {
   path: string;
 };
 
-export type SendMailOptions = {
+type SendMailCommonOptions = {
   to: string | string[];
   subject: string;
-  body: string;
   attachments?: MailAttachment[];
 };
+
+type HtmlSendMailOptions = SendMailCommonOptions & {
+  body: string;
+  template?: never;
+};
+type TemplateSendMailOptions = SendMailCommonOptions & {
+  template: {
+    view: string;
+    data?: { [key: string]: unknown };
+  };
+};
+
+export type SendMailOptions = HtmlSendMailOptions | TemplateSendMailOptions;
+
+export const isTemplateSendMailOptions = (
+  arg: Record<string, unknown>
+): arg is TemplateSendMailOptions =>
+  arg['template'] !== undefined &&
+  arg['template'] !== null &&
+  typeof arg === 'object';
+
+export const isHtmlSendMailOptions = (
+  arg: Record<string, unknown>
+): arg is HtmlSendMailOptions => !isTemplateSendMailOptions(arg);
 
 export type TransportOptions = {
   host?: string;

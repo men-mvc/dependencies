@@ -1,6 +1,9 @@
 import { LoggerContract } from './types';
 import ConsoleLogger from './consoleLogger';
 
+/**
+ * TODO: mechanism to disable logging by overwriting the .env variable.
+ */
 export class Logger {
   private static instance: LoggerContract | null;
 
