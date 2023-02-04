@@ -3,6 +3,7 @@ import path from 'path';
 import util from 'util';
 import { config, MailDriver } from '@men-mvc/config';
 import handlebars from 'handlebars';
+import { getSourceCodeDirectory } from '../utilities/app';
 
 let emailTemplatesDir: string;
 const readFileAsync = util.promisify(fs.readFile);
@@ -13,12 +14,12 @@ export const getEmailTemplatesDir = () => {
   if (emailTemplatesDir) {
     return emailTemplatesDir;
   }
-  emailTemplatesDir = path.join(process.cwd(), 'views', 'emails');
+
+  emailTemplatesDir = path.join(getSourceCodeDirectory(), 'views', 'emails');
 
   return emailTemplatesDir;
 };
 
-// reference -> https://alexanderpaterson.com/posts/use-handlebars-to-send-great-emails-from-node-applications
 const getEmailTemplate = async (
   templateView: string
 ): Promise<handlebars.TemplateDelegate> => {

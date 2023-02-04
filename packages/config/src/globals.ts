@@ -37,3 +37,5 @@ export const coreTestConfig: BaseConfig = {
 export type CacheDriver = 'redis' | 'in-memory';
 export type FileSystemDriver = 'local'; // TODO: add more driver in the future
 export type MailDriver = '' | 'mail' | 'file_log' | 'console_log';
+export const srcDirectory = 'src'; // small letters only
+export const buildDirectory = 'dist'; // small letters only

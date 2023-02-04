@@ -9,10 +9,12 @@ import {
   TransportOptions
 } from '../../../src';
 import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
+import * as appUtilities from '../../../src/utilities/app';
 
 // TODO: test for template
 describe(`NodemailerMailSender`, () => {
   describe(`send`, () => {
+    const testSourceCodeDirectory = `${process.cwd()}/tests`;
     const fakeTransportOptions: TransportOptions = {
       host: `smtp.gmail.com`,
       port: 25,
@@ -29,6 +31,11 @@ describe(`NodemailerMailSender`, () => {
     let createTransportStub: sinon.SinonStub;
     let createTransportMockFunc: jest.Mock;
     let getTransportOptionsStub: SinonStub;
+    let getSourceCodeDirectoryStub: SinonStub;
+
+    beforeAll(() => mockGetSourceCodeDirectory());
+    afterAll(() => getSourceCodeDirectoryStub.restore());
+
     beforeEach(() => {
       mockGetTransportOptions();
       mockSendMail();
@@ -132,6 +139,16 @@ describe(`NodemailerMailSender`, () => {
       getTransportOptionsStub = sinon.stub(mailer, '_getTransportOptions');
       getTransportOptionsStub.callsFake(
         jest.fn().mockReturnValue(fakeTransportOptions)
+      );
+    };
+
+    const mockGetSourceCodeDirectory = () => {
+      getSourceCodeDirectoryStub = sinon.stub(
+        appUtilities,
+        `getSourceCodeDirectory`
+      );
+      getSourceCodeDirectoryStub.callsFake(
+        jest.fn().mockReturnValue(testSourceCodeDirectory)
       );
     };
 
