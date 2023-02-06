@@ -10,6 +10,7 @@ import {
 } from '../../../src';
 import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
 import * as appUtilities from '../../../src/utilities/app';
+import { mockGetSourceCodeDirectory } from './testUtilities';
 
 // TODO: test for template
 describe(`NodemailerMailSender`, () => {
@@ -33,7 +34,12 @@ describe(`NodemailerMailSender`, () => {
     let getTransportOptionsStub: SinonStub;
     let getSourceCodeDirectoryStub: SinonStub;
 
-    beforeAll(() => mockGetSourceCodeDirectory());
+    beforeAll(
+      () =>
+        (getSourceCodeDirectoryStub = mockGetSourceCodeDirectory(
+          testSourceCodeDirectory
+        ))
+    );
     afterAll(() => getSourceCodeDirectoryStub.restore());
 
     beforeEach(() => {
@@ -139,16 +145,6 @@ describe(`NodemailerMailSender`, () => {
       getTransportOptionsStub = sinon.stub(mailer, '_getTransportOptions');
       getTransportOptionsStub.callsFake(
         jest.fn().mockReturnValue(fakeTransportOptions)
-      );
-    };
-
-    const mockGetSourceCodeDirectory = () => {
-      getSourceCodeDirectoryStub = sinon.stub(
-        appUtilities,
-        `getSourceCodeDirectory`
-      );
-      getSourceCodeDirectoryStub.callsFake(
-        jest.fn().mockReturnValue(testSourceCodeDirectory)
       );
     };
 

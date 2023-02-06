@@ -13,7 +13,7 @@ import {
   getAppStorageDirectory,
   LocalStorage
 } from '../../../src';
-import { delay, deleteStorageDirectory } from '../../utilities';
+import { delay, deleteStorageDirectory } from '../../testUtilities';
 import {
   generateSimpleFormDataPayload,
   makeFormDataRequest

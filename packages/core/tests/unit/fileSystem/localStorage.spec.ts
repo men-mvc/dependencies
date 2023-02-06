@@ -5,7 +5,7 @@ import path from 'path';
 import stream from 'stream';
 import { LocalStorage } from '../../../src/fileSystem/localStorage';
 import { ReadStreamOptions } from '../../../src/fileSystem';
-import { delay } from '../../utilities';
+import { delay } from '../../testUtilities';
 
 const localStorage = new LocalStorage();
 const fakeFileContent: string = `Greeting from Wai.`;

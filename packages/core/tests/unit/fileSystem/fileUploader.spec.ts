@@ -14,7 +14,7 @@ import {
   DeepPartial,
   getAppStorageDirectory
 } from '../../../src';
-import { delay, deleteStorageDirectory } from '../../utilities';
+import { delay, deleteStorageDirectory } from '../../testUtilities';
 
 const fileUploader = new FileUploader();
 describe('FileUploader Utility', function () {
