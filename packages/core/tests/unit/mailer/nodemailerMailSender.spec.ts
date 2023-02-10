@@ -9,13 +9,10 @@ import {
   TransportOptions
 } from '../../../src';
 import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
-import * as appUtilities from '../../../src/utilities/app';
 import { mockGetSourceCodeDirectory } from './testUtilities';
 
-// TODO: test for template
 describe(`NodemailerMailSender`, () => {
   describe(`send`, () => {
-    const testSourceCodeDirectory = `${process.cwd()}/tests`;
     const fakeTransportOptions: TransportOptions = {
       host: `smtp.gmail.com`,
       port: 25,
@@ -35,10 +32,7 @@ describe(`NodemailerMailSender`, () => {
     let getSourceCodeDirectoryStub: SinonStub;
 
     beforeAll(
-      () =>
-        (getSourceCodeDirectoryStub = mockGetSourceCodeDirectory(
-          testSourceCodeDirectory
-        ))
+      () => (getSourceCodeDirectoryStub = mockGetSourceCodeDirectory())
     );
     afterAll(() => getSourceCodeDirectoryStub.restore());
 
@@ -81,10 +75,11 @@ describe(`NodemailerMailSender`, () => {
 
     it(`should invoke the sendMail function passing the correct email content using the template with data`, async () => {
       const template = {
-        view: 'smart',
+        view: 'welcome',
         data: {
           name: 'Wai Yan Hein'
-        }
+        },
+        layout: 'layout'
       };
       const mailInfo = generateSendMailOptions(
         template
@@ -93,31 +88,10 @@ describe(`NodemailerMailSender`, () => {
 
       const expectedMailBody = `<html>
   <head>
-    <title>Smart Template</title>
+    <title>Email Template</title>
   </head>
   <body>
-    <p>Hello ${template.data.name}!</p>
-  </body>
-</html>`;
-      assertMailSentWithTheRightData({
-        ...mailInfo,
-        body: expectedMailBody,
-        template: undefined
-      } as HtmlSendMailOptions);
-    });
-
-    it(`should invoke the sendMail function passing the correct email content using the template without data`, async () => {
-      const mailInfo = generateSendMailOptions({
-        view: 'dump'
-      }) as TemplateSendMailOptions;
-      await mailer.send(mailInfo);
-
-      const expectedMailBody = `<html>
-  <head>
-    <title>Dump Template</title>
-  </head>
-  <body>
-    <p>Hello world!</p>
+    <p>Welcome ${template.data.name}!</p>
   </body>
 </html>`;
       assertMailSentWithTheRightData({

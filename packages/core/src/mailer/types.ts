@@ -18,6 +18,7 @@ export type TemplateSendMailOptions = SendMailCommonOptions & {
   template: {
     view: string;
     data?: Record<string, unknown>;
+    layout?: string;
   };
 };
 

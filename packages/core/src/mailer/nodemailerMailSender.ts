@@ -1,6 +1,5 @@
 import nodemailer from 'nodemailer';
 import { BaseConfig, config } from '@men-mvc/config';
-import handlebars from 'handlebars';
 import {
   isHtmlSendMailOptions,
   isTemplateSendMailOptions,
@@ -8,7 +7,7 @@ import {
   TransportOptions
 } from './types';
 import { MailSender } from './mailSender';
-import { buildEmailBodyFromTemplate } from './utilities';
+import { MailTemplateBuilder } from './mailTemplateBuilder';
 
 // exposing the function just to be able to mock in the test.
 export const getConfig = (): BaseConfig => config;
@@ -17,6 +16,8 @@ export const getConfig = (): BaseConfig => config;
 export class NodemailerMailSender implements MailSender {
   // public so that this can be reset in the test.
   public static transportOptions: TransportOptions | null;
+  private templateBuilder: MailTemplateBuilder =
+    MailTemplateBuilder.getInstance();
 
   _getTransportOptions = (): TransportOptions => {
     if (NodemailerMailSender.transportOptions) {
@@ -58,9 +59,10 @@ export class NodemailerMailSender implements MailSender {
   public send = async (data: SendMailOptions): Promise<void> => {
     let html = ``;
     if (isTemplateSendMailOptions(data)) {
-      html = await buildEmailBodyFromTemplate(
+      html = this.templateBuilder.build(
         data.template.view,
-        data.template.data
+        data.template.data ?? null,
+        data.template.layout
       );
     } else if (isHtmlSendMailOptions(data)) {
       html = data.body;
