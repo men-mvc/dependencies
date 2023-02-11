@@ -4,7 +4,11 @@ import path from 'path';
 import {
   appConfigUtility,
   BaseConfig,
-  CONFIG_VARIABLES_COUNT
+  CacheDriver,
+  CONFIG_VARIABLES_COUNT,
+  FileSystemDriver,
+  MailAuthType,
+  MailDriver
 } from '../../src';
 import * as utilities from '../../src/utilities';
 
@@ -14,14 +18,13 @@ const defaultConfigJson = require('./fakeConfigs/default.json');
 const fakeConfigDirPath = path.join(__dirname, `fakeConfigs`);
 const fakeEnvVars = require('./fakeConfigs/env-vars.json');
 const completeEnvVars = require('./fakeConfigs/complete-env-vars.json');
+
 describe(`AppConfigUtility`, () => {
   describe(`getConfig`, () => {
     let getAppEnvStub: SinonStub | null;
     let getAppLevelConfigDirStub: SinonStub | null;
     let getEnvVariablesStub: SinonStub | null;
-    beforeEach(() => {
-      appConfigUtility.resetConfig();
-    });
+    beforeEach(() => appConfigUtility.resetConfig());
     afterEach(() => {
       if (getAppEnvStub) {
         getAppEnvStub.restore();
@@ -150,6 +153,21 @@ describe(`AppConfigUtility`, () => {
       assertConfigUsesEnvVars(appConfigUtility.getConfig());
     });
 
+    Object.entries(MailDriver)
+      .map((tuple) => tuple[1])
+      .forEach((driver) => {
+        it(`should allow the mail driver to be set ${driver}`, () => {
+          fakeGetAppEnv(`staging`);
+          fakeGetAppLevelConfigDir();
+          fakeGetEnvVariables({
+            MAIL_DRIVER: driver
+          });
+          const config = appConfigUtility.getConfig();
+
+          expect(config.mail.driver).toBe(driver);
+        });
+      });
+
     it(`should throw error when invalid mail driver is set`, () => {
       try {
         fakeGetAppEnv(`staging`);
@@ -161,11 +179,43 @@ describe(`AppConfigUtility`, () => {
         throw new Error(`Expected error was not thrown.`);
       } catch (e) {
         expect(
-            e instanceof Error &&
-            e.message === `Mail driver is invalid.`
+          e instanceof Error && e.message === `Invalid mail driver.`
         ).toBeTruthy();
       }
     });
+
+    it(`should not allow tests to use non-local filesystem driver`, () => {
+      try {
+        appConfigUtility.resetConfig();
+        fakeGetAppEnv(`test`); // beta does not exist.
+        fakeGetAppLevelConfigDir();
+        fakeGetEnvVariables({
+          MAIL_DRIVER: 'mail',
+          MAIL_AUTH_TYPE: 'OAuth2',
+          FILESYSTEM_STORAGE_DRIVER: 's3' // tests can only use local
+        });
+        appConfigUtility.getConfig();
+        throw new Error(`Expected error was not thrown.`);
+      } catch (e) {
+        expect(
+          e instanceof Error &&
+            e.message === `Tests can only use local filesystem.`
+        ).toBeTruthy();
+      }
+    });
+
+    Object.entries(MailAuthType)
+      .map((tuple) => tuple[0])
+      .forEach((expectedAuthType) => {
+        it(`should be allowed to set ${expectedAuthType} for mail auth type`, () => {
+          const envVars = { ...completeEnvVars };
+          envVars.MAIL_AUTH_TYPE = expectedAuthType;
+          fakeGetEnvVariables(envVars);
+          const config = appConfigUtility.getConfig();
+
+          expect(config.mail.authType).toBe(expectedAuthType);
+        });
+      });
 
     it(`should throw error when invalid auth type value is set`, () => {
       try {
@@ -179,27 +229,78 @@ describe(`AppConfigUtility`, () => {
       } catch (e) {
         expect(
           e instanceof Error &&
-            e.message === `Mail auth type can only be "OAuth2".`
+            e.message === `Mail auth type must be one of OAuth2, Login`
         ).toBeTruthy();
       }
     });
 
-    it(`should not allow to use non-local filesystem driver for test`, () => {
+    Object.entries(CacheDriver)
+      .map((tuple) => tuple[1])
+      .forEach((driver) => {
+        it(`should allow cache driver to be set ${driver}`, () => {
+          fakeGetAppEnv(`staging`);
+          fakeGetAppLevelConfigDir();
+          fakeGetEnvVariables({
+            CACHE_DRIVER: driver,
+            MAIL_AUTH_TYPE: 'LOGIN'
+          });
+          const config = appConfigUtility.getConfig();
+
+          expect(config.cache.driver).toBe(driver);
+        });
+      });
+
+    it(`should throw invalid cache driver error when invalid value is set`, () => {
       try {
-        appConfigUtility.resetConfig();
-        fakeGetAppEnv(`test`); // beta does not exist.
+        fakeGetAppEnv(`staging`);
         fakeGetAppLevelConfigDir();
         fakeGetEnvVariables({
-          MAIL_AUTH_TYPE: 'OAuth2',
-          FILESYSTEM_STORAGE_DRIVER: 's3' // tests can only use local
+          CACHE_DRIVER: `invalid-cache-driver`,
+          MAIL_AUTH_TYPE: 'LOGIN'
         });
         appConfigUtility.getConfig();
+
         throw new Error(`Expected error was not thrown.`);
       } catch (e) {
         expect(
-          e instanceof Error &&
-            e.message === `Tests can only use local filesystem.`
+          e instanceof Error && e.message === `Invalid cache driver.`
         ).toBeTruthy();
+      }
+    });
+
+    Object.entries(FileSystemDriver)
+      .map((tuple) => tuple[1])
+      .forEach((driver) => {
+        it(`should allow file system storage driver value to be ${driver}`, () => {
+          fakeGetAppEnv(`staging`);
+          fakeGetAppLevelConfigDir();
+          fakeGetEnvVariables({
+            CACHE_DRIVER: 'in-memory',
+            MAIL_AUTH_TYPE: 'LOGIN',
+            FILESYSTEM_STORAGE_DRIVER: driver
+          });
+          const config = appConfigUtility.getConfig();
+
+          expect(config.fileSystem.storageDriver).toBe(driver);
+        });
+      });
+
+    it(`should throw invalid file system storage driver when invalid value is set`, () => {
+      try {
+        fakeGetAppEnv(`staging`);
+        fakeGetAppLevelConfigDir();
+        fakeGetEnvVariables({
+          CACHE_DRIVER: 'in-memory',
+          MAIL_AUTH_TYPE: 'LOGIN',
+          FILESYSTEM_STORAGE_DRIVER: `invalid-storage-driver`
+        });
+        appConfigUtility.getConfig();
+
+        throw new Error(`Expected error was not thrown.`);
+      } catch (e) {
+        expect(e instanceof Error && e.message).toBe(
+          `Invalid file system storage driver.`
+        );
       }
     });
 

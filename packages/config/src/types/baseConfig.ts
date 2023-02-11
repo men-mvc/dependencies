@@ -1,4 +1,6 @@
-import { CacheDriver, FileSystemDriver, MailDriver } from './globals';
+import { CacheDriver } from './cacheDriver';
+import { MailConfig } from './mailConfig';
+import { FileSystemDriver } from './fileSystemDriver';
 
 /**
  * ! 27 mutable props - when a new prop is added to the BaseConfig, update this variable too
@@ -21,22 +23,7 @@ export interface BaseConfig {
     passwordResetLinkDuration: number;
     emailVerificationLinkDuration: number;
   };
-  mail: {
-    driver?: MailDriver;
-    user: string;
-    password: string;
-    host?: string;
-    port?: number;
-    service?: string;
-    secure?: boolean;
-    authType?: string;
-    tlsCiphers?: string;
-    clientId?: string;
-    clientSecret?: string;
-    refreshToken?: string;
-    accessToken?: string;
-    expires?: number;
-  };
+  mail: MailConfig;
   cache: {
     driver?: CacheDriver;
     redis?: {

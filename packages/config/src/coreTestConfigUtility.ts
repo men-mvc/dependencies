@@ -1,5 +1,5 @@
 import { BaseConfigUtility } from './baseConfigUtility';
-import { BaseConfig } from './baseConfig';
+import { BaseConfig } from './types';
 import { coreTestConfig } from './globals';
 
 export class CoreTestConfigUtility extends BaseConfigUtility {

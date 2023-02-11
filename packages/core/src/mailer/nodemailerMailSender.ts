@@ -1,8 +1,11 @@
 import nodemailer from 'nodemailer';
-import { BaseConfig, config } from '@men-mvc/config';
+import { config, MailConfig } from '@men-mvc/config';
 import {
+  CommonTransportOptions,
   isHtmlSendMailOptions,
   isTemplateSendMailOptions,
+  LoginTransportOptions,
+  OAuth2TransportOptions,
   SendMailOptions,
   TransportOptions
 } from './types';
@@ -10,44 +13,97 @@ import { MailSender } from './mailSender';
 import { MailTemplateBuilder } from './mailTemplateBuilder';
 
 // exposing the function just to be able to mock in the test.
-export const getConfig = (): BaseConfig => config;
+export const getMailConfig = (): MailConfig => config.mail;
 
-// TODO: add support for PLAIN, LOGIN and CRAM-MD5 auth types
+// TODO: add options prop to auth
+
+//https://nodemailer.com/smtp/customauth/ for custom auth/
+/**
+ * {
+ *       auth: {
+ *         type: "CUSTOM",
+ *         method: "MY-CUSTOM-METHOD",
+ *         pass: "scx",
+ *         user: "xcxc",
+ *         options: {
+ *             clientId: 'verysecret',
+ *             applicationId: 'my-app'
+ *         }
+ *       },
+ *       customAuth: {
+ *         "MY-CUSTOM-METHOD": context => {
+ *
+ *         }
+ *       },
+ *     }
+ */
+
+// TODO: update email auth type string enum config in config package.
 export class NodemailerMailSender implements MailSender {
   // public so that this can be reset in the test.
   public static transportOptions: TransportOptions | null;
   private templateBuilder: MailTemplateBuilder =
     MailTemplateBuilder.getInstance();
 
+  getCommonTransportOptions = (): CommonTransportOptions => {
+    const mailConfig = getMailConfig();
+
+    return {
+      host: mailConfig.host,
+      port: mailConfig.port,
+      secure: mailConfig.secure,
+      service: mailConfig.service,
+      tls: {
+        ciphers: mailConfig.tlsCiphers
+      }
+    };
+  };
+
+  getOAuth2TransportOptions = (): OAuth2TransportOptions => {
+    const mailConfig = getMailConfig();
+    const commonOptions = this.getCommonTransportOptions();
+
+    return {
+      ...commonOptions,
+      auth: {
+        type: 'OAuth2',
+        user: mailConfig.user,
+        pass: mailConfig.password,
+        clientId: mailConfig.clientId,
+        clientSecret: mailConfig.clientSecret,
+        refreshToken: mailConfig.refreshToken,
+        accessToken: mailConfig.accessToken,
+        expires: mailConfig.expires
+      }
+    };
+  };
+
+  getLoginTransportOptions = (): LoginTransportOptions => {
+    const mailConfig = getMailConfig();
+    const commonOptions = this.getCommonTransportOptions();
+
+    return {
+      ...commonOptions,
+      auth: {
+        user: mailConfig.user,
+        pass: mailConfig.password
+      }
+    };
+  };
+
   _getTransportOptions = (): TransportOptions => {
     if (NodemailerMailSender.transportOptions) {
       return NodemailerMailSender.transportOptions;
     }
-    const appConfig = getConfig();
-    NodemailerMailSender.transportOptions = {
-      host: appConfig.mail.host,
-      port: appConfig.mail.port,
-      secure: appConfig.mail.secure,
-      auth:
-        appConfig.mail.authType === 'OAuth2'
-          ? {
-              type: 'OAuth2',
-              user: appConfig.mail.user,
-              clientId: appConfig.mail.clientId,
-              clientSecret: appConfig.mail.clientSecret,
-              refreshToken: appConfig.mail.refreshToken,
-              accessToken: appConfig.mail.accessToken,
-              expires: appConfig.mail.expires
-            }
-          : {
-              user: appConfig.mail.user,
-              pass: appConfig.mail.password
-            },
-      service: appConfig.mail.service,
-      tls: {
-        ciphers: appConfig.mail.tlsCiphers
-      }
-    };
+    const mailConfig = getMailConfig();
+    let transportOptions: TransportOptions;
+    if (mailConfig.authType?.toLowerCase() === 'oauth2') {
+      transportOptions = this.getOAuth2TransportOptions();
+    } else {
+      // login - default
+      transportOptions = this.getLoginTransportOptions();
+    }
+    NodemailerMailSender.transportOptions = transportOptions;
 
     return NodemailerMailSender.transportOptions;
   };

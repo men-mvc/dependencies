@@ -1,4 +1,4 @@
-import { BaseConfig } from './baseConfig';
+import { BaseConfig } from './types';
 import { coreTestConfigUtility } from './coreTestConfigUtility';
 import { appConfigUtility } from './appConfigUtility';
 import { isRunningCoreTests } from './utilities';

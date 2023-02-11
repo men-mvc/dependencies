@@ -1,3 +1,5 @@
+import { CustomAuthenticationContext } from 'nodemailer/lib/smtp-connection';
+
 export type MailAttachment = {
   filename: string;
   path: string;
@@ -36,10 +38,21 @@ export const isHtmlSendMailOptions = (
 ): sendMailOptions is HtmlSendMailOptions =>
   !isTemplateSendMailOptions(sendMailOptions);
 
-export type TransportOptions = {
+// TODO: add more transport options types.
+
+type CustomMailAuthContext = CustomAuthenticationContext;
+
+export type CommonTransportOptions = {
   host?: string;
   port?: number;
   secure?: boolean;
+  service?: string;
+  tls?: {
+    ciphers?: string;
+  };
+};
+
+export type OAuth2TransportOptions = CommonTransportOptions & {
   auth: {
     type?: 'OAuth2';
     user: string;
@@ -50,8 +63,28 @@ export type TransportOptions = {
     accessToken?: string;
     expires?: number;
   };
-  service?: string;
-  tls?: {
-    ciphers?: string;
+};
+
+export type LoginTransportOptions = CommonTransportOptions & {
+  auth: {
+    type?: undefined;
+    user: string;
+    pass: string;
   };
 };
+
+// // TODO:
+// export type CustomAuthTransportOptions = CommonTransportOptions & {
+//   auth: {
+//     type: "CUSTOM",
+//     method: string;
+//     user: string;
+//     pass: string;
+//     options: TransportAuthOptions;
+//   },
+//   customAuth: {
+//
+//   }
+// };
+
+export type TransportOptions = LoginTransportOptions | OAuth2TransportOptions;

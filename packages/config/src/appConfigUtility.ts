@@ -1,13 +1,19 @@
 import dotenv from 'dotenv';
-dotenv.config();
 import findUpOne from 'findup-sync';
 import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
-import { BaseConfig } from './baseConfig';
+import {
+  BaseConfig,
+  CacheDriver,
+  FileSystemDriver,
+  MailAuthType,
+  MailDriver
+} from './types';
 import { BaseConfigUtility } from './baseConfigUtility';
 import { getAppEnv, getEnvVariables } from './utilities';
-import { CacheDriver, FileSystemDriver, MailDriver } from './globals';
+
+dotenv.config();
 
 /**
  * ! throw error when the default storage is not local for test.
@@ -184,7 +190,9 @@ export class AppConfigUtility extends BaseConfigUtility {
         AppConfigUtility.config.mail.secure = Boolean(envVars['MAIL_SECURE']);
       }
       if (envVars['MAIL_AUTH_TYPE']) {
-        AppConfigUtility.config.mail.authType = envVars['MAIL_AUTH_TYPE'];
+        AppConfigUtility.config.mail.authType = envVars[
+          'MAIL_AUTH_TYPE'
+        ] as MailAuthType;
       }
       if (envVars['MAIL_TLS_CIPHERS']) {
         AppConfigUtility.config.mail.tlsCiphers = envVars['MAIL_TLS_CIPHERS'];
@@ -221,7 +229,7 @@ export class AppConfigUtility extends BaseConfigUtility {
     ) {
       if (!AppConfigUtility.config.cache) {
         AppConfigUtility.config.cache = {
-          driver: `in-memory`
+          driver: CacheDriver.inMemory
         };
       }
       let redisConfig: {
@@ -256,7 +264,7 @@ export class AppConfigUtility extends BaseConfigUtility {
     ) {
       if (!AppConfigUtility.config.fileSystem) {
         AppConfigUtility.config.fileSystem = {
-          storageDriver: `local`,
+          storageDriver: FileSystemDriver.local,
           maxUploadLimit: 0
         };
       }
