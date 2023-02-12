@@ -14,8 +14,8 @@ const loginAuthMailConfig: MailConfig = {
   driver: MailDriver.mail,
   host: `sandbox.smtp.mailtrap.io`,
   port: 25,
-  user: `a01f399e5cd4ab`,
-  password: `0be681dbbabcb1`,
+  user: `xxx`,
+  password: `xxx`,
   authType: MailAuthType.Login
 };
 
