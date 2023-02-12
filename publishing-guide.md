@@ -6,6 +6,10 @@ Inside the root folder
 - If all the tests are passed, run `lerna run build`
 - Commit and push all the changes to git repository
 - `lerna publish --registry=https://registry.npmjs.org` or `npm run publish`. Use  `--force-publish` if needed force publishing.
+
+### Creating tags
+
+Lerna takes care of creating tags for each version. But if you want to create own tags in additional to the ones Lerna creates, use the following commands.
 - `git tag {{TAG}}`
 - `git push origin --tag`
 
