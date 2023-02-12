@@ -13,8 +13,6 @@ import {
 import { BaseConfigUtility } from './baseConfigUtility';
 import { getAppEnv, getEnvVariables } from './utilities';
 
-dotenv.config();
-
 /**
  * ! throw error when the default storage is not local for test.
  * ! cache the config in the future.
