@@ -30,7 +30,7 @@ export class MailTemplateBuilder {
     data: { [key: string]: unknown } | null,
     layout?: string
   ): string => {
-    let html = this.getTemplateHtml(template, data ?? {}); // TODO: test default empty object
+    let html = this.getTemplateHtml(template, data ?? {});
     if (layout) {
       html = this.withLayout(layout, html);
     }
