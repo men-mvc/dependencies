@@ -67,7 +67,7 @@ describe(`MailTemplateBuilder`, () => {
     });
 
     it(`should return the html of data template with layout`, async () => {
-      const name = faker.name.fullName();
+      const name = faker.lorem.word();
       const expectedHtml = `<html>
   <head>
     <title>Email Template</title>

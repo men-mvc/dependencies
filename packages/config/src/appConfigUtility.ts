@@ -88,6 +88,22 @@ export class AppConfigUtility extends BaseConfigUtility {
     return AppConfigUtility.config;
   };
 
+  private isOptionalBooleanEnvVarSet = (
+    envVars: { [key: string]: string | undefined },
+    varName: string
+  ) => envVars[varName] !== undefined && envVars[varName] !== '';
+
+  private getBooleanEnvVarValue = (
+    envVars: { [key: string]: string | undefined },
+    varName: string
+  ): boolean => {
+    if (envVars[varName]?.length === 1) {
+      return envVars[varName] === '0' ? true : false;
+    }
+
+    return envVars[varName]?.toString().toLowerCase() === 'true' ? true : false;
+  };
+
   protected syncEnvVars = () => {
     if (!AppConfigUtility.config) {
       throw new Error(
@@ -186,8 +202,11 @@ export class AppConfigUtility extends BaseConfigUtility {
       if (envVars['MAIL_SERVICE']) {
         AppConfigUtility.config.mail.service = envVars['MAIL_SERVICE'];
       }
-      if (envVars['MAIL_SECURE'] !== '') {
-        AppConfigUtility.config.mail.secure = Boolean(envVars['MAIL_SECURE']);
+      if (this.isOptionalBooleanEnvVarSet(envVars, `MAIL_SECURE`)) {
+        AppConfigUtility.config.mail.secure = this.getBooleanEnvVarValue(
+          envVars,
+          'MAIL_SECURE'
+        );
       }
       if (envVars['MAIL_AUTH_TYPE']) {
         AppConfigUtility.config.mail.authType = envVars[
@@ -196,6 +215,12 @@ export class AppConfigUtility extends BaseConfigUtility {
       }
       if (envVars['MAIL_TLS_CIPHERS']) {
         AppConfigUtility.config.mail.tlsCiphers = envVars['MAIL_TLS_CIPHERS'];
+      }
+      if (
+        this.isOptionalBooleanEnvVarSet(envVars, 'MAIL_TLS_REJECT_UNAUTHORIZED')
+      ) {
+        AppConfigUtility.config.mail.tlsRejectUnauthorized =
+          this.getBooleanEnvVarValue(envVars, 'MAIL_TLS_REJECT_UNAUTHORIZED');
       }
       if (envVars['MAIL_CLIENT_ID']) {
         AppConfigUtility.config.mail.clientId = envVars['MAIL_CLIENT_ID'];

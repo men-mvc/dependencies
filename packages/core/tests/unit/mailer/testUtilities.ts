@@ -39,6 +39,7 @@ export const generateMailConfig = (
     secure: faker.datatype.boolean(),
     authType: _.sample(Object.entries(MailAuthType).map((tuple) => tuple[1])),
     tlsCiphers: faker.lorem.word(),
+    tlsRejectUnauthorized: faker.datatype.boolean(),
     clientId: faker.datatype.uuid(),
     clientSecret: faker.datatype.uuid(),
     refreshToken: faker.datatype.uuid(),

@@ -1,10 +1,10 @@
 import { MailDriver } from '@men-mvc/config';
 import sinon, { SinonStub } from 'sinon';
 import {
-  Mailer,
-  NodemailerMailSender,
   ConsoleLogMailSender,
-  FileLogMailSender
+  FileLogMailSender,
+  Mailer,
+  NodemailerMailSender
 } from '../../../src';
 import * as mailUtilities from '../../../src/mailer/utilities';
 
@@ -21,7 +21,7 @@ describe(`Mailer`, () => {
     });
 
     it(`should return the instance of NodemailerMailerMailSender when the driver is mail`, () => {
-      mockGetMailDriver(`mail`);
+      mockGetMailDriver(MailDriver.mail);
       const instance = Mailer.getInstance();
       expect(instance instanceof NodemailerMailSender).toBeTruthy();
     });
@@ -33,13 +33,13 @@ describe(`Mailer`, () => {
     });
 
     it(`should return the instance of ConsoleLogMailSender when the driver is console_log`, () => {
-      mockGetMailDriver('console_log');
+      mockGetMailDriver(MailDriver.consoleLog);
       const instance = Mailer.getInstance();
       expect(instance instanceof ConsoleLogMailSender).toBeTruthy();
     });
 
     it(`should return the instance of FileLogMailSender when the driver is file_log`, () => {
-      mockGetMailDriver('file_log');
+      mockGetMailDriver(MailDriver.fileLog);
       const instance = Mailer.getInstance();
       expect(instance instanceof FileLogMailSender).toBeTruthy();
     });

@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { config, MailConfig } from '@men-mvc/config';
+import { config, MailAuthType, MailConfig, MailDriver } from '@men-mvc/config';
 import {
   CommonTransportOptions,
   isHtmlSendMailOptions,
@@ -15,30 +15,28 @@ import { MailTemplateBuilder } from './mailTemplateBuilder';
 // exposing the function just to be able to mock in the test.
 export const getMailConfig = (): MailConfig => config.mail;
 
-// TODO: add options prop to auth
-
 //https://nodemailer.com/smtp/customauth/ for custom auth/
+// TODO: custom auth method support.
 /**
  * {
- *       auth: {
- *         type: "CUSTOM",
- *         method: "MY-CUSTOM-METHOD",
- *         pass: "scx",
- *         user: "xcxc",
- *         options: {
- *             clientId: 'verysecret',
- *             applicationId: 'my-app'
- *         }
- *       },
- *       customAuth: {
- *         "MY-CUSTOM-METHOD": context => {
- *
- *         }
- *       },
+ *   auth: {
+ *      type: "CUSTOM",
+ *      method: "MY-CUSTOM-METHOD",
+ *      pass: "xxxx",
+ *      user: "xxxx",
+ *      options: {
+ *          clientId: 'verysecret',
+ *          applicationId: 'my-app'
  *     }
+ *   },
+ *   customAuth: {
+ *     "MY-CUSTOM-METHOD": context => {
+ *
+ *      }
+ *   },
+ * }
  */
 
-// TODO: update email auth type string enum config in config package.
 export class NodemailerMailSender implements MailSender {
   // public so that this can be reset in the test.
   public static transportOptions: TransportOptions | null;
@@ -54,7 +52,8 @@ export class NodemailerMailSender implements MailSender {
       secure: mailConfig.secure,
       service: mailConfig.service,
       tls: {
-        ciphers: mailConfig.tlsCiphers
+        ciphers: mailConfig.tlsCiphers,
+        rejectUnauthorized: mailConfig.tlsRejectUnauthorized
       }
     };
   };
@@ -66,7 +65,7 @@ export class NodemailerMailSender implements MailSender {
     return {
       ...commonOptions,
       auth: {
-        type: 'OAuth2',
+        type: MailAuthType.OAuth2,
         user: mailConfig.user,
         pass: mailConfig.password,
         clientId: mailConfig.clientId,
@@ -86,7 +85,7 @@ export class NodemailerMailSender implements MailSender {
       ...commonOptions,
       auth: {
         user: mailConfig.user,
-        pass: mailConfig.password
+        pass: mailConfig.password ?? ``
       }
     };
   };
@@ -108,9 +107,8 @@ export class NodemailerMailSender implements MailSender {
     return NodemailerMailSender.transportOptions;
   };
 
-  private getTransporter = (): nodemailer.Transporter => {
-    return nodemailer.createTransport(this._getTransportOptions());
-  };
+  private getTransporter = (): nodemailer.Transporter =>
+    nodemailer.createTransport(this._getTransportOptions());
 
   public send = async (data: SendMailOptions): Promise<void> => {
     let html = ``;

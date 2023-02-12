@@ -226,6 +226,9 @@ describe(`NodemailerMailSender`, () => {
       expect(transportOptions.secure).toBe(fakeMailConfig.secure);
       expect(transportOptions.tls?.ciphers).toBe(fakeMailConfig.tlsCiphers);
       expect(transportOptions.service).toBe(fakeMailConfig.service);
+      expect(transportOptions.tls?.rejectUnauthorized).toBe(
+        fakeMailConfig.tlsRejectUnauthorized
+      );
     };
 
     const assertLoginTransportOptions = (
