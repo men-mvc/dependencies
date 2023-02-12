@@ -1,13 +1,17 @@
 import dotenv from 'dotenv';
-dotenv.config();
 import findUpOne from 'findup-sync';
 import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
-import { BaseConfig } from './baseConfig';
+import {
+  BaseConfig,
+  CacheDriver,
+  FileSystemDriver,
+  MailAuthType,
+  MailDriver
+} from './types';
 import { BaseConfigUtility } from './baseConfigUtility';
 import { getAppEnv, getEnvVariables } from './utilities';
-import { CacheDriver, FileSystemDriver, MailDriver } from './globals';
 
 /**
  * ! throw error when the default storage is not local for test.
@@ -80,6 +84,22 @@ export class AppConfigUtility extends BaseConfigUtility {
     }
 
     return AppConfigUtility.config;
+  };
+
+  private isOptionalBooleanEnvVarSet = (
+    envVars: { [key: string]: string | undefined },
+    varName: string
+  ) => envVars[varName] !== undefined && envVars[varName] !== '';
+
+  private getBooleanEnvVarValue = (
+    envVars: { [key: string]: string | undefined },
+    varName: string
+  ): boolean => {
+    if (envVars[varName]?.length === 1) {
+      return envVars[varName] === '0' ? true : false;
+    }
+
+    return envVars[varName]?.toString().toLowerCase() === 'true' ? true : false;
   };
 
   protected syncEnvVars = () => {
@@ -180,14 +200,25 @@ export class AppConfigUtility extends BaseConfigUtility {
       if (envVars['MAIL_SERVICE']) {
         AppConfigUtility.config.mail.service = envVars['MAIL_SERVICE'];
       }
-      if (envVars['MAIL_SECURE'] !== '') {
-        AppConfigUtility.config.mail.secure = Boolean(envVars['MAIL_SECURE']);
+      if (this.isOptionalBooleanEnvVarSet(envVars, `MAIL_SECURE`)) {
+        AppConfigUtility.config.mail.secure = this.getBooleanEnvVarValue(
+          envVars,
+          'MAIL_SECURE'
+        );
       }
       if (envVars['MAIL_AUTH_TYPE']) {
-        AppConfigUtility.config.mail.authType = envVars['MAIL_AUTH_TYPE'];
+        AppConfigUtility.config.mail.authType = envVars[
+          'MAIL_AUTH_TYPE'
+        ] as MailAuthType;
       }
       if (envVars['MAIL_TLS_CIPHERS']) {
         AppConfigUtility.config.mail.tlsCiphers = envVars['MAIL_TLS_CIPHERS'];
+      }
+      if (
+        this.isOptionalBooleanEnvVarSet(envVars, 'MAIL_TLS_REJECT_UNAUTHORIZED')
+      ) {
+        AppConfigUtility.config.mail.tlsRejectUnauthorized =
+          this.getBooleanEnvVarValue(envVars, 'MAIL_TLS_REJECT_UNAUTHORIZED');
       }
       if (envVars['MAIL_CLIENT_ID']) {
         AppConfigUtility.config.mail.clientId = envVars['MAIL_CLIENT_ID'];
@@ -221,7 +252,7 @@ export class AppConfigUtility extends BaseConfigUtility {
     ) {
       if (!AppConfigUtility.config.cache) {
         AppConfigUtility.config.cache = {
-          driver: `in-memory`
+          driver: CacheDriver.inMemory
         };
       }
       let redisConfig: {
@@ -256,7 +287,7 @@ export class AppConfigUtility extends BaseConfigUtility {
     ) {
       if (!AppConfigUtility.config.fileSystem) {
         AppConfigUtility.config.fileSystem = {
-          storageDriver: `local`,
+          storageDriver: FileSystemDriver.local,
           maxUploadLimit: 0
         };
       }

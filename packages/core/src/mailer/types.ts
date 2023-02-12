@@ -18,6 +18,7 @@ export type TemplateSendMailOptions = SendMailCommonOptions & {
   template: {
     view: string;
     data?: Record<string, unknown>;
+    layout?: string;
   };
 };
 
@@ -35,10 +36,18 @@ export const isHtmlSendMailOptions = (
 ): sendMailOptions is HtmlSendMailOptions =>
   !isTemplateSendMailOptions(sendMailOptions);
 
-export type TransportOptions = {
+export type CommonTransportOptions = {
   host?: string;
   port?: number;
   secure?: boolean;
+  service?: string;
+  tls?: {
+    ciphers?: string;
+    rejectUnauthorized?: boolean;
+  };
+};
+
+export type OAuth2TransportOptions = CommonTransportOptions & {
   auth: {
     type?: 'OAuth2';
     user: string;
@@ -49,8 +58,14 @@ export type TransportOptions = {
     accessToken?: string;
     expires?: number;
   };
-  service?: string;
-  tls?: {
-    ciphers?: string;
+};
+
+export type LoginTransportOptions = CommonTransportOptions & {
+  auth: {
+    type?: undefined;
+    user: string;
+    pass: string;
   };
 };
+
+export type TransportOptions = LoginTransportOptions | OAuth2TransportOptions;

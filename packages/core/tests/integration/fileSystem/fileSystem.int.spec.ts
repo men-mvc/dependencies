@@ -13,7 +13,7 @@ import {
   getAppStorageDirectory,
   LocalStorage
 } from '../../../src';
-import { delay, deleteStorageDirectory } from '../../utilities';
+import { delay, deleteStorageDirectory } from '../../testUtilities';
 import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
@@ -141,7 +141,7 @@ describe('FileSystem', () => {
       const result = body.data as SimpleFormData;
       expect(result.name).toBe(formData.name);
       expect(result.photoFile.originalFilename).toBe(`node.png`);
-      await delay(1500);
+      await delay(2000);
       expect((await localStorage.readDir(primaryTempStorageDir)).length).toBe(
         0
       );

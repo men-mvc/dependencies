@@ -11,12 +11,10 @@ import {
   failValidationForField,
   validateRequestAsync,
   validateFile,
-  UploadedFile,
   validateImage,
-  validateFileExtension,
-  DeepPartial
+  validateFileExtension
 } from '../../../src';
-import { generateUploadedFile } from '../../utilities';
+import { generateUploadedFile } from '../../testUtilities';
 
 describe(`Validation Utility`, () => {
   describe(`resolveValidationError`, () => {
@@ -304,7 +302,6 @@ describe(`Validation Utility`, () => {
     });
   });
 
-  // TODO:
   describe(`validateFileExtension`, () => {
     const allowedExtensions: string[] = [`.pdf`, `.PNG`, `.txt`];
 

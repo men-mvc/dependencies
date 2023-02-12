@@ -1,34 +1,41 @@
-import sinon, { SinonStub } from 'sinon';
 import nodemailer from 'nodemailer';
-import { faker } from '@faker-js/faker';
+import sinon, { SinonStub } from 'sinon';
 import {
-  HtmlSendMailOptions,
+  MailAuthType,
   NodemailerMailSender,
-  SendMailOptions,
-  TemplateSendMailOptions,
   TransportOptions
 } from '../../../src';
 import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
+import {
+  generateLoginTransportOptions,
+  generateMailConfig,
+  mockGetSourceCodeDirectory
+} from './testUtilities';
+import { MailConfig } from '@men-mvc/config';
+import { faker } from '@faker-js/faker';
+import {
+  HtmlSendMailOptions,
+  TemplateSendMailOptions,
+  SendMailOptions
+} from '../../../src/mailer';
 
-// TODO: test for template
 describe(`NodemailerMailSender`, () => {
   describe(`send`, () => {
-    const fakeTransportOptions: TransportOptions = {
-      host: `smtp.gmail.com`,
-      port: 25,
-      secure: faker.datatype.boolean(),
-      auth: {
-        user: faker.datatype.uuid(),
-        pass: faker.datatype.uuid()
-      },
-      service: faker.lorem.word()
-    };
+    const fakeTransportOptions: TransportOptions =
+      generateLoginTransportOptions();
 
     const mailer = new NodemailerMailSender();
     let sendMailMockFunc: jest.Mock;
     let createTransportStub: sinon.SinonStub;
     let createTransportMockFunc: jest.Mock;
     let getTransportOptionsStub: SinonStub;
+    let getSourceCodeDirectoryStub: SinonStub;
+
+    beforeAll(
+      () => (getSourceCodeDirectoryStub = mockGetSourceCodeDirectory())
+    );
+    afterAll(() => getSourceCodeDirectoryStub.restore());
+
     beforeEach(() => {
       mockGetTransportOptions();
       mockSendMail();
@@ -68,10 +75,11 @@ describe(`NodemailerMailSender`, () => {
 
     it(`should invoke the sendMail function passing the correct email content using the template with data`, async () => {
       const template = {
-        view: 'smart',
+        view: 'welcome',
         data: {
           name: 'Wai Yan Hein'
-        }
+        },
+        layout: 'layout'
       };
       const mailInfo = generateSendMailOptions(
         template
@@ -80,31 +88,10 @@ describe(`NodemailerMailSender`, () => {
 
       const expectedMailBody = `<html>
   <head>
-    <title>Smart Template</title>
+    <title>Email Template</title>
   </head>
   <body>
-    <p>Hello ${template.data.name}!</p>
-  </body>
-</html>`;
-      assertMailSentWithTheRightData({
-        ...mailInfo,
-        body: expectedMailBody,
-        template: undefined
-      } as HtmlSendMailOptions);
-    });
-
-    it(`should invoke the sendMail function passing the correct email content using the template without data`, async () => {
-      const mailInfo = generateSendMailOptions({
-        view: 'dump'
-      }) as TemplateSendMailOptions;
-      await mailer.send(mailInfo);
-
-      const expectedMailBody = `<html>
-  <head>
-    <title>Dump Template</title>
-  </head>
-  <body>
-    <p>Hello world!</p>
+    <p>Welcome ${template.data.name}!</p>
   </body>
 </html>`;
       assertMailSentWithTheRightData({
@@ -184,97 +171,102 @@ describe(`NodemailerMailSender`, () => {
 
   describe(`getTransportOptions`, () => {
     const mailer = new NodemailerMailSender();
-    let getConfigStub: SinonStub;
+    let getMailConfigStub: SinonStub;
     beforeEach(() => {
       NodemailerMailSender.transportOptions = null;
     });
     afterEach(() => {
       NodemailerMailSender.transportOptions = null;
-      getConfigStub.restore();
+      getMailConfigStub.restore();
     });
 
-    it(`should only set user and pass props of auth when authType is empty`, () => {
-      const fakeMailConfig = {
-        host: `smtp@gmail.com`,
-        port: 25,
-        secure: faker.datatype.boolean(),
-        user: faker.datatype.uuid(),
-        password: faker.datatype.uuid(),
-        clientId: faker.datatype.uuid(), // this will not be set.
-        clientSecret: faker.datatype.uuid(), // this will not be set.
-        refreshToken: faker.datatype.uuid(), // this will not be set.
-        accessToken: faker.datatype.uuid(), // this will not be set
-        expires: faker.datatype.number(4), // this will not be set
-        service: faker.lorem.word(),
-        tlsCiphers: faker.lorem.word()
-      };
-      getConfigStub = mockGetConfig(fakeMailConfig);
+    it(`should return login transport options when authType is empty`, () => {
+      const fakeMailConfig: MailConfig = generateMailConfig({
+        authType: undefined
+      });
+      getMailConfigStub = mockGetMailConfig(fakeMailConfig);
       const transportOptions = mailer._getTransportOptions();
-      assertCommonTransportOptionsProps(transportOptions, fakeMailConfig);
-      expect(transportOptions.auth.pass).toBe(fakeMailConfig.password);
-      expect(transportOptions.auth.clientId).toBeUndefined();
-      expect(transportOptions.auth.clientSecret).toBeUndefined();
-      expect(transportOptions.auth.refreshToken).toBeUndefined();
-      expect(transportOptions.auth.accessToken).toBeUndefined();
-      expect(transportOptions.auth.expires).toBeUndefined();
-      expect(transportOptions.service).toBe(fakeMailConfig.service);
-      expect(transportOptions.tls?.ciphers).toBe(fakeMailConfig.tlsCiphers);
+
+      assertLoginTransportOptions(transportOptions, fakeMailConfig);
     });
 
-    it(`should set oauth2 props of auth when authType is OAuth2`, () => {
-      const fakeMailConfig = {
-        host: `smtp@gmail.com`,
-        port: 25,
-        secure: faker.datatype.boolean(),
-        authType: 'OAuth2',
-        user: faker.datatype.uuid(),
-        password: faker.datatype.uuid(), // this will not be set.
-        clientId: faker.datatype.uuid(),
-        clientSecret: faker.datatype.uuid(),
-        refreshToken: faker.datatype.uuid(),
-        accessToken: faker.datatype.uuid(),
-        expires: faker.datatype.number(4),
-        service: faker.lorem.word(),
-        tlsCiphers: faker.lorem.word()
-      };
-      getConfigStub = mockGetConfig(fakeMailConfig);
+    it(`should return login transport options when authType is LOGIN`, () => {
+      const fakeMailConfig: MailConfig = generateMailConfig({
+        authType: MailAuthType.Login
+      });
+      getMailConfigStub = mockGetMailConfig(fakeMailConfig);
       const transportOptions = mailer._getTransportOptions();
-      assertCommonTransportOptionsProps(transportOptions, fakeMailConfig);
-      expect(transportOptions.auth.pass).toBeUndefined();
-      expect(transportOptions.auth.clientId).toBe(fakeMailConfig.clientId);
-      expect(transportOptions.auth.clientSecret).toBe(
-        fakeMailConfig.clientSecret
-      );
-      expect(transportOptions.auth.refreshToken).toBe(
-        fakeMailConfig.refreshToken
-      );
-      expect(transportOptions.auth.accessToken).toBe(
-        fakeMailConfig.accessToken
-      );
-      expect(transportOptions.auth.expires).toBe(fakeMailConfig.expires);
-      expect(transportOptions.service).toBe(fakeMailConfig.service);
-      expect(transportOptions.tls?.ciphers).toBe(fakeMailConfig.tlsCiphers);
+
+      assertLoginTransportOptions(transportOptions, fakeMailConfig);
     });
 
-    const mockGetConfig = (fakeMailConfig: { [key: string]: unknown }) => {
-      const stub = sinon.stub(nodemailerSenderModule, 'getConfig');
-      stub.callsFake(
-        jest.fn().mockReturnValue({
-          mail: fakeMailConfig
-        })
-      );
+    it(`should return OAuth2 transport options when authType is OAuth2`, () => {
+      const fakeMailConfig: MailConfig = generateMailConfig({
+        authType: MailAuthType.OAuth2
+      });
+      getMailConfigStub = mockGetMailConfig(fakeMailConfig);
+      const transportOptions = mailer._getTransportOptions();
+
+      assertOAuth2TransportOptions(transportOptions, fakeMailConfig);
+    });
+
+    const mockGetMailConfig = (fakeMailConfig: MailConfig) => {
+      const stub = sinon.stub(nodemailerSenderModule, 'getMailConfig');
+      stub.callsFake(jest.fn().mockReturnValue(fakeMailConfig));
 
       return stub;
     };
 
-    const assertCommonTransportOptionsProps = (
+    const assertCommonTransportOptions = (
       transportOptions: TransportOptions,
-      fakeMailConfig: { [key: string]: unknown }
+      fakeMailConfig: MailConfig
     ) => {
       expect(transportOptions.host).toBe(fakeMailConfig.host);
       expect(transportOptions.port).toBe(fakeMailConfig.port);
       expect(transportOptions.secure).toBe(fakeMailConfig.secure);
-      expect(transportOptions.auth.user).toBe(fakeMailConfig.user);
+      expect(transportOptions.tls?.ciphers).toBe(fakeMailConfig.tlsCiphers);
+      expect(transportOptions.service).toBe(fakeMailConfig.service);
+      expect(transportOptions.tls?.rejectUnauthorized).toBe(
+        fakeMailConfig.tlsRejectUnauthorized
+      );
+    };
+
+    const assertLoginTransportOptions = (
+      transportOptions: TransportOptions,
+      fakeMailConfig: MailConfig
+    ) => {
+      assertCommonTransportOptions(transportOptions, fakeMailConfig);
+      if (transportOptions.auth?.type === undefined) {
+        expect(transportOptions.auth.user).toBe(fakeMailConfig.user);
+        expect(transportOptions.auth.pass).toBe(fakeMailConfig.password);
+      } else {
+        throw new Error(`Transport type is not LOGIN.`);
+      }
+    };
+
+    const assertOAuth2TransportOptions = (
+      transportOptions: TransportOptions,
+      fakeMailConfig: MailConfig
+    ) => {
+      assertCommonTransportOptions(transportOptions, fakeMailConfig);
+      if (transportOptions.auth?.type === MailAuthType.OAuth2) {
+        expect(transportOptions.auth.type).toBe(MailAuthType.OAuth2);
+        expect(transportOptions.auth.user).toBe(fakeMailConfig.user);
+        expect(transportOptions.auth.pass).toBe(fakeMailConfig.password);
+        expect(transportOptions.auth.expires).toBe(fakeMailConfig.expires);
+        expect(transportOptions.auth.accessToken).toBe(
+          fakeMailConfig.accessToken
+        );
+        expect(transportOptions.auth.refreshToken).toBe(
+          fakeMailConfig.refreshToken
+        );
+        expect(transportOptions.auth.clientId).toBe(fakeMailConfig.clientId);
+        expect(transportOptions.auth.clientSecret).toBe(
+          fakeMailConfig.clientSecret
+        );
+      } else {
+        throw new Error(`Transport type is not OAuth2.`);
+      }
     };
   });
 });

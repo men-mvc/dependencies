@@ -1,4 +1,5 @@
-import { BaseConfig } from './baseConfig';
+import { BaseConfig, CacheDriver, FileSystemDriver } from './types';
+
 export const coreTestConfig: BaseConfig = {
   app: {
     name: `Men MVC`
@@ -20,7 +21,7 @@ export const coreTestConfig: BaseConfig = {
     service: `TestService`
   },
   cache: {
-    driver: `in-memory`,
+    driver: CacheDriver.inMemory,
     redis: {
       port: 6379,
       host: `127.0.0.1`,
@@ -29,11 +30,10 @@ export const coreTestConfig: BaseConfig = {
     }
   },
   fileSystem: {
-    storageDriver: `local`, // it's always local for tests
+    storageDriver: FileSystemDriver.local, // it's always local for tests
     maxUploadLimit: 1000 * 1024 * 512
   }
 };
-// TODO: create another package called @men-mvc/types or @men-mvc/globals
-export type CacheDriver = 'redis' | 'in-memory';
-export type FileSystemDriver = 'local'; // TODO: add more driver in the future
-export type MailDriver = '' | 'mail' | 'file_log' | 'console_log';
+
+export const srcDirectory = 'src'; // small letters only
+export const buildDirectory = 'dist'; // small letters only

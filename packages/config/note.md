@@ -1,7 +1,7 @@
 ### Checklist for adding a new env variable/ config field
 
-- `src/baseConfig.ts` - add the field and update `CONFIG_VARIABLES_COUNT` (don't forget to update the comment too)
-- `src/globals.ts` - add the field with default value if needed (this is not related to specifying default value for app project. For the app project, it is done in the `config/default.json`)
+- `src/types/baseConfig.ts` - add the field and update `CONFIG_VARIABLES_COUNT` (don't forget to update the comment too)
+- `src/globals.ts` - add the field with default value to `coreTestConfig` if needed for tests (this is not related to specifying default value for app project. For the app project, it is done in the `config/default.json`)
 - `src/appConfigUtility` - assign the `.env` variable to the right prop of the config object
 - `tests/unit/fakeConfigs/complete-env-vars.json` - add the env variable
 - `tests/unit/fakeConfigs/default.json` - add the field with default value if needed

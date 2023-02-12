@@ -4,7 +4,7 @@ import {
   FileLogMailSender,
   mailLogDirectory
 } from '../../../src/mailer/fileLogMailSender';
-import { generateSendMailData } from './utilities';
+import { generateSendMailData } from './testUtilities';
 
 describe(`FileLogMailSender`, () => {
   beforeAll(() => {
@@ -19,7 +19,6 @@ describe(`FileLogMailSender`, () => {
     expect(fs.existsSync(mailLogDirectory)).toBeTruthy();
   });
 
-  // TODO: fix date time
   it(`should log mail data in the mailLog directory creating a new log file`, async () => {
     const mailSender = new FileLogMailSender();
     const mailLogFilepath = `${mailLogDirectory}${path.sep}${

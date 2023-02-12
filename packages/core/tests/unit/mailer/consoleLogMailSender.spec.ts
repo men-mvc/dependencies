@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import util from 'util';
 import { ConsoleLogMailSender } from '../../../src/mailer/consoleLogMailSender';
-import { generateSendMailData } from './utilities';
+import { generateSendMailData } from './testUtilities';
 
 describe(`ConsoleLogMailSender`, () => {
   /**
