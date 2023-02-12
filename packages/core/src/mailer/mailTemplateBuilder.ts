@@ -3,8 +3,30 @@ import path from 'path';
 import fs from 'fs';
 import { getSourceCodeDirectory } from '../utilities/app';
 
-// TODO: this is the best time to learn decorator pattern
-// TODO: use decorator pattern for withLayout
+type TemplateData = { [key: string]: unknown };
+
+interface AbstractTemplateCompiler {
+  compile: (templateBuilder: MailTemplateBuilder, template: string, data: TemplateData) => string;
+}
+
+class TemplateCompiler implements AbstractTemplateCompiler {
+  public compile = (templateBuilder: MailTemplateBuilder, template: string, data: TemplateData): string => {
+    return templateBuilder.getTemplateHtml(template, data);
+  }
+}
+
+class LayoutDecorator implements AbstractTemplateCompiler {
+  constructor(private templateCompiler: AbstractTemplateCompiler) {}
+
+  public compile = (templateBuilder: MailTemplateBuilder, template: string, data: TemplateData): string => {
+    const templateHtml = this.templateCompiler.compile(templateBuilder, template, data);
+
+    return templateBuilder.build('layout', {
+      content: templateHtml
+    }) // template + layout html
+  }
+}
+
 /**
  * template arguments refer to the file names without handlebars extension in views/emails folder.
  * Eg: if the file path is views/emails/welcome.handlebars, the template name is welcome.
@@ -27,20 +49,20 @@ export class MailTemplateBuilder {
 
   public build = (
     template: string,
-    data: { [key: string]: unknown } | null,
+    data: TemplateData | null,
     layout?: string
   ): string => {
-    let html = this.getTemplateHtml(template, data ?? {});
+    let compiler = new TemplateCompiler();
     if (layout) {
-      html = this.withLayout(layout, html);
+      compiler = new LayoutDecorator(compiler);
     }
 
-    return html;
+    return compiler.compile(this, template, data ?? {});
   };
 
-  private getTemplateHtml = (
+  public getTemplateHtml = (
     template: string,
-    data: { [key: string]: unknown }
+    data: TemplateData
   ): string => {
     const templateDelegate = this.getTemplateDelegate(template);
 
@@ -65,16 +87,6 @@ export class MailTemplateBuilder {
     );
 
     return MailTemplateBuilder.emailTemplatesDir;
-  };
-
-  /**
-   * layout is also a template - path to file
-   * layout has a content variable in the html. The content variable is replaced with the html of the template
-   */
-  private withLayout = (layout: string, templateHtml: string): string => {
-    return this.getTemplateHtml(layout, {
-      content: templateHtml
-    });
   };
 
   private getTemplateDelegate = (
