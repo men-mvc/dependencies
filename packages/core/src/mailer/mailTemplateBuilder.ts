@@ -6,25 +6,41 @@ import { getSourceCodeDirectory } from '../utilities/app';
 type TemplateData = { [key: string]: unknown };
 
 interface AbstractTemplateCompiler {
-  compile: (templateBuilder: MailTemplateBuilder, template: string, data: TemplateData) => string;
+  compile: (
+    templateBuilder: MailTemplateBuilder,
+    template: string,
+    data: TemplateData
+  ) => string;
 }
 
 class TemplateCompiler implements AbstractTemplateCompiler {
-  public compile = (templateBuilder: MailTemplateBuilder, template: string, data: TemplateData): string => {
+  public compile = (
+    templateBuilder: MailTemplateBuilder,
+    template: string,
+    data: TemplateData
+  ): string => {
     return templateBuilder.getTemplateHtml(template, data);
-  }
+  };
 }
 
 class LayoutDecorator implements AbstractTemplateCompiler {
   constructor(private templateCompiler: AbstractTemplateCompiler) {}
 
-  public compile = (templateBuilder: MailTemplateBuilder, template: string, data: TemplateData): string => {
-    const templateHtml = this.templateCompiler.compile(templateBuilder, template, data);
+  public compile = (
+    templateBuilder: MailTemplateBuilder,
+    template: string,
+    data: TemplateData
+  ): string => {
+    const templateHtml = this.templateCompiler.compile(
+      templateBuilder,
+      template,
+      data
+    );
 
     return templateBuilder.build('layout', {
       content: templateHtml
-    }) // template + layout html
-  }
+    }); // template + layout html
+  };
 }
 
 /**
@@ -60,10 +76,7 @@ export class MailTemplateBuilder {
     return compiler.compile(this, template, data ?? {});
   };
 
-  public getTemplateHtml = (
-    template: string,
-    data: TemplateData
-  ): string => {
+  public getTemplateHtml = (template: string, data: TemplateData): string => {
     const templateDelegate = this.getTemplateDelegate(template);
 
     return templateDelegate(data);
