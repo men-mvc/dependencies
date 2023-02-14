@@ -17,7 +17,15 @@ import coreExpress, {
   MediaType,
   RequestParamHandler,
   RouterOptions,
-  Send
+  Send,
+  Router,
+  response,
+  application,
+  json,
+  raw,
+  request,
+  text,
+  urlencoded
 } from 'express';
 
 const express = coreExpress;
@@ -41,5 +49,13 @@ export {
   MediaType,
   RequestParamHandler,
   Send,
-  RouterOptions
+  RouterOptions,
+  Router,
+  response,
+  application,
+  json,
+  raw,
+  request,
+  text,
+  urlencoded
 };

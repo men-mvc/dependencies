@@ -1,6 +1,6 @@
 import sinon from 'sinon';
-import {CacheDriver} from '@men-mvc/config';
-import {Cache, MemoryCache, RedisCache} from '../../src/index';
+import { CacheDriver } from '@men-mvc/config';
+import { Cache, MemoryCache, RedisCache } from '../../src/index';
 import * as cacheUtilities from '../../src/utilities';
 
 describe(`Cache Utility`, () => {

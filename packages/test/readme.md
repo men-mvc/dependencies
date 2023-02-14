@@ -1,1 +1,1 @@
-### Test module for [MEN MVC](http://menmvc.com/) framework 
+### Test module for [MEN MVC](http://menmvc.com/) framework
