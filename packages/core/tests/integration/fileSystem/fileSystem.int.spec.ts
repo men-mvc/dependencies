@@ -134,6 +134,7 @@ describe('FileSystem', () => {
       );
     });
 
+    // FIXME: flaky
     it(`should clear the temp upload dir when the request finished`, async () => {
       const localStorage = new LocalStorage();
       const formData = generateSimpleFormDataPayload();
@@ -141,7 +142,7 @@ describe('FileSystem', () => {
       const result = body.data as SimpleFormData;
       expect(result.name).toBe(formData.name);
       expect(result.photoFile.originalFilename).toBe(`node.png`);
-      await delay(2000);
+      await delay(1000);
       expect((await localStorage.readDir(primaryTempStorageDir)).length).toBe(
         0
       );
