@@ -11,6 +11,7 @@
     "typescript": "^4.9.4"
   },
   "scripts": {
-    "publish": "lerna publish --registry=https://registry.npmjs.org"
+    "publish": "lerna publish --registry=https://registry.npmjs.org --no-push",
+    "postversion":"git push --follow-tags --no-verify origin main"
   }
 }
