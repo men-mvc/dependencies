@@ -8,4 +8,4 @@ export * from './mailer';
 export * from './middlewares';
 export * from './types';
 export * from '@men-mvc/config';
-export { StatusCodes };
+export { StatusCodes as HttpStatus };
