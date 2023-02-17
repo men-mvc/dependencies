@@ -11,7 +11,7 @@ describe(`Config`, () => {
     let isRunningCoreTestsStub: sinon.SinonStub;
     let getAppLevelConfigDirStub: sinon.SinonStub;
     beforeEach(() => {
-      Config.resetInstance();
+      Config.resetConfig();
     });
     afterEach(() => {
       if (getAppEnvStub) {
@@ -26,7 +26,7 @@ describe(`Config`, () => {
     });
     it(`should return core test config when core test is running`, () => {
       mockIsRunningCoreTests(true);
-      const config = Config.getInstance();
+      const config = Config.getConfig();
       expect(JSON.stringify(config)).toBe(JSON.stringify(coreTestConfig));
     });
 
@@ -35,9 +35,16 @@ describe(`Config`, () => {
       mockIsRunningCoreTests(false);
       mockGetAppEnv(`staging`);
       mockAppLevelConfigDir();
-      const config = Config.getInstance();
+      const config = Config.getConfig();
 
       expect(JSON.stringify(config)).toBe(JSON.stringify(expectedConfigJson));
+    });
+
+    it(`should return the same instance`, () => {
+      mockIsRunningCoreTests(true);
+      const config1 = Config.getConfig();
+      const config2 = Config.getConfig();
+      expect(config1).toBe(config2);
     });
 
     const mockIsRunningCoreTests = (value: boolean) => {

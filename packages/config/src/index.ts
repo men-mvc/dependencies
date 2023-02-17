@@ -1,7 +1,7 @@
 import { BaseConfig } from './types/baseConfig';
 import { Config } from './config';
 
-export const config: BaseConfig = Config.getInstance();
+export const config: BaseConfig = Config.getConfig();
 
 export * from './appConfigUtility';
 export * from './types';

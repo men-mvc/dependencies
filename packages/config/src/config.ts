@@ -4,21 +4,21 @@ import { appConfigUtility } from './appConfigUtility';
 import { isRunningCoreTests } from './utilities';
 
 export class Config {
-  private static instance: BaseConfig | null = null;
+  private static config: BaseConfig | null = null;
 
-  public static getInstance = (): BaseConfig => {
-    if (!Config.instance) {
+  public static getConfig = (): BaseConfig => {
+    if (!Config.config) {
       if (isRunningCoreTests()) {
-        Config.instance = coreTestConfigUtility.getConfig();
+        Config.config = coreTestConfigUtility.getConfig();
       } else {
-        Config.instance = appConfigUtility.getConfig();
+        Config.config = appConfigUtility.getConfig();
       }
     }
 
-    return Config.instance;
+    return Config.config;
   };
 
-  public static resetInstance = () => {
-    Config.instance = null;
+  public static resetConfig = () => {
+    Config.config = null;
   };
 }
