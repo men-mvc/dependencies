@@ -1,0 +1,20 @@
+{
+  "server": {
+    "port": "SERVER_PORT"
+  },
+  "auth": {
+    "secret": "AUTH_TOKEN_SECRET_KEY"
+  },
+  "mail": {
+    "driver": "MAIL_DRIVER",
+    "user": "MAIL_USER",
+    "password": "MAIL_PASSWORD",
+    "authType": "MAIL_AUTH_TYPE"
+  },
+  "fileSystem": {
+    "storageDriver": "FILESYSTEM_STORAGE_DRIVER"
+  },
+  "cache": {
+    "driver": "CACHE_DRIVER"
+  }
+}

@@ -1,6 +1,6 @@
 import { BaseConfig, CacheDriver, FileSystemDriver } from './types';
 
-export const coreTestConfig: BaseConfig = {
+export const frameworkTestConfig: BaseConfig = {
   app: {
     name: `Men MVC`
   },
@@ -35,5 +35,6 @@ export const coreTestConfig: BaseConfig = {
   }
 };
 
+export const appProjectConfigDir = 'configuration';
 export const srcDirectory = 'src'; // small letters only
 export const buildDirectory = 'dist'; // small letters only

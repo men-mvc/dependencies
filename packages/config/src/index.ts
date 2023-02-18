@@ -3,10 +3,10 @@ import { Config } from './config';
 
 export const config: BaseConfig = Config.getConfig();
 
-export * from './appConfigUtility';
 export * from './types';
-export * from './baseConfigUtility';
 export * from './config';
-export * from './coreTestConfigUtility';
+export * from './appProjectConfig';
+export * from './frameworkTestConfig';
+export * from './configValidator';
 export * from './globals';
 export * from './utilities';
