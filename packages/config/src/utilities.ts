@@ -1,9 +1,5 @@
-import _ from 'lodash';
 import findUpOne from 'findup-sync';
-import { BaseConfig } from './types';
 import { appProjectConfigDir } from './globals';
-import c from 'config';
-import * as console from 'console';
 
 export const getAppEnv = () => getEnvVariable(`NODE_ENV`, `local`);
 
