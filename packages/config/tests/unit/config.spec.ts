@@ -8,8 +8,7 @@ import {
   mockGetEnvVariables,
   mockIsRunningCoreTests
 } from './testUtilities';
-import { BaseConfig, MailAuthType, MailDriver } from '../../src';
-import { CacheDriver, FileSystemDriver } from '../../lib';
+import { BaseConfig, MailAuthType, MailDriver, CacheDriver, FileSystemDriver } from '../../src';
 
 const testEnvVarsWithValidEnumValues = {
   MAIL_DRIVER: MailDriver.mail,
