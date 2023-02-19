@@ -1,13 +1,13 @@
 {
   "app": {
-    "name": "Men MVC Staging"
+    "name": "Men MVC Default"
   },
   "server": {
     "port": 8080
   },
   "auth": {
-    "secret": "private-staging-auth-secret",
-    "tokenExpiresIn": "2y",
+    "secret": "private-default-auth-secret",
+    "tokenExpiresIn": "3y",
     "passwordResetLinkDuration": 7200,
     "emailVerificationLinkDuration": 7200
   },
@@ -20,7 +20,7 @@
     "service": "Gmail"
   },
   "cache": {
-    "driver": "in-memory",
+    "driver": "redis",
     "redis": {
       "port": 6379,
       "host": "127.0.0.1",

@@ -1,0 +1,37 @@
+{
+  "app": {
+    "name": "Men MVC Staging"
+  },
+  "server": {
+    "port": 9000
+  },
+  "mail": {
+    "user": "staging-user",
+    "password": "staging-password"
+  },
+  "cache": {
+    "redis": {
+      "port": 6345,
+      "host": "127.0.0.1",
+      "password": "stating-redis-password",
+      "database": 2
+    }
+  },
+  "additionalConfig": {
+    "orderStatus": {
+      "pending": 1,
+      "confirmed": 2,
+      "delivered": 3
+    },
+    "apiKeys": [
+      {
+        "key": "test-api-key-1",
+        "secret": "test-api-secret-1"
+      },
+      {
+        "key": "test-api-key-2",
+        "secret": "test-api-secret-2"
+      }
+    ]
+  }
+}

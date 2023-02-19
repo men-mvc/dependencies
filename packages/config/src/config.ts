@@ -1,24 +1,31 @@
-import { BaseConfig } from './types';
-import { coreTestConfigUtility } from './coreTestConfigUtility';
-import { appConfigUtility } from './appConfigUtility';
 import { isRunningCoreTests } from './utilities';
+import { ConfigContract } from './configContract';
+import { FrameworkTestConfig } from './frameworkTestConfig';
+import { AppProjectConfig } from './appProjectConfig';
+import { ConfigValidator } from './configValidator';
+import { BaseConfig } from './types';
 
 export class Config {
-  private static instance: BaseConfig | null = null;
+  private static config: Record<string, unknown> | null;
 
-  public static getInstance = (): BaseConfig => {
-    if (!Config.instance) {
-      if (isRunningCoreTests()) {
-        Config.instance = coreTestConfigUtility.getConfig();
-      } else {
-        Config.instance = appConfigUtility.getConfig();
-      }
+  public static getConfig = <T>(): T => {
+    if (Config.config) {
+      return Config.config as T;
     }
 
-    return Config.instance;
+    let config: ConfigContract;
+    if (isRunningCoreTests()) {
+      config = new FrameworkTestConfig();
+    } else {
+      config = new AppProjectConfig();
+    }
+    Config.config = config.getConfig<Record<string, unknown>>();
+    new ConfigValidator(Config.config as unknown as BaseConfig).validate();
+
+    return Config.config as T;
   };
 
-  public static resetInstance = () => {
-    Config.instance = null;
+  public static resetConfig = () => {
+    Config.config = null;
   };
 }

@@ -1,0 +1,69 @@
+{
+  "server": {
+    "port": "SERVER_PORT"
+  },
+  "auth": {
+    "secret": "AUTH_TOKEN_SECRET_KEY"
+  },
+  "mail": {
+    "driver": "MAIL_DRIVER",
+    "user": "MAIL_USER",
+    "password": "MAIL_PASSWORD",
+    "authType": "MAIL_AUTH_TYPE"
+  },
+  "fileSystem": {
+    "storageDriver": "FILESYSTEM_STORAGE_DRIVER"
+  },
+  "cache": {
+    "driver": "CACHE_DRIVER"
+  },
+  "envVariables": {
+    "stringVar": {
+      "name": "STRING_VAR",
+      "type": "string"
+    },
+    "numberVar": {
+      "name": "NUMBER_VAR",
+      "type": "number"
+    },
+    "stringArrayVar": {
+      "name": "STRING_ARRAY_VAR",
+      "type": "string_array"
+    },
+    "numberArrayVar": {
+      "name": "NUMBER_ARRAY_VAR",
+      "type": "number_array"
+    },
+    "nested": {
+      "stringVar": {
+        "name": "NESTED_STRING_VAR",
+        "type": "string"
+      },
+      "numberVar": {
+        "name": "NESTED_NUMBER_VAR",
+        "type": "number"
+      },
+      "stringArrayVar": {
+        "name": "NESTED_STRING_ARRAY_VAR",
+        "type": "string_array"
+      },
+      "numberArrayVar": {
+        "name": "NESTED_NUMBER_ARRAY_VAR",
+        "type": "number_array"
+      }
+    }
+  },
+  "invalidEnvVariables": {
+    "nameIsEmpty": {
+      "name": "",
+      "type": "string"
+    },
+    "typeIsUndefined": {
+      "name": "TYPE_IS_UNDEFINED"
+    },
+    "invalidTypeValue": {
+      "name": "INVALID_TYPE_VALUE",
+      "type": "invalid-type-value"
+    }
+  }
+}
