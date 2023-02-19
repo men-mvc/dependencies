@@ -38,11 +38,16 @@ interface FullConfig extends BaseConfig {
     numberVar: number;
     stringArrayVar: string[];
     numberArrayVar: number[];
+    booleanVarStringTrue: boolean;
+    booleanVarStringFalse: boolean;
+    booleanVarNumberTrue: boolean;
+    booleanVarNumberFalse: boolean;
     nested: {
       stringVar: string;
       numberVar: number;
       stringArrayVar: string[];
       numberArrayVar: number[];
+      booleanVar: boolean;
     };
   };
   invalidEnvVariables: {
@@ -374,7 +379,74 @@ describe(`AppProjectConfig`, () => {
       getEnvVariablesStub = mockGetEnvVariables(mockVariables);
       const actualConfig = instance.getConfig<FullConfig>();
 
-      expect(JSON.stringify(actualConfig.invalidEnvVariables.invalidTypeValue)).toBe(JSON.stringify({name: mockVariables.INVALID_TYPE_VALUE}));
+      expect(
+        JSON.stringify(actualConfig.invalidEnvVariables.invalidTypeValue)
+      ).toBe(JSON.stringify({ name: mockVariables.INVALID_TYPE_VALUE }));
+    });
+
+    it(`should declare the .env variable as boolean and string "true" will be casted to true`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        BOOLEAN_VAR_STRING_TRUE: 'true'
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.booleanVarStringTrue).toBeTruthy();
+    });
+
+    it(`should declare the .env variable as boolean and string "false" will be casted to false`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        BOOLEAN_VAR_STRING_FALSE: 'false'
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.booleanVarStringFalse).toBeFalsy();
+    });
+
+    it(`should declare the .env variable as boolean and "0" will be casted to false`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        BOOLEAN_VAR_NUMBER_FALSE: '0'
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.booleanVarNumberFalse).toBeFalsy();
+    });
+
+    it(`should declare the .env variable as boolean and "1" will be casted to true`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        BOOLEAN_VAR_NUMBER_TRUE: '1'
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.booleanVarNumberTrue).toBeTruthy();
+    });
+
+    it(`should declare the nested .env variable as boolean`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        NESTED_BOOLEAN_VAR: 'true'
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.nested.booleanVar).toBeTruthy();
     });
   });
 

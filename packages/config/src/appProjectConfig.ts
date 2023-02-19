@@ -9,9 +9,9 @@ import {
   getEnvVariable
 } from './utilities';
 import {
+  EnvVarDataType,
   EnvVarDeclaration,
-  isEnvVarDeclaration,
-  EnvVarDataType
+  isEnvVarDeclaration
 } from './types';
 import { defaultConfigFilename, envVariablesConfigFilename } from './globals';
 
@@ -121,6 +121,15 @@ export class AppProjectConfig implements ConfigContract {
               key,
               envVarValue.split(',').map((element) => Number(element))
             );
+            break;
+          }
+          case EnvVarDataType.BOOLEAN: {
+            let booleanValue =
+              envVarValue.toLowerCase() === 'false' ||
+              envVarValue.toLowerCase() === '0'
+                ? false
+                : !!envVarValue;
+            _.set(appProjectConfig, key, booleanValue);
             break;
           }
           default: {

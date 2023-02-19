@@ -34,6 +34,22 @@
       "name": "NUMBER_ARRAY_VAR",
       "type": "number_array"
     },
+    "booleanVarStringTrue": {
+      "name": "BOOLEAN_VAR_STRING_TRUE",
+      "type": "boolean"
+    },
+    "booleanVarStringFalse": {
+      "name": "BOOLEAN_VAR_STRING_FALSE",
+      "type": "boolean"
+    },
+    "booleanVarNumberTrue": {
+      "name": "BOOLEAN_VAR_NUMBER_TRUE",
+      "type": "boolean"
+    },
+    "booleanVarNumberFalse": {
+      "name": "BOOLEAN_VAR_NUMBER_FALSE",
+      "type": "boolean"
+    },
     "nested": {
       "stringVar": {
         "name": "NESTED_STRING_VAR",
@@ -50,6 +66,10 @@
       "numberArrayVar": {
         "name": "NESTED_NUMBER_ARRAY_VAR",
         "type": "number_array"
+      },
+      "booleanVar": {
+        "name": "NESTED_BOOLEAN_VAR",
+        "type": "boolean"
       }
     }
   },
