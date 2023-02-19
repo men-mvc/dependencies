@@ -1,14 +1,14 @@
 import { stub, SinonStub } from 'sinon';
+import { faker } from '@faker-js/faker';
 import * as path from 'path';
 import * as utilities from '../../src/utilities';
 import { AppProjectConfig } from '../../src/appProjectConfig';
-import { BaseConfig } from '../../src';
+import { BaseConfig, appProjectConfigDir } from '../../src';
 import {
   mockGetAppEnv,
   mockGetAppProjectConfigDirectory,
   mockGetEnvVariables
 } from './testUtilities';
-import { faker } from '@faker-js/faker';
 
 const testEnvVariables = {
   SERVER_PORT: '4575',
@@ -16,9 +16,9 @@ const testEnvVariables = {
   MAIL_USER: 'test-env-var-user',
   MAIL_PASSWORD: 'test-env-password'
 };
-const testDefaultConfigJson = require('./configuration/default.json');
-const testStagingConfigJson = require('./configuration/staging.json');
-const testConfigDirectory = path.join(__dirname, `configuration`);
+const testDefaultConfigJson = require('./envConfigs/default.json');
+const testStagingConfigJson = require('./envConfigs/staging.json');
+const testConfigDirectory = path.join(__dirname, appProjectConfigDir);
 const instance = new AppProjectConfig();
 
 interface FullConfig extends BaseConfig {
@@ -113,7 +113,7 @@ describe(`AppProjectConfig`, () => {
       assertAllConfigVarsGetMergedTogether(instance.getConfig<BaseConfig>());
     });
 
-    it(`should return empty object when empty object when the configuration folder is missing`, () => {
+    it(`should return empty object when empty object when the ${appProjectConfigDir} folder is missing`, () => {
       getAppProjectConfigDirectoryStub.restore();
       getAppProjectConfigDirectoryStub =
         mockGetAppProjectConfigDirectory(`does-not-exists`);

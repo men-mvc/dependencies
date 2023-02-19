@@ -13,7 +13,8 @@ import {
   MailAuthType,
   MailDriver,
   CacheDriver,
-  FileSystemDriver
+  FileSystemDriver,
+  appProjectConfigDir
 } from '../../src';
 
 const testEnvVarsWithValidEnumValues = {
@@ -22,8 +23,8 @@ const testEnvVarsWithValidEnumValues = {
   CACHE_DRIVER: CacheDriver.inMemory,
   MAIL_AUTH_TYPE: 'LOGIN'
 };
-const testStagingConfig = require('./configuration/staging.json');
-const testAppProjectConfigDir = path.join(__dirname, `configuration`);
+const testStagingConfig = require('./envConfigs/staging.json');
+const testAppProjectConfigDir = path.join(__dirname, appProjectConfigDir);
 
 describe(`Config`, () => {
   describe(`getConfig`, () => {

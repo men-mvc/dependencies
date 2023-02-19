@@ -5,8 +5,6 @@ import {
   MailAuthType,
   MailDriver
 } from './types';
-import { getAppEnv } from './utilities';
-import * as console from 'console';
 
 export class ConfigValidator {
   constructor(private config: BaseConfig) {}
