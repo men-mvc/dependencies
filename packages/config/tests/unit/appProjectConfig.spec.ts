@@ -45,6 +45,11 @@ interface FullConfig extends BaseConfig {
       numberArrayVar: number[];
     };
   };
+  invalidEnvVariables: {
+    nameIsEmpty?: string;
+    typeIsUndefined?: unknown;
+    invalidTypeValue?: unknown;
+  };
 }
 
 describe(`AppProjectConfig`, () => {
@@ -331,6 +336,45 @@ describe(`AppProjectConfig`, () => {
             'number'
         ).toBeTruthy();
       });
+    });
+
+    it(`should not consider the declaration as valid when the name prop is empty string`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        '': ''
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.invalidEnvVariables?.nameIsEmpty).toBeUndefined();
+    });
+
+    it(`should not consider the declaration as valid when the type is not defined`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        TYPE_IS_UNDEFINED: 'test-string'
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(
+        JSON.stringify(actualConfig.invalidEnvVariables?.typeIsUndefined)
+      ).toBe(JSON.stringify({ name: mockVariables.TYPE_IS_UNDEFINED }));
+    });
+
+    it(`should not consider the declaration as valid when the type value is invalid`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        INVALID_TYPE_VALUE: 'test-string'
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(JSON.stringify(actualConfig.invalidEnvVariables.invalidTypeValue)).toBe(JSON.stringify({name: mockVariables.INVALID_TYPE_VALUE}));
     });
   });
 

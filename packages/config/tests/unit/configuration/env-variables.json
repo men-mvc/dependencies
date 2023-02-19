@@ -52,5 +52,18 @@
         "type": "number_array"
       }
     }
+  },
+  "invalidEnvVariables": {
+    "nameIsEmpty": {
+      "name": "",
+      "type": "string"
+    },
+    "typeIsUndefined": {
+      "name": "TYPE_IS_UNDEFINED"
+    },
+    "invalidTypeValue": {
+      "name": "INVALID_TYPE_VALUE",
+      "type": "invalid-type-value"
+    }
   }
 }

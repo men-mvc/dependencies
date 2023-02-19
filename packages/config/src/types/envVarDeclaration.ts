@@ -1,11 +1,11 @@
 import { EnvVarDataType } from './envVarDataType';
+import { isNil } from 'lodash';
 
 export type EnvVarDeclaration = {
   name: string;
   type: EnvVarDataType;
 };
 
-// TODO: unit test
 export const isEnvVarDeclaration = (arg: unknown): arg is EnvVarDeclaration => {
   if (typeof arg !== 'object') {
     return false;
@@ -14,7 +14,7 @@ export const isEnvVarDeclaration = (arg: unknown): arg is EnvVarDeclaration => {
   if (!declaration.name || typeof declaration.name !== 'string') {
     return false;
   }
-  if (typeof declaration.type !== 'string') {
+  if (isNil(declaration.type)) {
     return false;
   }
   if (
