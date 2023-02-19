@@ -16,5 +16,41 @@
   },
   "cache": {
     "driver": "CACHE_DRIVER"
+  },
+  "envVariables": {
+    "stringVar": {
+      "name": "STRING_VAR",
+      "type": "string"
+    },
+    "numberVar": {
+      "name": "NUMBER_VAR",
+      "type": "number"
+    },
+    "stringArrayVar": {
+      "name": "STRING_ARRAY_VAR",
+      "type": "string_array"
+    },
+    "numberArrayVar": {
+      "name": "NUMBER_ARRAY_VAR",
+      "type": "number_array"
+    },
+    "nested": {
+      "stringVar": {
+        "name": "NESTED_STRING_VAR",
+        "type": "string"
+      },
+      "numberVar": {
+        "name": "NESTED_NUMBER_VAR",
+        "type": "number"
+      },
+      "stringArrayVar": {
+        "name": "NESTED_STRING_ARRAY_VAR",
+        "type": "string_array"
+      },
+      "numberArrayVar": {
+        "name": "NESTED_NUMBER_ARRAY_VAR",
+        "type": "number_array"
+      }
+    }
   }
 }

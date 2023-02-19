@@ -8,9 +8,13 @@ import {
   getConfigKeyEnvVarNameMappings,
   getEnvVariable
 } from './utilities';
-import * as console from 'console';
+import {
+  EnvVarDeclaration,
+  isEnvVarDeclaration,
+  EnvVarDataType
+} from './types';
+import { defaultConfigFilename, envVariablesConfigFilename } from './globals';
 
-// TODO: add type casting support for .env variables.
 export class AppProjectConfig implements ConfigContract {
   public getAppProjectDefaultConfig = (): Record<string, unknown> => {
     const appProjectConfigDir = getAppProjectConfigDirectory();
@@ -20,7 +24,7 @@ export class AppProjectConfig implements ConfigContract {
 
     let appProjectConfigFilePath = path.join(
       appProjectConfigDir,
-      `default.json`
+      defaultConfigFilename
     );
     if (fs.existsSync(appProjectConfigFilePath)) {
       const defaultConfig = require(appProjectConfigFilePath);
@@ -60,7 +64,10 @@ export class AppProjectConfig implements ConfigContract {
       this.getAppProjectEnvSpecificConfig()
     );
 
-  private getAppProjectConfigKeyEnvVarMappings = (): Map<string, string> => {
+  private getAppProjectConfigKeyEnvVarMappings = (): Map<
+    string,
+    string | EnvVarDeclaration
+  > => {
     const appProjectConfigDir = getAppProjectConfigDirectory();
     if (!appProjectConfigDir) {
       // config directory not found in the app project.
@@ -69,7 +76,7 @@ export class AppProjectConfig implements ConfigContract {
 
     const envVariablesConfigFilePath = path.join(
       appProjectConfigDir,
-      `env-variables.json`
+      envVariablesConfigFilename
     );
 
     if (fs.existsSync(envVariablesConfigFilePath)) {
@@ -90,12 +97,48 @@ export class AppProjectConfig implements ConfigContract {
      * replace the config value from .json file with the value of the .env variable.
      * but only replace when the env variable value is null or undefined.
      */
-    configKeyEnvVarMappings.forEach((value, key) => {
-      const envVarValue = getEnvVariable(value, undefined);
-      if (isNil(envVarValue)) {
-        return;
+    configKeyEnvVarMappings.forEach((envVarDeclaration, key) => {
+      if (isEnvVarDeclaration(envVarDeclaration)) {
+        // TODO: test this logic
+        const envVarValue = getEnvVariable<string | undefined>(
+          envVarDeclaration.name,
+          undefined
+        );
+        if (envVarValue === null || envVarValue === undefined) {
+          return;
+        }
+        switch (envVarDeclaration.type) {
+          case EnvVarDataType.NUMBER: {
+            _.set(appProjectConfig, key, Number(envVarValue));
+            break;
+          }
+          case EnvVarDataType.STRING_ARRAY: {
+            _.set(appProjectConfig, key, envVarValue.split(','));
+            break;
+          }
+          case EnvVarDataType.NUMBER_ARRAY: {
+            _.set(
+              appProjectConfig,
+              key,
+              envVarValue.split(',').map((element) => Number(element))
+            );
+            break;
+          }
+          default: {
+            // string
+            _.set(appProjectConfig, key, envVarValue);
+          }
+        }
+      } else {
+        const envVarValue = getEnvVariable<string | undefined>(
+          envVarDeclaration,
+          undefined
+        );
+        if (isNil(envVarValue)) {
+          return;
+        }
+        _.set(appProjectConfig, key, envVarValue);
       }
-      _.set(appProjectConfig, key, envVarValue);
     });
 
     return appProjectConfig as T;

@@ -8,6 +8,7 @@ import {
   mockGetAppProjectConfigDirectory,
   mockGetEnvVariables
 } from './testUtilities';
+import { faker } from '@faker-js/faker';
 
 const testEnvVariables = {
   SERVER_PORT: '4575',
@@ -31,6 +32,18 @@ interface FullConfig extends BaseConfig {
       key: string;
       secret: string;
     }[];
+  };
+  envVariables: {
+    stringVar: string;
+    numberVar: number;
+    stringArrayVar: string[];
+    numberArrayVar: number[];
+    nested: {
+      stringVar: string;
+      numberVar: number;
+      stringArrayVar: string[];
+      numberArrayVar: number[];
+    };
   };
 }
 
@@ -150,6 +163,174 @@ describe(`AppProjectConfig`, () => {
       getEnvVariablesStub = mockGetEnvVariables(testEnvVariables);
       const actualConfig = instance.getConfig<BaseConfig>();
       expect(actualConfig.server.port).toBe(testEnvVariables.SERVER_PORT);
+    });
+
+    it(`should declare the .env variable as string`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        STRING_VAR: faker.lorem.sentence()
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.stringVar).toBe(
+        mockVariables.STRING_VAR
+      );
+    });
+
+    it(`should declare the nested .env variable as string`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        NESTED_STRING_VAR: faker.lorem.sentence()
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.nested.stringVar).toBe(
+        mockVariables.NESTED_STRING_VAR
+      );
+    });
+
+    it(`should declare the .env variable as number`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        NUMBER_VAR: faker.random.numeric().toString()
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.numberVar).toBe(
+        Number(mockVariables.NUMBER_VAR)
+      );
+      expect(
+        typeof actualConfig.envVariables.numberVar === 'number'
+      ).toBeTruthy();
+    });
+
+    it(`should declare the nested .env variable as number`, () => {
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        NESTED_NUMBER_VAR: faker.random.numeric().toString().toString()
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.nested.numberVar).toBe(
+        Number(mockVariables.NESTED_NUMBER_VAR)
+      );
+      expect(
+        typeof actualConfig.envVariables.nested.numberVar === 'number'
+      ).toBeTruthy();
+    });
+
+    it(`should declare the .env variable as string array`, () => {
+      const stringArray = [faker.lorem.word(), faker.lorem.word()];
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        STRING_ARRAY_VAR: stringArray.join(',')
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.stringArrayVar.length).toBe(
+        stringArray.length
+      );
+      stringArray.forEach((envValue, index) => {
+        expect(actualConfig.envVariables.stringArrayVar[index]).toBe(envValue);
+        expect(
+          typeof actualConfig.envVariables.stringArrayVar[index] === 'string'
+        ).toBeTruthy();
+      });
+    });
+
+    it(`should declare the nested .env variable as string array`, () => {
+      const stringArray = [faker.lorem.word(), faker.lorem.word()];
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        NESTED_STRING_ARRAY_VAR: stringArray.join(',')
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.nested.stringArrayVar.length).toBe(
+        stringArray.length
+      );
+      stringArray.forEach((envValue, index) => {
+        expect(actualConfig.envVariables.nested.stringArrayVar[index]).toBe(
+          envValue
+        );
+        expect(
+          typeof actualConfig.envVariables.nested.stringArrayVar[index] ===
+            'string'
+        ).toBeTruthy();
+      });
+    });
+
+    it(`should declare the .env variable as number array`, () => {
+      const numberArray = [
+        faker.random.numeric().toString(),
+        faker.random.numeric().toString()
+      ];
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        NUMBER_ARRAY_VAR: numberArray.join(',')
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.numberArrayVar.length).toBe(
+        numberArray.length
+      );
+      numberArray.forEach((envValue, index) => {
+        expect(actualConfig.envVariables.numberArrayVar[index]).toBe(
+          Number(envValue)
+        );
+        expect(
+          typeof actualConfig.envVariables.numberArrayVar[index] === 'number'
+        ).toBeTruthy();
+      });
+    });
+
+    it(`should declare the nested .env variable as number array`, () => {
+      const numberArray = [
+        faker.random.numeric().toString(),
+        faker.random.numeric().toString()
+      ];
+      getAppEnvStub = mockGetAppEnv(`somewhere`);
+      getAppProjectDefaultConfigStub = mockGetAppProjectDefaultConfig({}); // mock the default.json file to be missing
+      const mockVariables = {
+        ...testEnvVariables,
+        NESTED_NUMBER_ARRAY_VAR: numberArray.join(',')
+      };
+      getEnvVariablesStub = mockGetEnvVariables(mockVariables);
+      const actualConfig = instance.getConfig<FullConfig>();
+
+      expect(actualConfig.envVariables.nested.numberArrayVar.length).toBe(
+        numberArray.length
+      );
+      numberArray.forEach((envValue, index) => {
+        expect(actualConfig.envVariables.nested.numberArrayVar[index]).toBe(
+          Number(envValue)
+        );
+        expect(
+          typeof actualConfig.envVariables.nested.numberArrayVar[index] ===
+            'number'
+        ).toBeTruthy();
+      });
     });
   });
 

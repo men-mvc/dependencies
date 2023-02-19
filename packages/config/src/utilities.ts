@@ -1,5 +1,9 @@
 import findUpOne from 'findup-sync';
 import { appProjectConfigDir } from './globals';
+import {
+  EnvVarDeclaration,
+  isEnvVarDeclaration
+} from './types/envVarDeclaration';
 
 export const getAppEnv = () => getEnvVariable(`NODE_ENV`, `local`);
 
@@ -57,7 +61,6 @@ export const getConfigKeyList = (
 };
 
 /**
- * // TODO: test.
  * return
  * [
  *    'app.name' => 'APP_NAME',
@@ -67,8 +70,11 @@ export const getConfigKeyList = (
  */
 export const getConfigKeyEnvVarNameMappings = (
   envVarsConfigJson: Record<string, unknown>
-): Map<string, string> => {
-  const maps: Map<string, string> = new Map<string, string>();
+): Map<string, string | EnvVarDeclaration> => {
+  const maps: Map<string, string | EnvVarDeclaration> = new Map<
+    string,
+    string | EnvVarDeclaration
+  >();
 
   const getKeyEnvVarMappingsRecursively = (
     configObject: Record<string, unknown> | unknown[],
@@ -79,7 +85,11 @@ export const getConfigKeyEnvVarNameMappings = (
         const newKeyPrefix = `${keyPrefix}${index}.`;
         getKeyEnvVarMappingsRecursively(value, newKeyPrefix);
       });
-    } else if (typeof configObject === 'object' && configObject !== null) {
+    } else if (
+      typeof configObject === 'object' &&
+      configObject !== null &&
+      !isEnvVarDeclaration(configObject)
+    ) {
       for (let key in configObject) {
         const configValue = configObject[key];
         const newKeyPrefix = `${keyPrefix}${key}.`;
@@ -90,7 +100,11 @@ export const getConfigKeyEnvVarNameMappings = (
       }
     } else {
       const joinedKey = keyPrefix.slice(0, -1); // Remove trailing dot
-      maps.set(joinedKey, configObject as string);
+      if (isEnvVarDeclaration(configObject)) {
+        maps.set(joinedKey, configObject as EnvVarDeclaration);
+      } else {
+        maps.set(joinedKey, configObject as string);
+      }
     }
   };
 

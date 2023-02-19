@@ -35,6 +35,8 @@ export const frameworkTestConfig: BaseConfig = {
   }
 };
 
+export const envVariablesConfigFilename = `env-variables.json`;
+export const defaultConfigFilename = `default.json`;
 export const appProjectConfigDir = 'configuration';
 export const srcDirectory = 'src'; // small letters only
 export const buildDirectory = 'dist'; // small letters only
