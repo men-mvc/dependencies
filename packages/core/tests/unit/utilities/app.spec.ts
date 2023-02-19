@@ -1,4 +1,4 @@
-import { setEnvVariable, srcDirectory, buildDirectory } from '@men-mvc/config';
+import { setEnvVariable, srcDirectory } from '@men-mvc/config';
 import { faker } from '@faker-js/faker';
 import * as appUtilities from '../../../src/utilities/app';
 import {
@@ -105,9 +105,9 @@ describe(`App Utility`, () => {
     });
 
     it(`should return path with dist when the server is in the dist directory`, () => {
-      setServerDirectory(`/app/${buildDirectory}`);
+      setServerDirectory(`/app/`);
       expect(getSourceCodeDirectory()).toBe(
-        `${process.cwd()}/${buildDirectory}`
+        `${process.cwd()}`
       );
     });
   });

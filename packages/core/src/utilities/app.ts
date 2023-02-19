@@ -1,7 +1,6 @@
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  buildDirectory,
   getEnvVariable,
   setEnvVariable,
   srcDirectory
@@ -49,5 +48,5 @@ export const isInSourceDirectory = (): boolean => {
 export const getSourceCodeDirectory = (): string =>
   path.join(
     process.cwd(),
-    isInSourceDirectory() ? srcDirectory : buildDirectory
+    isInSourceDirectory() ? srcDirectory : '' // for dist, the process.cwd will be current directory as it is starting server.js executing "node server.js"
   );
