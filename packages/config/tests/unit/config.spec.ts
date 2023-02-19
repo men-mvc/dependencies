@@ -6,7 +6,7 @@ import {
   mockGetAppEnv,
   mockGetAppProjectConfigDirectory,
   mockGetEnvVariables,
-  mockIsRunningCoreTests
+  mockIsRunningFrameworkTests
 } from './testUtilities';
 import {
   BaseConfig,
@@ -51,13 +51,13 @@ describe(`Config`, () => {
     });
 
     it(`should return framework test config when framework test is running`, () => {
-      isRunningCoreTestsStub = mockIsRunningCoreTests(true);
+      isRunningCoreTestsStub = mockIsRunningFrameworkTests(true);
       const config = Config.getConfig();
       expect(JSON.stringify(config)).toBe(JSON.stringify(frameworkTestConfig));
     });
 
     it(`should return app project config when it is not running core tests`, () => {
-      isRunningCoreTestsStub = mockIsRunningCoreTests(false);
+      isRunningCoreTestsStub = mockIsRunningFrameworkTests(false);
       getAppProjectConfigDirectoryStub = mockGetAppProjectConfigDirectory(
         testAppProjectConfigDir
       );
@@ -71,7 +71,7 @@ describe(`Config`, () => {
     });
 
     it(`should return the same instance`, () => {
-      isRunningCoreTestsStub = mockIsRunningCoreTests(true);
+      isRunningCoreTestsStub = mockIsRunningFrameworkTests(true);
       const config1 = Config.getConfig();
       const config2 = Config.getConfig();
       expect(config1).toBe(config2);
@@ -85,7 +85,7 @@ describe(`Config`, () => {
     let getEnvVariablesStub: sinon.SinonStub;
 
     beforeAll(() => {
-      isRunningCoreTestsStub = mockIsRunningCoreTests(false);
+      isRunningCoreTestsStub = mockIsRunningFrameworkTests(false);
       getAppEnvStub = mockGetAppEnv(`staging`);
       getAppProjectConfigDirectoryStub = mockGetAppProjectConfigDirectory(
         testAppProjectConfigDir

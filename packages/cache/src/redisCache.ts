@@ -1,15 +1,15 @@
 import { createClient, RedisClientType } from 'redis';
-import { config } from '@men-mvc/config';
+import { baseConfig } from '@men-mvc/config';
 import { CacheContract } from './cacheContract';
 
 const getRedisOptions = () => {
   return {
     socket: {
-      port: config.cache.redis?.port,
-      host: config.cache.redis?.host
+      port: baseConfig.cache.redis?.port,
+      host: baseConfig.cache.redis?.host
     },
-    password: config.cache.redis?.password,
-    database: config.cache.redis?.database
+    password: baseConfig.cache.redis?.password,
+    database: baseConfig.cache.redis?.database
   };
 };
 export class RedisCache implements CacheContract {

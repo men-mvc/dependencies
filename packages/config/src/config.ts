@@ -1,4 +1,4 @@
-import { isRunningCoreTests } from './utilities';
+import { isRunningFrameworkTests } from './utilities';
 import { ConfigContract } from './configContract';
 import { FrameworkTestConfig } from './frameworkTestConfig';
 import { AppProjectConfig } from './appProjectConfig';
@@ -14,7 +14,7 @@ export class Config {
     }
 
     let config: ConfigContract;
-    if (isRunningCoreTests()) {
+    if (isRunningFrameworkTests()) {
       config = new FrameworkTestConfig();
     } else {
       config = new AppProjectConfig();

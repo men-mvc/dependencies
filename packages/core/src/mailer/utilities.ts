@@ -1,11 +1,11 @@
-import { config, MailDriver } from '@men-mvc/config';
+import { baseConfig, MailDriver } from '@men-mvc/config';
 
-export const getMailDriver = (): MailDriver | undefined => config.mail.driver;
+export const getMailDriver = (): MailDriver | undefined => baseConfig.mail.driver;
 
 export const isOAuth2AuthType = (): boolean =>
-  config.mail.authType?.toLowerCase() === 'oauth2';
+    baseConfig.mail.authType?.toLowerCase() === 'oauth2';
 
 export const isLoginAuthType = (): boolean =>
-  config.mail.authType?.toLowerCase() === 'login' || !config.mail.authType; // default.
+    baseConfig.mail.authType?.toLowerCase() === 'login' || !baseConfig.mail.authType; // default.
 
 // TODO: add custom method auth type

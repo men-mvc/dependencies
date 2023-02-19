@@ -1,4 +1,4 @@
-import { config } from '@men-mvc/config';
+import { baseConfig } from '@men-mvc/config';
 
 export const getUploadFilesizeLimit = (): number =>
-  config.fileSystem.maxUploadLimit;
+    baseConfig.fileSystem.maxUploadLimit;

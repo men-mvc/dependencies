@@ -18,7 +18,7 @@ export const mockGetEnvVariables = (
   return subjectFuncStub.callsFake(jest.fn().mockReturnValue(mockVars));
 };
 
-export const mockIsRunningCoreTests = (value: boolean): SinonStub => {
-  const subjectFuncStub = sinon.stub(utilities, `isRunningCoreTests`);
+export const mockIsRunningFrameworkTests = (value: boolean): SinonStub => {
+  const subjectFuncStub = sinon.stub(utilities, `isRunningFrameworkTests`);
   return subjectFuncStub.returns(value);
 };

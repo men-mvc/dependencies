@@ -1,4 +1,3 @@
-// TODO: rename this to FrameworkTestConfig
 import { ConfigContract } from './configContract';
 import { frameworkTestConfig } from './globals';
 

@@ -1,8 +1,7 @@
 import { BaseConfig } from './types/baseConfig';
 import { Config } from './config';
 
-// TODO: rename this to baseConfig?
-export const config: BaseConfig = Config.getConfig();
+export const baseConfig: BaseConfig = Config.getConfig();
 
 export * from './types';
 export * from './config';

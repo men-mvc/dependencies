@@ -34,7 +34,7 @@ export const setEnvVariable = (key: string, value: string): void => {
  * the functions inside this file are available within the core package only
  * TODO: rename this to is running framework tests
  */
-export const isRunningCoreTests = (): boolean =>
+export const isRunningFrameworkTests = (): boolean =>
   process.env.CORE_TEST ? true : false;
 
 /**

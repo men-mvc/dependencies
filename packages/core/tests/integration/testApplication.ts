@@ -1,5 +1,5 @@
 import express, { Express } from 'express';
-import { config } from '@men-mvc/config';
+import { baseConfig } from '@men-mvc/config';
 import { AbstractApplication } from '../../src/types/abstractApplication';
 import { configureTestRoutes } from './testRoutes';
 import { registerMultipartFormParser } from '../../src/middlewares/registerMultipartFormParser';
@@ -24,9 +24,9 @@ export class TestApplication extends AbstractApplication {
   public initialisePostMiddlewares = () => {};
 
   public start = () => {
-    this.app.listen(config.server.port, () => {
+    this.app.listen(baseConfig.server.port, () => {
       console.log(
-        `⚡️[server]: Test server is running on port ${config.server.port}`
+        `⚡️[server]: Test server is running on port ${baseConfig.server.port}`
       );
     });
   };
