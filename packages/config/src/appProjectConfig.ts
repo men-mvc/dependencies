@@ -99,7 +99,6 @@ export class AppProjectConfig implements ConfigContract {
      */
     configKeyEnvVarMappings.forEach((envVarDeclaration, key) => {
       if (isEnvVarDeclaration(envVarDeclaration)) {
-        // TODO: test this logic
         const envVarValue = getEnvVariable<string | undefined>(
           envVarDeclaration.name,
           undefined
