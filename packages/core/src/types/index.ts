@@ -7,3 +7,4 @@ export * from './validationErrorResponse';
 export * from './abstractApplication';
 export * from './insufficientPermissionError';
 export * from './errorResponseData';
+export * from './statusCodes';

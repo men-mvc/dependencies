@@ -12,6 +12,6 @@
   },
   "scripts": {
     "publish": "lerna publish --registry=https://registry.npmjs.org --no-push",
-    "postversion":"git push --follow-tags --no-verify origin main"
+    "postversion": "git push --follow-tags --no-verify origin main"
   }
 }

@@ -1,5 +1,4 @@
 import { Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
 import { faker } from '@faker-js/faker';
 import {
   successResponse,
@@ -11,7 +10,7 @@ import {
   insufficientPermissionsResponse
 } from '../../../src/utilities/response';
 import { ValidationError } from '../../../src/types/validationError';
-import { ErrorCodes, InsufficientPermissionError } from '../../../src/types';
+import { ErrorCodes, InsufficientPermissionError, StatusCodes } from '../../../src/types';
 
 class FakeExpressResponse {
   status = (status: number) => {

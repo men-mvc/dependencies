@@ -1,8 +1,8 @@
 import { Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
 import {
   ErrorResponse,
   ErrorResponseData,
+  StatusCodes,
   ValidationError,
   ValidationErrorResponse
 } from '../types';
