@@ -1,5 +1,5 @@
-import { Logger } from '../../../src';
-import { ConsoleLogger } from '../../../src/logger/consoleLogger';
+import { Logger } from '../src';
+import { ConsoleLogger } from '../src/consoleLogger';
 
 describe(`Logger`, () => {
   describe(`getInstance`, () => {

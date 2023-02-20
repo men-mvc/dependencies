@@ -106,9 +106,7 @@ describe(`App Utility`, () => {
 
     it(`should return path with dist when the server is in the dist directory`, () => {
       setServerDirectory(`/app/`);
-      expect(getSourceCodeDirectory()).toBe(
-        `${process.cwd()}`
-      );
+      expect(getSourceCodeDirectory()).toBe(`${process.cwd()}`);
     });
   });
 });

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { faker } from '@faker-js/faker';
 import { http, HttpResult } from '../src/http';
-import {StatusCodes} from "../src";
+import { StatusCodes } from '../src';
 
 /**
  * The tests are only making sure that the functions in the abstraction layer are calling the

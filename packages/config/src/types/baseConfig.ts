@@ -29,4 +29,7 @@ export interface BaseConfig {
     storageDriver: FileSystemDriver;
     maxUploadLimit: number; // in bytes
   };
+  logging?: {
+    disabled?: boolean;
+  }
 }

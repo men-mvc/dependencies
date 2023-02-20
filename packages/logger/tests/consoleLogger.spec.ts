@@ -1,8 +1,8 @@
 import sinon from 'sinon';
 import util from 'util';
 import { faker } from '@faker-js/faker';
-import { ConsoleLogger } from '../../../src/logger/consoleLogger';
-import * as utilities from '../../../src/logger/utilities';
+import { ConsoleLogger } from '../src/consoleLogger';
+import * as utilities from '../src/utilities';
 
 const instance = new ConsoleLogger();
 describe(`ConsoleLogger`, () => {
@@ -54,8 +54,8 @@ describe(`ConsoleLogger`, () => {
     const stubIsLoggingDisabled = (returnValue: boolean): sinon.SinonStub => {
       const subjectFuncStub = sinon.stub(utilities, `isLoggingDisabled`);
       return subjectFuncStub.returns(returnValue);
-    }
-  })
+    };
+  });
 
   const assertInspectInvoked = (data: unknown) => {
     expect(mockInspectFunc.mock.calls.length).toBe(1);
