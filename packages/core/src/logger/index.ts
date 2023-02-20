@@ -6,3 +6,4 @@ export const logger: LoggerContract = Logger.getInstance();
 export * from './consoleLogger';
 export * from './types';
 export * from './logger';
+export * from './utilities';

@@ -1,10 +1,6 @@
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  getEnvVariable,
-  setEnvVariable,
-  srcDirectory
-} from '@men-mvc/config';
+import { getEnvVariable, setEnvVariable, srcDirectory } from '@men-mvc/config';
 
 export const getAppStorageDirectory = (): string => {
   let storageDirectory: string;

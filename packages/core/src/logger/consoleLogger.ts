@@ -1,12 +1,18 @@
 import util from 'util';
 import { LoggerContract } from './types';
+import { isLoggingDisabled } from './utilities';
 
-export default class ConsoleLogger implements LoggerContract {
-  logError = <T>(error: T | Error) => {
-    console.log(util.inspect(error, false, null, true));
+export class ConsoleLogger implements LoggerContract {
+  private log = (data: unknown) => {
+    if (isLoggingDisabled()) {
+      // does not log when the logging is disabled.
+      return;
+    }
+
+    console.log(util.inspect(data, false, null, true));
   };
 
-  logMessage = (message: string) => {
-    console.log(util.inspect(message, false, null, true));
-  };
+  logError = (error: unknown | Error) => this.log(error);
+
+  logMessage = (message: string) => this.log(message);
 }

@@ -1,5 +1,5 @@
 import { LoggerContract } from './types';
-import ConsoleLogger from './consoleLogger';
+import { ConsoleLogger } from './consoleLogger';
 
 /**
  * TODO: mechanism to disable logging by overwriting the .env variable.

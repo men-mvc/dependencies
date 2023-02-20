@@ -10,7 +10,11 @@ import {
   insufficientPermissionsResponse
 } from '../../../src/utilities/response';
 import { ValidationError } from '../../../src/types/validationError';
-import { ErrorCodes, InsufficientPermissionError, StatusCodes } from '../../../src/types';
+import {
+  ErrorCodes,
+  InsufficientPermissionError,
+  StatusCodes
+} from '../../../src/types';
 
 class FakeExpressResponse {
   status = (status: number) => {
