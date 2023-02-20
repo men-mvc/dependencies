@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/logger",
-  "version": "0.56.0",
+  "version": "0.57.0",
   "private": false,
   "type": "commonjs",
   "main": "lib/index.js",
@@ -26,7 +26,7 @@
     "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
-    "@men-mvc/config": "^0.56.0"
+    "@men-mvc/config": "^0.57.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
