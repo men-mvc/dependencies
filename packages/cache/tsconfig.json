@@ -5,6 +5,7 @@
     "module": "commonjs" /* Specify what module code is generated. */,
     "outDir": "./lib" /* Specify an output folder for all emitted files. */,
     "strict": true,
+    "experimentalDecorators": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
