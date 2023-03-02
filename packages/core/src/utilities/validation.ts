@@ -1,3 +1,5 @@
+import { Request, Response, NextFunction } from 'express';
+import joi from 'joi';
 import path from 'path';
 import { getEnvVariable } from '@men-mvc/config';
 import {
@@ -7,6 +9,7 @@ import {
 } from 'joi';
 import { ValidationError } from '../types';
 import { UploadedFile } from '../fileSystem';
+import { validationErrorResponse } from './response';
 
 export const resolveValidationError = (
   valError: JoiValidationError | undefined
@@ -168,4 +171,60 @@ export const validateFileExtension = (
   } else if (!validate(value)) {
     failValidationForField(field, error);
   }
+};
+
+export function ValidateRequest(schema: joi.ObjectSchema) {
+  return (
+    target: unknown,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) => {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = function (
+      req: Request,
+      res: Response,
+      next?: NextFunction
+    ) {
+      try {
+        validateRequest(schema, req.body);
+      } catch (e: unknown) {
+        if (e instanceof ValidationError) {
+          return validationErrorResponse(res, e);
+        }
+      }
+
+      return originalMethod.apply(this, [req, res, next]);
+    };
+    //
+    return descriptor;
+  };
+}
+
+export const ValidateRequestAsync = (schema: joi.ObjectSchema) => {
+  return function (
+    scope: unknown,
+    methodName: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (
+      req: Request,
+      res: Response,
+      ...args: unknown[]
+    ) {
+      try {
+        await validateRequestAsync(schema, req.body);
+      } catch (e) {
+        if (e instanceof ValidationError) {
+          return validationErrorResponse(res, e);
+        } else if (e instanceof joi.ValidationError) {
+          return validationErrorResponse(res, resolveValidationError(e));
+        }
+      }
+
+      return originalMethod.apply(this, [req, res, ...args]);
+    };
+  };
 };
