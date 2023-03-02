@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import sinon, { SinonStub, stub } from 'sinon';
 import joi, {
   ValidationError as JoiValidationError,
   ValidationErrorItem
@@ -21,7 +22,6 @@ import {
 import * as responseUtilities from '../../../src/utilities/response';
 import { delay, generateUploadedFile } from '../../testUtilities';
 import { MockValidationController } from './mocks/mockValidationController';
-import sinon, { SinonStub, stub } from 'sinon';
 
 describe(`Validation Utility`, () => {
   describe(`resolveValidationError`, () => {
