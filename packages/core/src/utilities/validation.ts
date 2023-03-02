@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import joi from 'joi';
 import path from 'path';
 import { getEnvVariable } from '@men-mvc/config';
-import {
+import joi, {
   ObjectSchema,
   ValidationError as JoiValidationError,
   ValidationOptions
