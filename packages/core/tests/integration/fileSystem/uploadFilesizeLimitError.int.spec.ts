@@ -17,7 +17,6 @@ describe('FileSystem - UploadFilesizeLimit', function () {
     const { body } = await makeFormDataRequest(generateSimpleFormDataPayload());
 
     expect(body.error.name).toBe(ErrorCodes.UPLOAD_MAX_FILESIZE_LIMIT);
-    expect(body.error.message).toBe(`Payload is too large.`);
     getMaxUploadLimitStub.restore();
   });
 

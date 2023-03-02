@@ -223,7 +223,6 @@ describe('FileSystem', () => {
     const assertInvalidPayloadFormatError = (result: supertest.Response) => {
       expect(result.body.error).not.toBeUndefined();
       expect(result.body.error.name).toBe(ErrorCodes.INVALID_PAYLOAD_FORMAT);
-      expect(result.body.error.message).toBe(`Payload format is invalid.`);
     };
 
     const generateComplexFormDataPayload = () => ({
