@@ -31,5 +31,5 @@ export interface BaseConfig {
   };
   logging?: {
     disabled?: boolean;
-  }
+  };
 }

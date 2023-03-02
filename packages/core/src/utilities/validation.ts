@@ -9,7 +9,7 @@ import {
 } from 'joi';
 import { ValidationError } from '../types';
 import { UploadedFile } from '../fileSystem';
-import {validationErrorResponse} from "./response";
+import { validationErrorResponse } from './response';
 
 export const resolveValidationError = (
   valError: JoiValidationError | undefined
@@ -175,16 +175,16 @@ export const validateFileExtension = (
 
 export function ValidateRequest(schema: joi.ObjectSchema) {
   return (
-      target: unknown,
-      propertyKey: string,
-      descriptor: PropertyDescriptor
+    target: unknown,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
   ) => {
     const originalMethod = descriptor.value;
 
     descriptor.value = function (
-        req: Request,
-        res: Response,
-        next?: NextFunction,
+      req: Request,
+      res: Response,
+      next?: NextFunction
     ) {
       try {
         validateRequest(schema, req.body);
@@ -203,16 +203,16 @@ export function ValidateRequest(schema: joi.ObjectSchema) {
 
 export const ValidateRequestAsync = (schema: joi.ObjectSchema) => {
   return function (
-      scope: unknown,
-      methodName: string,
-      descriptor: PropertyDescriptor
+    scope: unknown,
+    methodName: string,
+    descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (
-        req: Request,
-        res: Response,
-        ...args: unknown[]
+      req: Request,
+      res: Response,
+      ...args: unknown[]
     ) {
       try {
         await validateRequestAsync(schema, req.body);
@@ -227,4 +227,4 @@ export const ValidateRequestAsync = (schema: joi.ObjectSchema) => {
       return originalMethod.apply(this, [req, res, ...args]);
     };
   };
-}
+};
