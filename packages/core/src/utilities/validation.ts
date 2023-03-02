@@ -196,7 +196,7 @@ export function ValidateRequest(schema: joi.ObjectSchema) {
 
       return originalMethod.apply(this, [req, res, next]);
     };
-    //
+
     return descriptor;
   };
 }
