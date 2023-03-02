@@ -2,6 +2,7 @@
     "compilerOptions": {
         "lib": ["es2022"],
         "target": "es2022" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+        "experimentalDecorators": true,
         "module": "commonjs" /* Specify what module code is generated. */,
         "outDir": "./lib" /* Specify an output folder for all emitted files. */,
         "strict": true,

@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import joi, {
   ValidationError as JoiValidationError,
   ValidationErrorItem
@@ -12,9 +13,15 @@ import {
   validateRequestAsync,
   validateFile,
   validateImage,
-  validateFileExtension
+  validateFileExtension,
+  ValidateRequest,
+  ValidateRequestAsync,
+  validationErrorResponse
 } from '../../../src';
-import { generateUploadedFile } from '../../testUtilities';
+import * as responseUtilities from '../../../src/utilities/response';
+import { delay, generateUploadedFile } from '../../testUtilities';
+import { MockValidationController } from './mocks/mockValidationController';
+import sinon, { SinonStub, stub } from 'sinon';
 
 describe(`Validation Utility`, () => {
   describe(`resolveValidationError`, () => {
@@ -411,5 +418,104 @@ describe(`Validation Utility`, () => {
         expect(e.errors['photo']).toBe(`File is invalid.`);
       }
     });
+  });
+
+  describe(`Validation decorators`, () => {
+    let validationErrorResponseStub: SinonStub;
+    const mockController = new MockValidationController();
+
+    beforeAll(() => {
+      validationErrorResponseStub = stubValidationErrorResponse();
+    });
+
+    afterEach(() => {
+      validationErrorResponseStub.reset();
+    });
+
+    afterAll(() => {
+      validationErrorResponseStub.restore();
+    });
+
+    describe(`ValidateRequest`, () => {
+      it(`should return validation error response when the validation fails`, () => {
+        const mockController = new MockValidationController();
+        mockController.validateRequest(
+          {
+            body: {
+              name: ''
+            }
+          } as Request,
+          {} as Response
+        );
+
+        sinon.assert.calledOnce(validationErrorResponseStub);
+      });
+
+      it(`should not return validation error response when the validation passes`, () => {
+        const response = mockController.validateRequest(
+          {
+            body: {
+              name: 'I am not empty'
+            }
+          } as Request,
+          {} as Response
+        );
+
+        sinon.assert.notCalled(validationErrorResponseStub);
+        expect(response).toBeTruthy();
+      });
+    });
+
+    describe(`ValidateRequestAsync`, () => {
+      it(`should return validation error response when the validation fails and throws app validation error`, async () => {
+        mockController.validateRequestAsync(
+          {
+            body: {
+              code: 'INVALID_CODE'
+            }
+          } as Request,
+          {} as Response
+        );
+        await delay(1000); // async
+
+        sinon.assert.calledOnce(validationErrorResponseStub);
+      });
+
+      it(`should return validation error response when the validation fails and throw joi validation error`, async () => {
+        mockController.validateRequestAsync(
+          {
+            body: {
+              code: ''
+            }
+          } as Request,
+          {} as Response
+        );
+        await delay(1000); // async
+
+        sinon.assert.calledOnce(validationErrorResponseStub);
+      });
+
+      it(`should not return the validation error response when the validation passes`, async () => {
+        mockController.validateRequestAsync(
+          {
+            body: {
+              code: 'TEST'
+            }
+          } as Request,
+          {} as Response
+        );
+        await delay(1000); // async
+
+        sinon.assert.notCalled(validationErrorResponseStub);
+      });
+    });
+
+    const stubValidationErrorResponse = (): SinonStub => {
+      const subjectFuncStub = stub(
+        responseUtilities,
+        'validationErrorResponse'
+      );
+      return subjectFuncStub.callsFake(jest.fn());
+    };
   });
 });
