@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/test",
-  "version": "0.63.0",
+  "version": "0.64.0",
   "description": "Test package for Men MVC framework.",
   "private": false,
   "type": "commonjs",
