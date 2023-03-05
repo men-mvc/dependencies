@@ -11,5 +11,6 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true
   },
-  "include": ["src/**/*", "globals.d.ts"]
+  "include": ["src/**/*", "globals.d.ts"],
+  "files": ["typings/change-case/index.d.ts"]
 }
