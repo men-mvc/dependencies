@@ -6,7 +6,7 @@ import {
   FileArray
 } from 'express-fileupload';
 import {
-  IFileUploader,
+  BaseFileUploader,
   InvalidPayloadFormatException,
   StoreFileParams,
   StoreFilesParams,
@@ -15,8 +15,7 @@ import {
 } from './types';
 import { DeepPartial } from '../types';
 import { LocalStorage } from './localStorage';
-import { getAppStorageDirectory, isNumber } from '../utilities';
-import { generateUuid } from '../utilities/app';
+import { getAppStorageDirectory, isNumber, generateUuid } from '../utilities';
 import { getUploadFilesizeLimit } from './utilities';
 
 type SubFieldMetaData = {
@@ -27,9 +26,9 @@ type SubFieldMetaData = {
 };
 const OPEN_BRACKET = `[`;
 const CLOSE_BRACKET = `]`;
-export class FileUploader implements IFileUploader {
-  private static tempDirId: string;
-  private static storage: LocalStorage;
+export class FileUploader implements BaseFileUploader {
+  private tempDirId: string | undefined;
+  private storage: LocalStorage | undefined;
 
   public getTempUploadDirectory(): string {
     const tempDirectory = path.join(getAppStorageDirectory(), 'temp');
@@ -39,7 +38,7 @@ export class FileUploader implements IFileUploader {
 
   public clearTempUploadDirectory = async (): Promise<void> => {
     const tempDir = this.getTempUploadDirectory();
-    if (await this.getLocalStorage().exits(tempDir)) {
+    if (await this.getLocalStorage().exists(tempDir)) {
       await this.getLocalStorage().rmdir(tempDir, true);
     }
   };
@@ -98,7 +97,7 @@ export class FileUploader implements IFileUploader {
     directory
   }: StoreFileParams): Promise<string> => {
     const destDir = this.buildDestinationDir(directory);
-    if (!(await this.getLocalStorage().exits(destDir))) {
+    if (!(await this.getLocalStorage().exists(destDir))) {
       await this.getLocalStorage().mkdir(destDir);
     }
 
@@ -251,19 +250,19 @@ export class FileUploader implements IFileUploader {
   };
 
   private getLocalStorage = (): LocalStorage => {
-    if (!FileUploader.storage) {
-      FileUploader.storage = new LocalStorage();
+    if (!this.storage) {
+      this.storage = new LocalStorage();
     }
 
-    return FileUploader.storage;
+    return this.storage;
   };
 
   _getTempDirId = (): string => {
-    if (!FileUploader.tempDirId) {
-      FileUploader.tempDirId = generateUuid();
+    if (!this.tempDirId) {
+      this.tempDirId = generateUuid();
     }
 
-    return FileUploader.tempDirId;
+    return this.tempDirId;
   };
 
   _isPayloadTooLarge = (files: FileArray | null | undefined): boolean => {

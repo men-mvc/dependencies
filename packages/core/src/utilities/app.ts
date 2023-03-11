@@ -2,17 +2,6 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { getEnvVariable, setEnvVariable, srcDirectory } from '@men-mvc/config';
 
-export const changeToCamelCase = (value: string) => {
-  try {
-    const changeCase = require('change-case');
-
-    return changeCase.camelCase(value);
-  } catch (e) {
-    console.log("change-case module does not exist.");
-    console.log(e);
-  }
-}
-
 export const getAppStorageDirectory = (): string => {
   let storageDirectory: string;
   const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);

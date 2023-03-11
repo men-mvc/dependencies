@@ -6,7 +6,8 @@ import {
   mockGetAppEnv,
   mockGetAppProjectConfigDirectory,
   mockGetEnvVariables,
-  mockIsRunningFrameworkTests
+  mockIsRunningFrameworkTests,
+  mockIsTestEnvironment
 } from './testUtilities';
 import {
   BaseConfig,
@@ -83,6 +84,7 @@ describe(`Config`, () => {
     let isRunningCoreTestsStub: sinon.SinonStub;
     let getAppProjectConfigDirectoryStub: sinon.SinonStub;
     let getEnvVariablesStub: sinon.SinonStub;
+    let isTestEnvironmentStub: sinon.SinonStub;
 
     beforeAll(() => {
       isRunningCoreTestsStub = mockIsRunningFrameworkTests(false);
@@ -96,6 +98,9 @@ describe(`Config`, () => {
       isRunningCoreTestsStub.restore();
       getAppEnvStub.restore();
       getAppProjectConfigDirectoryStub.restore();
+      if (isTestEnvironmentStub) {
+        isTestEnvironmentStub.restore();
+      }
     });
 
     beforeEach(() => {
@@ -149,11 +154,22 @@ describe(`Config`, () => {
     it(`should not allow to file system storage driver to be set with invalid value`, () => {
       getEnvVariablesStub = mockGetEnvVariables({
         ...testEnvVarsWithValidEnumValues,
-        FILESYSTEM_STORAGE_DRIVER: 's3'
+        FILESYSTEM_STORAGE_DRIVER: 'invalid-storage-driver'
       });
       expect(() => {
         Config.getConfig<BaseConfig>();
       }).toThrow(`Invalid file system storage driver.`);
+    });
+
+    it(`should not allow tests to use non-local filesystem driver`, () => {
+      isTestEnvironmentStub = mockIsTestEnvironment(true);
+      getEnvVariablesStub = mockGetEnvVariables({
+        ...testEnvVarsWithValidEnumValues,
+        FILESYSTEM_STORAGE_DRIVER: 's3'
+      });
+      expect(() => {
+        Config.getConfig<BaseConfig>();
+      }).toThrow(`Tests only support local filesystem driver.`);
     });
 
     Object.entries(MailAuthType)

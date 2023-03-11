@@ -1,39 +1,50 @@
 import { Request } from 'express';
 import { ReadStream, WriteFileOptions } from 'fs';
+import { FileSystemDriver } from '@men-mvc/config';
 import {
-  IFileSystem,
-  IFileUploader,
-  IStorage,
+  BaseFileSystem,
+  BaseFileUploader,
   ReadStreamOptions,
+  Storage,
   StoreFileParams,
-  StoreFilesParams
+  StoreFilesParams,
+  WriteFileResult
 } from './types';
-import { LocalStorage } from './localStorage';
 import { DeepPartial } from '../types';
 import { FileUploader } from './fileUploader';
+import { getFileSystemDriver } from './utilities';
+import { LocalStorage } from './localStorage';
+import { S3Storage } from './s3/s3Storage';
 
-export class FileSystem implements IFileSystem {
-  private static instance: IFileSystem;
-  private static storageInstance: IStorage;
-  private static uploaderInstance: IFileUploader;
+// TODO: add deleteMany
+export class FileSystem implements BaseFileSystem {
+  private static instance: BaseFileSystem;
+  private storageInstance: Storage | undefined;
+  private uploaderInstance: BaseFileUploader | undefined;
 
-  private getStorageInstance = (): IStorage => {
-    if (!FileSystem.storageInstance) {
-      FileSystem.storageInstance = new LocalStorage();
+  // TODO: unit test
+  public getStorageInstance = (): Storage => {
+    if (!this.storageInstance) {
+      if (getFileSystemDriver() === FileSystemDriver.s3) {
+        this.storageInstance = new S3Storage();
+      } else {
+        this.storageInstance = new LocalStorage();
+      }
     }
 
-    return FileSystem.storageInstance;
+    return this.storageInstance;
   };
 
-  private getUploaderInstance = (): IFileUploader => {
-    if (!FileSystem.uploaderInstance) {
-      FileSystem.uploaderInstance = new FileUploader();
+  // TODO: unit test
+  public getUploaderInstance = (): BaseFileUploader => {
+    if (!this.uploaderInstance) {
+      this.uploaderInstance = new FileUploader();
     }
 
-    return FileSystem.uploaderInstance;
+    return this.uploaderInstance;
   };
 
-  public static getInstance = (): IFileSystem => {
+  public static getInstance = (): BaseFileSystem => {
     if (!FileSystem.instance) {
       FileSystem.instance = new FileSystem();
     }
@@ -60,17 +71,23 @@ export class FileSystem implements IFileSystem {
     filepath: string,
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
-  ): Promise<void> =>
+  ): Promise<WriteFileResult> =>
     this.getStorageInstance().writeFile(filepath, data, options);
 
   public deleteFile = async (path: string): Promise<void> =>
     this.getStorageInstance().deleteFile(path);
 
+  deleteFiles = async (pathsOrKeys: string[]): Promise<void> =>
+      this.getStorageInstance().deleteFiles(pathsOrKeys);
+
   public rename = async (from: string, to: string): Promise<void> =>
     this.getStorageInstance().rename(from, to);
 
-  public exits = async (path: string): Promise<boolean> =>
-    this.getStorageInstance().exits(path);
+  public copy = async (from: string, to: string): Promise<void> =>
+    this.getStorageInstance().copy(from, to);
+
+  public exists = async (path: string): Promise<boolean> =>
+    this.getStorageInstance().exists(path);
 
   public mkdir = async (dirPath: string): Promise<void> =>
     this.getStorageInstance().mkdir(dirPath);

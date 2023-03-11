@@ -22,3 +22,8 @@ export const mockIsRunningFrameworkTests = (value: boolean): SinonStub => {
   const subjectFuncStub = sinon.stub(utilities, `isRunningFrameworkTests`);
   return subjectFuncStub.returns(value);
 };
+
+export const mockIsTestEnvironment = (returnValue: boolean): SinonStub => {
+  const subjectFuncStub = sinon.stub(utilities, `isTestEnvironment`);
+  return subjectFuncStub.returns(returnValue);
+};

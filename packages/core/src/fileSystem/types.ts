@@ -1,8 +1,9 @@
 import { Request } from 'express';
 import { WriteFileOptions, ReadStream } from 'fs';
 import { DeepPartial, ErrorCodes } from '../types';
+import { MenS3PutObjectCommandOutput } from './s3/types';
 
-export interface IStorage {
+export interface Storage {
   readDir: (dir: string) => Promise<string[]>;
 
   readFile: (
@@ -19,16 +20,21 @@ export interface IStorage {
   ) => Promise<ReadStream>;
 
   writeFile: (
-    path: string,
+    pathOrKey: string,
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
-  ) => Promise<void>;
+  ) => Promise<WriteFileResult>;
 
-  deleteFile: (path: string) => Promise<void>;
+  deleteFile: (pathOrKey: string) => Promise<void>;
+
+  // TODO:
+  deleteFiles: (pathsOrKeys: string[]) => Promise<void>;
 
   rename: (from: string, to: string) => Promise<void>;
 
-  exits: (path: string) => Promise<boolean>;
+  copy: (from: string, to: string) => Promise<void>;
+
+  exists: (pathOrKey: string) => Promise<boolean>;
 
   // TODO: test it creates recursively.
   mkdir: (path: string) => Promise<void>;
@@ -40,7 +46,7 @@ export interface IStorage {
   isFile: (dirOrFilepath: string) => Promise<boolean>;
 }
 
-export interface IFileUploader {
+export interface BaseFileUploader {
   parseFormData: <T>(request: Request) => Promise<DeepPartial<T>>;
 
   storeFile: (params: StoreFileParams) => Promise<string>;
@@ -52,7 +58,7 @@ export interface IFileUploader {
   clearTempUploadDirectory: () => Promise<void>;
 }
 
-export interface IFileSystem extends IStorage, IFileUploader {}
+export interface BaseFileSystem extends Storage, BaseFileUploader {}
 
 export type StoreFileParams = {
   uploadedFile: UploadedFile;
@@ -108,3 +114,7 @@ export type ReadStreamOptions = {
   encoding: BufferEncoding;
   highWaterMark: number;
 };
+
+export type WriteFileResult = {
+  filepath: string;
+} & Partial<MenS3PutObjectCommandOutput>;

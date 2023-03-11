@@ -1,6 +1,7 @@
 import { CacheDriver } from './cacheDriver';
 import { MailConfig } from './mailConfig';
 import { FileSystemDriver } from './fileSystemDriver';
+import { S3Config } from './s3Config';
 
 export interface BaseConfig {
   app: {
@@ -28,6 +29,7 @@ export interface BaseConfig {
   fileSystem: {
     storageDriver: FileSystemDriver;
     maxUploadLimit: number; // in bytes
+    s3?: S3Config;
   };
   logging?: {
     disabled?: boolean;

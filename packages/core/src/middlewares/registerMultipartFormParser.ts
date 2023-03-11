@@ -2,7 +2,7 @@ import { Express, Request, Response, NextFunction } from 'express';
 import fileUpload from 'express-fileupload';
 import { asyncRequestHandler } from '../utilities';
 import { fileSystem } from '../fileSystem';
-import { getUploadFilesizeLimit } from '../fileSystem/utilities';
+import { getUploadFilesizeLimit } from '../fileSystem';
 
 const clearTempFiles = async (
   req: Request,

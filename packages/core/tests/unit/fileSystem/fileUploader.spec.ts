@@ -7,7 +7,7 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import path from 'path';
 import fs from 'fs';
-import { FileUploader } from '../../../src/fileSystem/fileUploader';
+import { FileUploader } from '../../../src';
 import * as fileSystemUtilities from '../../../src/fileSystem/utilities';
 import {
   UploadedFile,

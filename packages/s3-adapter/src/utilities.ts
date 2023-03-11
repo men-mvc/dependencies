@@ -1,10 +1,4 @@
-import { baseConfig, FileSystemDriver } from '@men-mvc/config';
-
-export const getUploadFilesizeLimit = (): number =>
-  baseConfig.fileSystem.maxUploadLimit;
-
-export const getFileSystemDriver = (): FileSystemDriver =>
-  baseConfig.fileSystem.storageDriver;
+import { baseConfig } from '@men-mvc/config';
 
 // export const getAwsS3Bucket = (): string => baseConfig.fileSystem.s3?.bucket ?? ``;
 export const getAwsS3Bucket = (): string => `men-mvc-local`;

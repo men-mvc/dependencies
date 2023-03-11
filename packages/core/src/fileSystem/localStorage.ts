@@ -1,17 +1,21 @@
 import fs, { WriteFileOptions } from 'fs';
 import rimraf from 'rimraf';
 import util from 'util';
-import { IStorage, ReadStreamOptions } from './types';
+import { Storage, ReadStreamOptions, WriteFileResult } from './types';
 
 const readdirAsync = util.promisify(fs.readdir);
 const rmdirAsync = util.promisify(fs.rmdir);
 const rimrafAsync = util.promisify(rimraf);
+const unlinkAsync = util.promisify(fs.unlink);
 
-// TODO: add sync versions of the functions.
-// TODO: readDir recursive
-export class LocalStorage implements IStorage {
+/**
+ * TODO: improvements
+ * - add sync versions of the functions.
+ * - readDir recursive
+ */
+export class LocalStorage implements Storage {
   public static instance: LocalStorage;
-  // TODO: try using this function
+
   public static getInstance = (): LocalStorage => {
     if (!LocalStorage.instance) {
       LocalStorage.instance = new LocalStorage();
@@ -58,13 +62,15 @@ export class LocalStorage implements IStorage {
     filepath: string,
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
-  ): Promise<void> => {
+  ): Promise<WriteFileResult> => {
     return new Promise((resolve) => {
       fs.writeFile(filepath, data, options ?? {}, (err) => {
         if (err) {
           throw err;
         }
-        return resolve();
+        return resolve({
+          filepath
+        });
       });
     });
   };
@@ -80,6 +86,14 @@ export class LocalStorage implements IStorage {
     });
   };
 
+  public deleteFiles = async (filepaths: string[]): Promise<void> => {
+    if (filepaths.length < 1) {
+      return;
+    }
+
+    await Promise.all(filepaths.map(path => unlinkAsync(path)));
+  };
+
   public rename = async (from: string, to: string): Promise<void> => {
     return new Promise((resolve) => {
       fs.rename(from, to, (err) => {
@@ -91,7 +105,20 @@ export class LocalStorage implements IStorage {
     });
   };
 
-  public exits = async (filepath: string): Promise<boolean> => {
+  public copy = async (from: string, to: string): Promise<void> => {
+    try {
+      if (from === to) {
+        return;
+      }
+
+      const copyFilePromise = util.promisify(fs.copyFile);
+      await copyFilePromise(from, to);
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  public exists = async (filepath: string): Promise<boolean> => {
     return new Promise((resolve) => {
       fs.stat(filepath, (error) => {
         if (!error) {

@@ -6,3 +6,4 @@ export * from './cacheDriver';
 export * from './fileSystemDriver';
 export * from './envVarDataType';
 export * from './envVarDeclaration';
+export * from './baseConfig';
