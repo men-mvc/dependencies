@@ -5,6 +5,7 @@ import {
   UploadedFile as OriginalUploadedFile,
   FileArray
 } from 'express-fileupload';
+import { DeepPartial, isNumber } from '@men-mvc/globals';
 import {
   BaseFileUploader,
   InvalidPayloadFormatException,
@@ -13,9 +14,8 @@ import {
   UploadedFile,
   UploadMaxFileSizeException
 } from './types';
-import { DeepPartial } from '../types';
 import { LocalStorage } from './localStorage';
-import { getAppStorageDirectory, isNumber, generateUuid } from '../utilities';
+import { getAppStorageDirectory, generateUuid } from '../utilities';
 import { getUploadFilesizeLimit } from './utilities';
 
 type SubFieldMetaData = {

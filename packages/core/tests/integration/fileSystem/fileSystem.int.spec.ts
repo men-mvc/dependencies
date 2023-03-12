@@ -4,12 +4,11 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import supertest from 'supertest';
 import fs from 'fs';
-import { getTestExpressApp, initTestApplication } from '../utilities';
+import { ErrorCodes, DeepPartial } from '@men-mvc/globals';
 import { FakeUploadedFile, makePostFormDataRequest } from '@men-mvc/test';
+import { getTestExpressApp, initTestApplication } from '../utilities';
 import { ComplexFormData, SimpleFormData } from './support/types';
 import {
-  DeepPartial,
-  ErrorCodes,
   getAppStorageDirectory,
   LocalStorage
 } from '../../../src';

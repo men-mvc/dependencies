@@ -1,6 +1,6 @@
 import { Request } from 'express';
+import { DeepPartial, ErrorCodes } from '@men-mvc/globals';
 import { WriteFileOptions, ReadStream } from 'fs';
-import { DeepPartial, ErrorCodes } from '../types';
 import { MenS3PutObjectCommandOutput } from './s3/types';
 
 export interface Storage {

@@ -7,11 +7,11 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import path from 'path';
 import fs from 'fs';
+import { DeepPartial } from '@men-mvc/globals';
 import { FileUploader } from '../../../src';
 import * as fileSystemUtilities from '../../../src/fileSystem/utilities';
 import {
   UploadedFile,
-  DeepPartial,
   getAppStorageDirectory
 } from '../../../src';
 import { delay, deleteStorageDirectory } from '../../testUtilities';

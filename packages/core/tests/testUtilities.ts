@@ -1,5 +1,6 @@
 import rimraf from 'rimraf';
-import { DeepPartial, getAppStorageDirectory, UploadedFile } from '../src';
+import { DeepPartial } from '@men-mvc/globals';
+import { getAppStorageDirectory, UploadedFile } from '../src';
 import { faker } from '@faker-js/faker';
 
 export const delay = (milliseconds: number = 500): Promise<boolean> => {

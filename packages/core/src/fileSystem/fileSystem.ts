@@ -10,13 +10,12 @@ import {
   StoreFilesParams,
   WriteFileResult
 } from './types';
-import { DeepPartial } from '../types';
+import { DeepPartial } from '@men-mvc/globals';
 import { FileUploader } from './fileUploader';
 import { getFileSystemDriver } from './utilities';
 import { LocalStorage } from './localStorage';
 import { S3Storage } from './s3/s3Storage';
 
-// TODO: add deleteMany
 export class FileSystem implements BaseFileSystem {
   private static instance: BaseFileSystem;
   private storageInstance: Storage | undefined;

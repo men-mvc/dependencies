@@ -1,4 +1,4 @@
-import { ErrorCodes } from './errorCodes';
+import { ErrorCodes } from '@men-mvc/globals';
 
 export class InsufficientPermissionError extends Error {
   constructor() {

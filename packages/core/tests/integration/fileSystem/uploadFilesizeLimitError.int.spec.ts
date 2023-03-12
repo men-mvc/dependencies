@@ -1,12 +1,12 @@
 import express from 'express';
 import sinon from 'sinon';
-import { registerMultipartFormParser } from '../../../src/middlewares/registerMultipartFormParser';
+import { ErrorCodes } from '@men-mvc/globals';
+import { registerMultipartFormParser } from '../../../src';
 import { configureTestRoutes } from '../testRoutes';
 import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
 } from './utilities';
-import { ErrorCodes } from '../../../src';
 import * as fileSystemUtils from '../../../src/fileSystem/utilities';
 
 describe('FileSystem - UploadFilesizeLimit', function () {
