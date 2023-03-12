@@ -10,8 +10,6 @@ import {
   GetObjectCommand,
   DeleteObjectsCommandInput,
   DeleteObjectsCommand,
-  GetObjectCommandOutput,
-  ListObjectsV2CommandOutput
 } from '@aws-sdk/client-s3';
 import { getAwsS3Bucket, getAwsS3Credentials } from './utilities';
 import { MenS3PutObjectCommandOutput } from './types';
@@ -45,9 +43,9 @@ export class MenS3Adapter {
       Key: key
     });
 
-    const response = (await this.getS3Client().send(
-      command
-    )) as GetObjectCommandOutput;
+    const response = await this.getS3Client().send(
+        command
+    );
     if (!response.Body) {
       throw new Error('Unable to read the content of the S3 object.');
     }
@@ -109,17 +107,6 @@ export class MenS3Adapter {
     await this.getS3Client().send(command);
   };
 
-  private readHeadObject = async (
-    key: string
-  ): Promise<HeadObjectCommandOutput> => {
-    const command = new HeadObjectCommand({
-      Bucket: getAwsS3Bucket(),
-      Key: key
-    });
-
-    return (await this.getS3Client().send(command)) as HeadObjectCommandOutput;
-  };
-
   /**
    * if the directory has objects and if you pass directory-name/, it will return false
    * works for both file and directory
@@ -144,9 +131,9 @@ export class MenS3Adapter {
       Prefix: !keyPrefix || keyPrefix === '/' ? undefined : keyPrefix
     });
 
-    const response = (await this.getS3Client().send(
-      command
-    )) as ListObjectsV2CommandOutput;
+    const response = await this.getS3Client().send(
+        command
+    );
     if (!response.Contents?.length) {
       return [];
     }
@@ -161,40 +148,6 @@ export class MenS3Adapter {
       path = `${path}/`;
     }
     await this.writeFile(path, '');
-  };
-
-  private rmDirRecursively = async (prefix: string): Promise<void> => {
-    const listCommand = new ListObjectsV2Command({
-      Bucket: getAwsS3Bucket(),
-      Prefix: prefix
-    });
-
-    const listResult = (await this.getS3Client().send(
-      listCommand
-    )) as ListObjectsV2CommandOutput;
-    if (!listResult.Contents?.length) {
-      return;
-    }
-
-    const deleteParams: DeleteObjectsCommandInput = {
-      Bucket: getAwsS3Bucket(),
-      Delete: {
-        Objects: []
-      }
-    };
-
-    for (const content of listResult.Contents) {
-      deleteParams.Delete?.Objects?.push({
-        Key: content.Key
-      });
-    }
-
-    const deleteCommand = new DeleteObjectsCommand(deleteParams);
-    await this.getS3Client().send(deleteCommand);
-
-    if (listResult.IsTruncated) {
-      await this.rmDirRecursively(prefix);
-    }
   };
 
   public rmdir = async (path: string, forceDelete?: boolean): Promise<void> => {
@@ -215,9 +168,9 @@ export class MenS3Adapter {
       Key: key
     });
 
-    const response = (await this.getS3Client().send(
-      command
-    )) as GetObjectCommandOutput;
+    const response = await this.getS3Client().send(
+        command
+    );
 
     if (!response.Body) {
       throw new Error(`Unable to read the content of the object.`);
@@ -296,5 +249,50 @@ export class MenS3Adapter {
       }
       throw e;
     }
+  };
+
+  private rmDirRecursively = async (prefix: string): Promise<void> => {
+    const listCommand = new ListObjectsV2Command({
+      Bucket: getAwsS3Bucket(),
+      Prefix: prefix
+    });
+
+    const listResult = await this.getS3Client().send(
+        listCommand
+    );
+    if (!listResult.Contents?.length) {
+      return;
+    }
+
+    const deleteParams: DeleteObjectsCommandInput = {
+      Bucket: getAwsS3Bucket(),
+      Delete: {
+        Objects: []
+      }
+    };
+
+    for (const content of listResult.Contents) {
+      deleteParams.Delete?.Objects?.push({
+        Key: content.Key
+      });
+    }
+
+    const deleteCommand = new DeleteObjectsCommand(deleteParams);
+    await this.getS3Client().send(deleteCommand);
+
+    if (listResult.IsTruncated) {
+      await this.rmDirRecursively(prefix);
+    }
+  };
+
+  private readHeadObject = async (
+      key: string
+  ): Promise<HeadObjectCommandOutput> => {
+    const command = new HeadObjectCommand({
+      Bucket: getAwsS3Bucket(),
+      Key: key
+    });
+
+    return this.getS3Client().send(command);
   };
 }

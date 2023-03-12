@@ -1,3 +1,3 @@
-export * from './s3Storage';
+export * from './menS3Adapter';
 export * from './types';
 export * from './utilities';

@@ -1,19 +1,55 @@
 import { ReadStream, WriteFileOptions } from 'fs';
 import { ReadStreamOptions, Storage, WriteFileResult } from '../types';
-import {MenS3Adapter} from "@men-mvc/s3-adapter"; // TODO: why is this not removed? no longer in package.json.
+
+type MenS3PutObjectCommandOutput = {
+  $metadata: {
+    httpStatusCode: number;
+    requestId: string;
+    cfId?: string;
+    attempts: number;
+    totalRetryDelay: number;
+  };
+  ETag: string;
+  ServerSideEncryption: string;
+  VersionId: string;
+};
+
+declare class MenS3Adapter {
+  public createReadStream: (key: string) => Promise<ReadStream>;
+  public copy: (fromKey: string, toKey: string) => Promise<void>;
+  public rename: (fromKey: string, toKey: string) => Promise<void>
+  public writeFile: (
+      key: string, // for s3 this will be the key
+      data: string | NodeJS.ArrayBufferView // content is the content for the S3
+  ) => Promise<MenS3PutObjectCommandOutput>;
+  public deleteFile: (key: string) => Promise<void>;
+  public deleteFiles: (pathsOrKeys: string[]) => Promise<void>;
+  public exists:(pathOrKey: string) => Promise<boolean>;
+  public readDir:(keyPrefix: string) => Promise<string[]>;
+  public mkdir: (path: string) => Promise<void>;
+  public rmdir: (path: string, forceDelete?: boolean) => Promise<void>;
+  public readFile: (key: string) => Promise<Buffer>;
+  public isFile: (key: string) => Promise<boolean>;
+  public isDir: (pathOrKey: string) => Promise<boolean>;
+}
 
 // referene link -> https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html?fbclid=IwAR0gIsyNLqKN0wJd1-C4RG0izXxFy0u8fjU3FyE9exJ_Swfji6eEIWgzegg
 // TODO: unit test.
 export class S3Storage implements Storage {
-  private adapter: MenS3Adapter | undefined; // TODO: declare type for MenS3Adapter.
+  private adapter: MenS3Adapter | undefined;
 
-  private getS3Adapter = () => {
-    if (this.adapter) {
+  private getS3Adapter = (): MenS3Adapter => {
+    try {
+      if (this.adapter) {
+        return this.adapter;
+      }
+      const s3Adapter = require(`@men-mvc/s3-adapter`)
+      this.adapter = new s3Adapter.MenS3Adapter() as MenS3Adapter;
+
       return this.adapter;
+    } catch (e) {
+      throw e;
     }
-    this.adapter = new MenS3Adapter();
-
-    return this.adapter;
   }
 
   public createReadStream = async (
