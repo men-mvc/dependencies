@@ -1,4 +1,3 @@
-// TODO: move to globals
 export enum ErrorCodes {
   VALIDATION_ERROR = `ValidationError`,
   INSUFFICIENT_PERMISSIONS = `InsufficientPermissions`,
