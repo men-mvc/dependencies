@@ -1,13 +1,13 @@
 import express from 'express';
 import sinon from 'sinon';
 import { ErrorCodes } from '@men-mvc/globals';
-import { registerMultipartFormParser } from '../../../src';
 import { configureTestRoutes } from '../testRoutes';
 import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
 } from './utilities';
-import * as fileSystemUtils from '../../../src/fileSystem/utilities';
+import * as utilities from '../../../src/utilities';
+import {registerMultipartFormParser} from "@men-mvc/core";
 
 describe('FileSystem - UploadFilesizeLimit', function () {
   // TODO: figure out why uploaded file sie is sometimes 1 and sometimes 2
@@ -32,7 +32,7 @@ describe('FileSystem - UploadFilesizeLimit', function () {
 
   const fakeGetMaxUploadLimit = (maxLimit: number): sinon.SinonStub => {
     let getMaxUploadLimitStub = sinon.stub(
-      fileSystemUtils,
+        utilities,
       `getUploadFilesizeLimit`
     );
     const fakeGetUploadFilesizeLimit = jest

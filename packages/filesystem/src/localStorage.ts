@@ -1,11 +1,9 @@
 import fs, { WriteFileOptions } from 'fs';
-import rimraf from 'rimraf';
 import util from 'util';
 import { Storage, ReadStreamOptions, WriteFileResult } from './types';
 
 const readdirAsync = util.promisify(fs.readdir);
 const rmdirAsync = util.promisify(fs.rmdir);
-const rimrafAsync = util.promisify(rimraf);
 const unlinkAsync = util.promisify(fs.unlink);
 
 /**
@@ -141,11 +139,9 @@ export class LocalStorage implements Storage {
     dirPath: string,
     forceDelete?: boolean
   ): Promise<void> => {
-    if (forceDelete) {
-      await rimrafAsync(dirPath);
-    } else {
-      await rmdirAsync(dirPath);
-    }
+    await rmdirAsync(dirPath, {
+      recursive: !!forceDelete,
+    });
   };
 
   public isDir = async (dirOrFilepath: string): Promise<boolean> => {

@@ -1,34 +1,14 @@
-import { setEnvVariable, srcDirectory } from '@men-mvc/config';
+import { srcDirectory } from '@men-mvc/config';
 import { faker } from '@faker-js/faker';
-import * as appUtilities from '../../../src/utilities/app';
 import {
   getServerDirectory,
   getSourceCodeDirectory,
   isInSourceDirectory,
   setServerDirectory
-} from '../../../src/utilities/app';
+} from '../../../src';
 
 describe(`App Utility`, () => {
   afterEach(() => (process.env['SERVER_DIRECTORY'] = undefined));
-
-  describe(`getAppStorageDirectory`, () => {
-    afterAll(() => {
-      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
-    });
-
-    it(`should return value of FILESYSTEM_STORAGE_DIRECTORY env variable when var is set`, () => {
-      const fakeStorageDir = `~/home/custom_storage`;
-      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
-      const storageDir = appUtilities.getAppStorageDirectory();
-      expect(storageDir).toBe(fakeStorageDir);
-    });
-
-    it(`should return cwd/storage by default`, () => {
-      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
-      const storageDir = appUtilities.getAppStorageDirectory();
-      expect(storageDir).toBe(`${process.cwd()}/storage`);
-    });
-  });
 
   describe(`setServerDirectory & getServerDirectory`, () => {
     it(`should set SERVER_DIRECTORY env variable`, () => {

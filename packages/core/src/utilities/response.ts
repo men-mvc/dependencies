@@ -6,7 +6,7 @@ import {
   ValidationError,
   ValidationErrorResponse
 } from '../types';
-import { InsufficientPermissionError } from '../types/insufficientPermissionError';
+import { InsufficientPermissionError } from '../types';
 
 export const successResponse = <T>(
   res: Response,

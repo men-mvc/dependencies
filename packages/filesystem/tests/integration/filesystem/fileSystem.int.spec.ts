@@ -17,7 +17,7 @@ import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
 } from './utilities';
-import * as appUtilities from '../../../src/utilities/app';
+import * as utilities from "../../../src/utilities";
 
 type StoreFilePayload = {
   file: FakeUploadedFile;
@@ -364,7 +364,7 @@ describe('FileSystem', () => {
     };
 
     const mockGenerateUuid = () => {
-      generateUuidStub = sinon.stub(appUtilities, `generateUuid`);
+      generateUuidStub = sinon.stub(utilities, `generateUuid`);
       const fakeGenerateUuid = jest
         .fn()
         .mockImplementation(() => fakeFilenameUuid);
@@ -432,7 +432,7 @@ describe('FileSystem', () => {
     });
 
     const mockGenerateUuid = () => {
-      generateUuidStub = sinon.stub(appUtilities, `generateUuid`);
+      generateUuidStub = sinon.stub(utilities, `generateUuid`);
       generateUuidStub.onCall(0).returns(generatedFilenames[0]);
       generateUuidStub.onCall(1).returns(generatedFilenames[1]);
       generateUuidStub.returns(faker.datatype.uuid());

@@ -3,8 +3,8 @@ import { faker } from '@faker-js/faker';
 import fs from 'fs';
 import path from 'path';
 import stream from 'stream';
-import { LocalStorage, ReadStreamOptions } from '../../../src';
-import { delay } from '../../testUtilities';
+import { LocalStorage, ReadStreamOptions } from '../../src';
+import { delay } from '../testUtilities';
 
 const localStorage = new LocalStorage();
 const fakeFileContent: string = `Greeting from Wai.`;

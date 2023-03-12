@@ -1,3 +1,5 @@
+import {v4 as uuidv4} from "uuid";
+
 export const isNumber = (str: string): boolean => {
   if (typeof str !== 'string') {
     return false;
@@ -8,3 +10,5 @@ export const isNumber = (str: string): boolean => {
 
   return !Number.isNaN(Number(str));
 };
+
+export const generateUuid = () => uuidv4();

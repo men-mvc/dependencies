@@ -7,14 +7,10 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import path from 'path';
 import fs from 'fs';
-import { DeepPartial } from '@men-mvc/globals';
-import { FileUploader } from '../../../src';
-import * as fileSystemUtilities from '../../../src/fileSystem/utilities';
-import {
-  UploadedFile,
-  getAppStorageDirectory
-} from '../../../src';
-import { delay, deleteStorageDirectory } from '../../testUtilities';
+import { DeepPartial, UploadedFile } from '@men-mvc/globals';
+import * as fileSystemUtilities from '../../src/utilities';
+import { delay, deleteStorageDirectory } from '../testUtilities';
+import {FileUploader, getAppStorageDirectory} from "../../src";
 
 const fileUploader = new FileUploader();
 describe('FileUploader Utility', function () {
@@ -159,6 +155,14 @@ describe('FileUploader Utility', function () {
         ).toBeTruthy();
       });
       deleteStorageDirectory();
+    });
+
+    it(`should fail silently when clearing temp storage directory throws error`, async () => {
+      const getLocalStorageStub = sinon.stub(fileUploader, `getLocalStorage`).throws(`Something went wrong.`);
+      await fileUploader.clearTempUploadDirectory();
+
+      expect(getLocalStorageStub.threw()).toBeTruthy();
+      getLocalStorageStub.restore();
     });
 
     const createTempDirAndContents = async (): Promise<string> => {

@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
 import { baseConfig } from '@men-mvc/config';
-import { AbstractApplication } from '../../src/types/abstractApplication';
+import { AbstractApplication } from '@men-mvc/globals';
 import { configureTestRoutes } from './testRoutes';
 import { registerMultipartFormParser } from '../../src/middlewares/registerMultipartFormParser';
 

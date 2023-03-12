@@ -6,8 +6,8 @@ import joi, {
   ValidationError as JoiValidationError,
   ValidationOptions
 } from 'joi';
+import { UploadedFile } from '@men-mvc/globals';
 import { ValidationError } from '../types';
-import { UploadedFile } from '../fileSystem';
 import { validationErrorResponse } from './response';
 
 export const resolveValidationError = (
