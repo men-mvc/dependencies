@@ -525,7 +525,6 @@ describe(`MenS3Adapter Utility`, () => {
     };
   });
 
-  // TODO: commands are invoked with the right parameters such bucket name
   describe(`isFile`, () => {
     it(`should return true when it can read head object and key does not have trailing slash`, async () => {
       sendStub = mockSend({
@@ -541,6 +540,39 @@ describe(`MenS3Adapter Utility`, () => {
       } as HeadObjectCommandOutput);
 
       expect(await adapter.isFile(`${faker.datatype.uuid()}/`)).toBeFalsy();
+    });
+
+    it(`should invoke the first read head object call with the right parameters`, async () => {
+      sendStub = mockSend({
+        VersionId: faker.datatype.uuid()
+      } as HeadObjectCommandOutput);
+
+      const key = faker.datatype.uuid();
+      await adapter.isFile(key);
+      sinon.assert.calledOnce(sendStub);
+      const firstCall = sendStub.getCalls()[0];
+      expect(firstCall.args[0] instanceof HeadObjectCommand).toBeTruthy();
+      const command = firstCall.args[0] as HeadObjectCommand;
+      expect(command.input.Key).toBe(key);
+      expect(command.input.Bucket).toBe(fakeBucketName);
+    });
+
+    it(`should invoke the second read head object call with the right parameters`, async () => {
+      const notFoundError = new Error(`Object does not exist`);
+      notFoundError.name = `NotFound`;
+      sendStub = sinon.stub(adapter.getS3Client(), `send`);
+      sendStub.onFirstCall().throws(notFoundError);
+      sendStub.onSecondCall().returns({
+        VersionId: faker.datatype.uuid()
+      } as HeadObjectCommandOutput);
+      const key = faker.datatype.uuid();
+      await adapter.isFile(key);
+      sinon.assert.calledTwice(sendStub);
+      const secondCall = sendStub.getCalls()[1];
+      expect(secondCall.args[0] instanceof HeadObjectCommand).toBeTruthy();
+      const command = secondCall.args[0] as HeadObjectCommand;
+      expect(command.input.Key).toBe(`${key}/`);
+      expect(command.input.Bucket).toBe(fakeBucketName);
     });
 
     it(`should return false when it throws NotFound error reading head object but it can read in the second and key does not have trailing slash`, async () => {
