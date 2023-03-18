@@ -495,7 +495,7 @@ describe(`LocalStorage Utility`, () => {
       const file1Path = createFile(`file1.txt`);
       const file2Path = createFile(`file2.txt`);
 
-      await localStorage.deleteFiles([ file1Path, file2Path ]);
+      await localStorage.deleteFiles([file1Path, file2Path]);
 
       expect(fs.existsSync(file1Path)).toBeFalsy();
       expect(fs.existsSync(file2Path)).toBeFalsy();
@@ -505,7 +505,7 @@ describe(`LocalStorage Utility`, () => {
       const file1Path = createFile(`file1.txt`);
       const file2Path = createFile(`file2.txt`);
 
-      await localStorage.deleteFiles([ file1Path ]);
+      await localStorage.deleteFiles([file1Path]);
 
       expect(fs.existsSync(file2Path)).toBeTruthy();
     });

@@ -10,7 +10,7 @@ import fs from 'fs';
 import { DeepPartial, UploadedFile } from '@men-mvc/globals';
 import * as fileSystemUtilities from '../../src/utilities';
 import { delay, deleteStorageDirectory } from '../testUtilities';
-import {FileUploader, getAppStorageDirectory} from "../../src";
+import { FileUploader, getAppStorageDirectory } from '../../src';
 
 const fileUploader = new FileUploader();
 describe('FileUploader Utility', function () {
@@ -158,7 +158,9 @@ describe('FileUploader Utility', function () {
     });
 
     it(`should fail silently when clearing temp storage directory throws error`, async () => {
-      const getLocalStorageStub = sinon.stub(fileUploader, `getLocalStorage`).throws(`Something went wrong.`);
+      const getLocalStorageStub = sinon
+        .stub(fileUploader, `getLocalStorage`)
+        .throws(`Something went wrong.`);
       await fileUploader.clearTempUploadDirectory();
 
       expect(getLocalStorageStub.threw()).toBeTruthy();

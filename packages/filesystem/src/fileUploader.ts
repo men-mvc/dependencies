@@ -14,7 +14,11 @@ import {
   UploadMaxFileSizeException
 } from './types';
 import { LocalStorage } from './localStorage';
-import { getUploadFilesizeLimit, getAppStorageDirectory, generateUuid } from './utilities';
+import {
+  getUploadFilesizeLimit,
+  getAppStorageDirectory,
+  generateUuid
+} from './utilities';
 
 type SubFieldMetaData = {
   openBracketIndex: number;
@@ -60,11 +64,11 @@ export class FileUploader implements BaseFileUploader {
         let fieldValue: UploadedFile | UploadedFile[];
         if (Array.isArray(req.files[field])) {
           fieldValue = (req.files[field] as OriginalUploadedFile[]).map(
-              (file) => this._makeUploadedFileCompatible(file)
+            (file) => this._makeUploadedFileCompatible(file)
           );
         } else {
           fieldValue = this._makeUploadedFileCompatible(
-              req.files[field] as OriginalUploadedFile
+            req.files[field] as OriginalUploadedFile
           );
         }
         if (this.isNestedField(field)) {
@@ -94,19 +98,19 @@ export class FileUploader implements BaseFileUploader {
   };
 
   public storeFile = async ({
-                              uploadedFile,
-                              filename,
-                              directory
-                            }: StoreFileParams): Promise<string> => {
+    uploadedFile,
+    filename,
+    directory
+  }: StoreFileParams): Promise<string> => {
     const destDir = this.buildDestinationDir(directory);
     if (!(await this.getLocalStorage().exists(destDir))) {
       await this.getLocalStorage().mkdir(destDir);
     }
 
     const targetFilepath = this.getTargetFilepath(
-        uploadedFile,
-        destDir,
-        filename
+      uploadedFile,
+      destDir,
+      filename
     );
     await this.getLocalStorage().rename(uploadedFile.filepath, targetFilepath);
 
@@ -114,9 +118,9 @@ export class FileUploader implements BaseFileUploader {
   };
 
   public storeFiles = async ({
-                               uploadedFiles,
-                               directory
-                             }: StoreFilesParams): Promise<string[]> => {
+    uploadedFiles,
+    directory
+  }: StoreFilesParams): Promise<string[]> => {
     const paths: string[] = [];
     for (let i = 0; i < uploadedFiles.length; i++) {
       const path = await this.storeFile({
@@ -134,9 +138,9 @@ export class FileUploader implements BaseFileUploader {
     const closeBracketIndex = fieldName.indexOf(CLOSE_BRACKET);
 
     return (
-        openBracketIndex > -1 &&
-        closeBracketIndex > -1 &&
-        closeBracketIndex - openBracketIndex > 0
+      openBracketIndex > -1 &&
+      closeBracketIndex > -1 &&
+      closeBracketIndex - openBracketIndex > 0
     );
   };
 
@@ -158,14 +162,14 @@ export class FileUploader implements BaseFileUploader {
   };
 
   private getTargetFilepath = (
-      uploadedFile: UploadedFile,
-      destDir: string,
-      filename?: string
+    uploadedFile: UploadedFile,
+    destDir: string,
+    filename?: string
   ) => {
     const fileExtension = this.getFileExtension(uploadedFile.originalFilename);
     const targetFilename = filename
-        ? `${filename}${fileExtension}`.toLowerCase()
-        : `${generateUuid()}${fileExtension}`;
+      ? `${filename}${fileExtension}`.toLowerCase()
+      : `${generateUuid()}${fileExtension}`;
 
     return path.join(destDir, targetFilename);
   };
@@ -181,8 +185,8 @@ export class FileUploader implements BaseFileUploader {
     let subFields: SubFieldMetaData[] = [];
     // get the base field name. For eg: for user[name], base field name would be user.
     const baseFieldName = fieldName.substring(
-        0,
-        fieldName.indexOf(OPEN_BRACKET)
+      0,
+      fieldName.indexOf(OPEN_BRACKET)
     );
     if (!baseFieldName) {
       // in other words, if payload is an array
@@ -212,8 +216,8 @@ export class FileUploader implements BaseFileUploader {
       }
       if (openBracketIndex > -1 && closeBracketIndex > -1) {
         const subFieldName = fieldName.substring(
-            openBracketIndex + 1,
-            closeBracketIndex
+          openBracketIndex + 1,
+          closeBracketIndex
         );
         if (!subFieldName) {
           // if there is nothing between [ and ], then the format is invalid.
@@ -292,7 +296,7 @@ export class FileUploader implements BaseFileUploader {
   };
 
   _makeUploadedFileCompatible = (
-      originalFile: OriginalUploadedFile
+    originalFile: OriginalUploadedFile
   ): UploadedFile => {
     return new UploadedFile({
       originalFilename: originalFile.name,

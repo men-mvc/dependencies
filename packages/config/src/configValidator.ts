@@ -1,5 +1,11 @@
-import {BaseConfig, CacheDriver, FileSystemDriver, MailAuthType, MailDriver} from './types';
-import {isTestEnvironment} from './utilities';
+import {
+  BaseConfig,
+  CacheDriver,
+  FileSystemDriver,
+  MailAuthType,
+  MailDriver
+} from './types';
+import { isTestEnvironment } from './utilities';
 
 export class ConfigValidator {
   constructor(private config: BaseConfig) {}
@@ -57,12 +63,12 @@ export class ConfigValidator {
   // TODO: finish
   // checking if the driver is s3 is already done before calling this function
   private validateS3FileSystemConfig = (): boolean => {
-    if (! this.config.fileSystem?.s3) {
+    if (!this.config.fileSystem?.s3) {
       throw new Error(`AWS credentials are not set for s3 filesystem driver.`);
     }
 
     return true;
-  }
+  };
 
   public validate = () => {
     if (!this.hasValidMailDriver()) {

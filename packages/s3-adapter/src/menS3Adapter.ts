@@ -9,7 +9,7 @@ import {
   ListObjectsV2Command,
   GetObjectCommand,
   DeleteObjectsCommandInput,
-  DeleteObjectsCommand,
+  DeleteObjectsCommand
 } from '@aws-sdk/client-s3';
 import { getAwsS3Bucket, getAwsS3Credentials } from './utilities';
 import { MenS3PutObjectCommandOutput } from './types';
@@ -43,9 +43,7 @@ export class MenS3Adapter {
       Key: key
     });
 
-    const response = await this.getS3Client().send(
-        command
-    );
+    const response = await this.getS3Client().send(command);
     if (!response.Body) {
       throw new Error('Unable to read the content of the S3 object.');
     }
@@ -131,15 +129,13 @@ export class MenS3Adapter {
       Prefix: !keyPrefix || keyPrefix === '/' ? undefined : keyPrefix
     });
 
-    const response = await this.getS3Client().send(
-        command
-    );
+    const response = await this.getS3Client().send(command);
     if (!response.Contents?.length) {
       return [];
     }
 
     return response.Contents.map((c) => c.Key).filter(
-      (key) => key !== null && key !== undefined
+      (key) => !!key
     ) as string[];
   };
 
@@ -168,9 +164,7 @@ export class MenS3Adapter {
       Key: key
     });
 
-    const response = await this.getS3Client().send(
-        command
-    );
+    const response = await this.getS3Client().send(command);
 
     if (!response.Body) {
       throw new Error(`Unable to read the content of the object.`);
@@ -257,9 +251,7 @@ export class MenS3Adapter {
       Prefix: prefix
     });
 
-    const listResult = await this.getS3Client().send(
-        listCommand
-    );
+    const listResult = await this.getS3Client().send(listCommand);
     if (!listResult.Contents?.length) {
       return;
     }
@@ -286,7 +278,7 @@ export class MenS3Adapter {
   };
 
   private readHeadObject = async (
-      key: string
+    key: string
   ): Promise<HeadObjectCommandOutput> => {
     const command = new HeadObjectCommand({
       Bucket: getAwsS3Bucket(),

@@ -89,7 +89,7 @@ export class LocalStorage implements Storage {
       return;
     }
 
-    await Promise.all(filepaths.map(path => unlinkAsync(path)));
+    await Promise.all(filepaths.map((path) => unlinkAsync(path)));
   };
 
   public rename = async (from: string, to: string): Promise<void> => {
@@ -140,7 +140,7 @@ export class LocalStorage implements Storage {
     forceDelete?: boolean
   ): Promise<void> => {
     await rmdirAsync(dirPath, {
-      recursive: !!forceDelete,
+      recursive: !!forceDelete
     });
   };
 

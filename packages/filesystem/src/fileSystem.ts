@@ -16,6 +16,7 @@ import { getFileSystemDriver } from './utilities';
 import { LocalStorage } from './localStorage';
 import { S3Storage } from './s3/s3Storage';
 
+// TODO: add writeFiles
 export class FileSystem implements BaseFileSystem {
   private static instance: BaseFileSystem;
   private storageInstance: Storage | undefined;
@@ -77,7 +78,7 @@ export class FileSystem implements BaseFileSystem {
     this.getStorageInstance().deleteFile(path);
 
   deleteFiles = async (pathsOrKeys: string[]): Promise<void> =>
-      this.getStorageInstance().deleteFiles(pathsOrKeys);
+    this.getStorageInstance().deleteFiles(pathsOrKeys);
 
   public rename = async (from: string, to: string): Promise<void> =>
     this.getStorageInstance().rename(from, to);

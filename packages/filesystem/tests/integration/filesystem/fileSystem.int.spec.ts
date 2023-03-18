@@ -8,16 +8,13 @@ import { ErrorCodes, DeepPartial } from '@men-mvc/globals';
 import { FakeUploadedFile, makePostFormDataRequest } from '@men-mvc/test';
 import { getTestExpressApp, initTestApplication } from '../utilities';
 import { ComplexFormData, SimpleFormData } from './support/types';
-import {
-  getAppStorageDirectory,
-  LocalStorage
-} from '../../../src';
+import { getAppStorageDirectory, LocalStorage } from '../../../src';
 import { delay, deleteStorageDirectory } from '../../testUtilities';
 import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
 } from './utilities';
-import * as utilities from "../../../src/utilities";
+import * as utilities from '../../../src/utilities';
 
 type StoreFilePayload = {
   file: FakeUploadedFile;
@@ -133,7 +130,6 @@ describe('FileSystem', () => {
       );
     });
 
-    // FIXME: flaky
     it(`should clear the temp upload dir when the request finished`, async () => {
       const localStorage = new LocalStorage();
       const formData = generateSimpleFormDataPayload();
