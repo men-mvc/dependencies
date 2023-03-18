@@ -1,19 +1,18 @@
-import {Readable} from "stream";
+import { Readable } from 'stream';
 
 export class ReadableString extends Readable {
-    private sent = false
+  private sent = false;
 
-    constructor(private str: string) {
-        super();
-    }
+  constructor(private str: string) {
+    super();
+  }
 
-    _read() {
-        if (!this.sent) {
-            this.push(Buffer.from(this.str));
-            this.sent = true
-        }
-        else {
-            this.push(null)
-        }
+  _read() {
+    if (!this.sent) {
+      this.push(Buffer.from(this.str));
+      this.sent = true;
+    } else {
+      this.push(null);
     }
+  }
 }

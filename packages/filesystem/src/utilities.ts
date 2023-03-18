@@ -36,3 +36,6 @@ export const getAwsS3Credentials = () => ({
 // });
 
 export const generateUuid = (): string => globalGenerateUuid();
+
+export const getDriver = (): FileSystemDriver =>
+  baseConfig.fileSystem?.storageDriver ?? FileSystemDriver.local;

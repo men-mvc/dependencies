@@ -34,8 +34,8 @@ declare class MenS3Adapter {
 }
 
 // reference link link -> https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html?fbclid=IwAR0gIsyNLqKN0wJd1-C4RG0izXxFy0u8fjU3FyE9exJ_Swfji6eEIWgzegg
-// TODO: unit test.
-// TODO: test for storeFile and storeFiles
+// TODO: unit tests.
+// TODO: test for storeFile
 export class S3Storage implements Storage {
   private adapter: MenS3Adapter | undefined;
 

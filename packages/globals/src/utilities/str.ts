@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import {Readable} from "stream";
+import { Readable } from 'stream';
 
 export const isNumber = (str: string): boolean => {
   if (typeof str !== 'string') {
@@ -22,13 +22,15 @@ const readReadableAsStringPromise = (readable: Readable): Promise<string> => {
     });
     readable.on(`end`, () => resolve(strings.join()));
     readable.on(`error`, (err) => reject(err));
-  })
-}
+  });
+};
 
-export const readReadableAsString = async (readable: Readable): Promise<string> => {
+export const readReadableAsString = async (
+  readable: Readable
+): Promise<string> => {
   try {
     return await readReadableAsStringPromise(readable);
   } catch (e) {
     throw e;
   }
-}
+};

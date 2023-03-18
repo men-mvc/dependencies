@@ -1,7 +1,8 @@
 import sinon from 'sinon';
+import Sinon, { SinonStub } from 'sinon';
 import {
-  UploadedFile as ExpressUploadedFile,
-  FileArray
+  FileArray,
+  UploadedFile as ExpressUploadedFile
 } from 'express-fileupload';
 import { faker } from '@faker-js/faker';
 import _ from 'lodash';
@@ -9,11 +10,112 @@ import path from 'path';
 import fs from 'fs';
 import { DeepPartial, UploadedFile } from '@men-mvc/globals';
 import * as fileSystemUtilities from '../../src/utilities';
-import { delay, deleteStorageDirectory } from '../testUtilities';
+import {
+  delay,
+  deleteStorageDirectory,
+  generateUploadedFile
+} from '../testUtilities';
 import { FileUploader, getAppStorageDirectory } from '../../src';
+import { FileSystemDriver } from '@men-mvc/config';
 
+/**
+ * Note: the remaining functions are tested as integration tests
+ */
 const fileUploader = new FileUploader();
 describe('FileUploader Utility', function () {
+  describe(`storeFile`, () => {
+    let getDriverStub: SinonStub;
+    const fakeUploadedFileContent = faker.lorem.sentence();
+    const testFilesDirectory = path.join(
+      getAppStorageDirectory(),
+      `testStoreFile`
+    );
+
+    afterEach(async () => {
+      await deleteStorageDirectory();
+      if (getDriverStub) {
+        getDriverStub.restore();
+      }
+    });
+
+    it(`should rename the uploaded file on the local storage`, async () => {
+      getDriverStub = mockGetDriver(FileSystemDriver.local);
+      const originalFilename = `testfile`;
+      const uploadedFilepath = createTestUploadedFile(originalFilename);
+      const uploadedFile = await generateUploadedFile({
+        filepath: uploadedFilepath,
+        originalFilename: `${originalFilename}.txt`
+      });
+      const storeFileParams = {
+        uploadedFile,
+        filename: `newFile`,
+        directory: `testDirectory`
+      };
+      await fileUploader.storeFile(storeFileParams);
+
+      expect(
+        fs.existsSync(
+          `${path.join(
+            getAppStorageDirectory(),
+            storeFileParams.directory.toLowerCase(),
+            storeFileParams.filename.toLowerCase()
+          )}.txt`
+        )
+      ).toBeTruthy();
+      expect(fs.existsSync(uploadedFilepath)).toBeFalsy();
+    });
+
+    it(`should move the uploaded file on the local storage to the S3 bucket`, async () => {
+      getDriverStub = mockGetDriver(FileSystemDriver.s3);
+      const originalFilename = `testfile.txt`;
+      const uploadedFilepath = createTestUploadedFile(`testfile`);
+      const uploadedFile = await generateUploadedFile({
+        filepath: uploadedFilepath,
+        originalFilename
+      });
+      const fileKey = `testFileKey`;
+      const directory = `testFileDirectory`;
+      const s3WriteFileStub = sinon.stub(
+        fileUploader.getS3Storage(),
+        `writeFile`
+      );
+      const storeFileParams = {
+        uploadedFile,
+        filename: fileKey,
+        directory
+      };
+      const createdObjectKey = await fileUploader.storeFile(storeFileParams);
+
+      expect(createdObjectKey).toBe(
+        `${directory}/${fileKey}.txt`.toLowerCase()
+      );
+      expect(fs.existsSync(uploadedFilepath)).toBeFalsy();
+      sinon.assert.calledOnceWithExactly(
+        s3WriteFileStub,
+        createdObjectKey,
+        fakeUploadedFileContent
+      );
+      s3WriteFileStub.restore();
+    });
+
+    const createTestUploadedFile = (filename: string): string => {
+      if (!fs.existsSync(getAppStorageDirectory())) {
+        fs.mkdirSync(getAppStorageDirectory());
+      }
+
+      if (!fs.existsSync(testFilesDirectory)) {
+        fs.mkdirSync(testFilesDirectory);
+      }
+      const absoluteFilepath = path.join(testFilesDirectory, filename);
+      fs.writeFileSync(absoluteFilepath, fakeUploadedFileContent);
+
+      return absoluteFilepath;
+    };
+
+    const mockGetDriver = (driver: FileSystemDriver) =>
+      Sinon.stub(fileSystemUtilities, `getDriver`).returns(driver);
+  });
+
   describe(`_makeUploadedFileCompatible`, () => {
     it(`should convert original uploaded file to the format that is compatible with the app`, () => {
       const originalFile: ExpressUploadedFile = generateExpressUploadedFile();

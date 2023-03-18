@@ -12,6 +12,10 @@ export const delay = (milliseconds: number = 500): Promise<boolean> => {
 };
 
 export const deleteStorageDirectory = () => {
+  if (!fs.existsSync(getAppStorageDirectory())) {
+    return;
+  }
+
   fs.rmdirSync(getAppStorageDirectory(), {
     recursive: true
   });

@@ -7,7 +7,7 @@ import {
   makeFormDataRequest
 } from './utilities';
 import * as utilities from '../../../src/utilities';
-import {registerMultipartFormParser} from "../../../src/middlewares/registerMultipartFormParser";
+import { registerMultipartFormParser } from '../../../src/middlewares/registerMultipartFormParser';
 
 describe('FileSystem - UploadFilesizeLimit', function () {
   // TODO: figure out why uploaded file sie is sometimes 1 and sometimes 2

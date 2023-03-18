@@ -27,7 +27,6 @@ export interface Storage {
 
   deleteFile: (pathOrKey: string) => Promise<void>;
 
-  // TODO:
   deleteFiles: (pathsOrKeys: string[]) => Promise<void>;
 
   rename: (from: string, to: string) => Promise<void>;

@@ -2,8 +2,8 @@ import { Request } from 'express';
 import path from 'path';
 import _ from 'lodash';
 import {
-  UploadedFile as OriginalUploadedFile,
-  FileArray
+  FileArray,
+  UploadedFile as OriginalUploadedFile
 } from 'express-fileupload';
 import { DeepPartial, isNumber, UploadedFile } from '@men-mvc/globals';
 import {
@@ -15,10 +15,13 @@ import {
 } from './types';
 import { LocalStorage } from './localStorage';
 import {
-  getUploadFilesizeLimit,
+  generateUuid,
   getAppStorageDirectory,
-  generateUuid
+  getDriver,
+  getUploadFilesizeLimit
 } from './utilities';
+import { S3Storage } from './s3/s3Storage';
+import { FileSystemDriver } from '@men-mvc/config';
 
 type SubFieldMetaData = {
   openBracketIndex: number;
@@ -30,7 +33,26 @@ const OPEN_BRACKET = `[`;
 const CLOSE_BRACKET = `]`;
 export class FileUploader implements BaseFileUploader {
   private tempDirId: string | undefined;
-  private storage: LocalStorage | undefined;
+  private localStorage: LocalStorage | undefined;
+  private s3Storage: S3Storage | undefined;
+
+  // TODO: unit test for singleton
+  public getLocalStorage = (): LocalStorage => {
+    if (!this.localStorage) {
+      this.localStorage = new LocalStorage();
+    }
+
+    return this.localStorage;
+  };
+
+  // TODO: unit test for singleton
+  public getS3Storage = (): S3Storage => {
+    if (!this.s3Storage) {
+      this.s3Storage = new S3Storage();
+    }
+
+    return this.s3Storage;
+  };
 
   public getTempUploadDirectory(): string {
     const tempDirectory = path.join(getAppStorageDirectory(), 'temp');
@@ -97,40 +119,67 @@ export class FileUploader implements BaseFileUploader {
     return fields as T;
   };
 
-  public storeFile = async ({
+  private storeFileInS3Bucket = async ({
     uploadedFile,
     filename,
     directory
   }: StoreFileParams): Promise<string> => {
-    const destDir = this.buildDestinationDir(directory);
+    let targetKey = this.getTargetFilename(uploadedFile, filename);
+    targetKey = directory
+      ? `${directory.toLowerCase()}/${targetKey}`
+      : targetKey;
+    // move the temp file on the local filesystem to the S3
+    const content = await this.getLocalStorage().readFile(
+      uploadedFile.filepath
+    );
+    await this.getS3Storage().writeFile(targetKey, content.toString());
+    await this.getLocalStorage().deleteFile(uploadedFile.filepath);
+
+    return targetKey;
+  };
+
+  private storeFileLocally = async ({
+    uploadedFile,
+    filename,
+    directory
+  }: StoreFileParams): Promise<string> => {
+    const destDir = this.buildLocalDestinationDir(directory);
     if (!(await this.getLocalStorage().exists(destDir))) {
       await this.getLocalStorage().mkdir(destDir);
     }
 
-    const targetFilepath = this.getTargetFilepath(
+    const targetFilepath = this.getLocalTargetFilepath(
       uploadedFile,
       destDir,
       filename
     );
+
     await this.getLocalStorage().rename(uploadedFile.filepath, targetFilepath);
 
     return targetFilepath;
+  };
+
+  public storeFile = async (params: StoreFileParams): Promise<string> => {
+    if (getDriver() === FileSystemDriver.s3) {
+      return this.storeFileInS3Bucket(params);
+    } else {
+      return this.storeFileLocally(params);
+    }
   };
 
   public storeFiles = async ({
     uploadedFiles,
     directory
   }: StoreFilesParams): Promise<string[]> => {
-    const paths: string[] = [];
-    for (let i = 0; i < uploadedFiles.length; i++) {
-      const path = await this.storeFile({
-        uploadedFile: uploadedFiles[i],
-        directory
-      });
-      paths.push(path);
-    }
+    const storeFilePromises: Promise<string>[] = uploadedFiles.map(
+      (uploadedFile) =>
+        this.storeFile({
+          uploadedFile,
+          directory
+        })
+    );
 
-    return paths;
+    return await Promise.all(storeFilePromises);
   };
 
   private isNestedField = (fieldName: string): boolean => {
@@ -144,7 +193,7 @@ export class FileUploader implements BaseFileUploader {
     );
   };
 
-  private buildDestinationDir = (destDir?: string): string => {
+  private buildLocalDestinationDir = (destDir?: string): string => {
     let destDirectory = getAppStorageDirectory();
     if (!destDir) {
       destDir = path.sep;
@@ -161,18 +210,23 @@ export class FileUploader implements BaseFileUploader {
     return path.extname(filepath).toLowerCase();
   };
 
-  private getTargetFilepath = (
+  private getTargetFilename = (
+    uploadedFile: UploadedFile,
+    filename?: string
+  ): string => {
+    const fileExtension = this.getFileExtension(uploadedFile.originalFilename);
+    const finalName = filename
+      ? `${filename}${fileExtension}`
+      : `${generateUuid()}${fileExtension}`;
+
+    return finalName.toLowerCase();
+  };
+
+  private getLocalTargetFilepath = (
     uploadedFile: UploadedFile,
     destDir: string,
     filename?: string
-  ) => {
-    const fileExtension = this.getFileExtension(uploadedFile.originalFilename);
-    const targetFilename = filename
-      ? `${filename}${fileExtension}`.toLowerCase()
-      : `${generateUuid()}${fileExtension}`;
-
-    return path.join(destDir, targetFilename);
-  };
+  ) => path.join(destDir, this.getTargetFilename(uploadedFile, filename));
 
   /**
    * this function should only be called when isNestedField is true
@@ -253,14 +307,6 @@ export class FileUploader implements BaseFileUploader {
     };
 
     return result;
-  };
-
-  public getLocalStorage = (): LocalStorage => {
-    if (!this.storage) {
-      this.storage = new LocalStorage();
-    }
-
-    return this.storage;
   };
 
   _getTempDirId = (): string => {
