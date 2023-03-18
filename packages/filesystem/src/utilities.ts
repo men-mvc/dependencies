@@ -1,6 +1,6 @@
-import {baseConfig, FileSystemDriver, getEnvVariable} from '@men-mvc/config';
-import {generateUuid as globalGenerateUuid} from "@men-mvc/globals";
-import path from "path";
+import { baseConfig, FileSystemDriver, getEnvVariable } from '@men-mvc/config';
+import { generateUuid as globalGenerateUuid } from '@men-mvc/globals';
+import path from 'path';
 
 export const getAppStorageDirectory = (): string => {
   let storageDirectory: string;

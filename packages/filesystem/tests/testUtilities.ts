@@ -1,6 +1,6 @@
 import { DeepPartial, UploadedFile } from '@men-mvc/globals';
 import { faker } from '@faker-js/faker';
-import fs from "fs";
+import fs from 'fs';
 import { getAppStorageDirectory } from '../src';
 
 export const delay = (milliseconds: number = 500): Promise<boolean> => {
@@ -13,9 +13,9 @@ export const delay = (milliseconds: number = 500): Promise<boolean> => {
 
 export const deleteStorageDirectory = () => {
   fs.rmdirSync(getAppStorageDirectory(), {
-    recursive: true,
+    recursive: true
   });
-}
+};
 
 export const generateUploadedFile = (
   data: DeepPartial<UploadedFile> = {}

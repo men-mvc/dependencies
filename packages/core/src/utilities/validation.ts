@@ -95,7 +95,7 @@ export const validateFile = <T>(
   value: T | null,
   field: string,
   message?: string
-) => {
+): void => {
   const error = message ?? `Input value(s) must be file(s).`;
   if (!value) {
     // if the value is empty, it does not validate if the input is file or not

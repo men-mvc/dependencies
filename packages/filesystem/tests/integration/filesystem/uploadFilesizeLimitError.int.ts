@@ -7,7 +7,7 @@ import {
   makeFormDataRequest
 } from './utilities';
 import * as utilities from '../../../src/utilities';
-import {registerMultipartFormParser} from "@men-mvc/core";
+import {registerMultipartFormParser} from "../../../src/middlewares/registerMultipartFormParser";
 
 describe('FileSystem - UploadFilesizeLimit', function () {
   // TODO: figure out why uploaded file sie is sometimes 1 and sometimes 2
@@ -31,10 +31,7 @@ describe('FileSystem - UploadFilesizeLimit', function () {
   };
 
   const fakeGetMaxUploadLimit = (maxLimit: number): sinon.SinonStub => {
-    let getMaxUploadLimitStub = sinon.stub(
-        utilities,
-      `getUploadFilesizeLimit`
-    );
+    let getMaxUploadLimitStub = sinon.stub(utilities, `getUploadFilesizeLimit`);
     const fakeGetUploadFilesizeLimit = jest
       .fn()
       .mockImplementation(() => maxLimit);

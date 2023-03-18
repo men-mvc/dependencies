@@ -25,4 +25,3 @@ export const getTestExpressApp = async (): Promise<Express> => {
 
   return application.app;
 };
-

@@ -1,8 +1,5 @@
 import { Request, Response } from 'express';
-import {
-  requestHandler,
-  asyncRequestHandler,
-} from '../../../src';
+import { requestHandler, asyncRequestHandler } from '../../../src';
 
 describe(`Request Utility`, () => {
   describe(`requestHandler`, () => {

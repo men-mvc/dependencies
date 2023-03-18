@@ -1,8 +1,6 @@
 import { Request } from 'express';
 import { faker } from '@faker-js/faker';
-import {
-  extractBearerToken
-} from '../../../src';
+import { extractBearerToken } from '../../../src';
 
 describe(`Request Utility`, () => {
   describe(`extractBearerToken`, () => {
