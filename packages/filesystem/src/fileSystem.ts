@@ -18,11 +18,10 @@ import { S3Storage } from './s3/s3Storage';
 
 // TODO: add writeFiles
 export class FileSystem implements BaseFileSystem {
-  private static instance: BaseFileSystem;
+  private static instance: BaseFileSystem | null;
   private storageInstance: Storage | undefined;
   private uploaderInstance: BaseFileUploader | undefined;
 
-  // TODO: unit test
   public getStorageInstance = (): Storage => {
     if (!this.storageInstance) {
       if (getFileSystemDriver() === FileSystemDriver.s3) {
@@ -35,7 +34,6 @@ export class FileSystem implements BaseFileSystem {
     return this.storageInstance;
   };
 
-  // TODO: unit test
   public getUploaderInstance = (): BaseFileUploader => {
     if (!this.uploaderInstance) {
       this.uploaderInstance = new FileUploader();
@@ -45,11 +43,15 @@ export class FileSystem implements BaseFileSystem {
   };
 
   public static getInstance = (): BaseFileSystem => {
-    if (!FileSystem.instance) {
-      FileSystem.instance = new FileSystem();
+    if (!this.instance) {
+      this.instance = new FileSystem();
     }
 
-    return FileSystem.instance;
+    return this.instance;
+  };
+
+  public static resetInstance = () => {
+    this.instance = null;
   };
 
   public clearTempUploadDirectory = (): Promise<void> =>

@@ -56,10 +56,10 @@ export class AppProjectConfig implements ConfigContract {
   };
 
   private getAppProjectConfig = (): Record<string, unknown> =>
-      _.merge(
-          this.getAppProjectDefaultConfig(),
-          this.getAppProjectEnvSpecificConfig()
-      );
+    _.merge(
+      this.getAppProjectDefaultConfig(),
+      this.getAppProjectEnvSpecificConfig()
+    );
 
   private getAppProjectConfigKeyEnvVarMappings = (): Map<
     string,
