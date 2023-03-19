@@ -1,7 +1,6 @@
 import findUpOne from 'findup-sync';
 import { appProjectConfigDir } from './globals';
-import { EnvVarDeclaration, isEnvVarDeclaration } from './types';
-import * as process from 'process';
+import { EnvVarDeclaration, isEnvVarDeclaration } from './types';;
 
 // TODO: write tests for the utility functions inside this file
 
