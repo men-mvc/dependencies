@@ -36,7 +36,6 @@ export class FileUploader implements BaseFileUploader {
   private localStorage: LocalStorage | undefined;
   private s3Storage: S3Storage | undefined;
 
-  // TODO: unit test for singleton
   public getLocalStorage = (): LocalStorage => {
     if (!this.localStorage) {
       this.localStorage = new LocalStorage();
@@ -45,7 +44,6 @@ export class FileUploader implements BaseFileUploader {
     return this.localStorage;
   };
 
-  // TODO: unit test for singleton
   public getS3Storage = (): S3Storage => {
     if (!this.s3Storage) {
       this.s3Storage = new S3Storage();

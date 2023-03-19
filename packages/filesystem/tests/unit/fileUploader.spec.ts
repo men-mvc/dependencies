@@ -1,5 +1,7 @@
 import sinon from 'sinon';
 import Sinon, { SinonStub } from 'sinon';
+import { DeepPartial, UploadedFile } from '@men-mvc/globals';
+import { FileSystemDriver } from '@men-mvc/config';
 import {
   FileArray,
   UploadedFile as ExpressUploadedFile
@@ -8,7 +10,6 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import path from 'path';
 import fs from 'fs';
-import { DeepPartial, UploadedFile } from '@men-mvc/globals';
 import * as fileSystemUtilities from '../../src/utilities';
 import {
   delay,
@@ -16,13 +17,26 @@ import {
   generateUploadedFile
 } from '../testUtilities';
 import { FileUploader, getAppStorageDirectory } from '../../src';
-import { FileSystemDriver } from '@men-mvc/config';
 
 /**
  * Note: the remaining functions are tested as integration tests
  */
 const fileUploader = new FileUploader();
 describe('FileUploader Utility', function () {
+  describe(`getLocalStorage`, () => {
+    it(`should always return the same instance`, () => {
+      expect(fileUploader.getLocalStorage()).toBe(
+        fileUploader.getLocalStorage()
+      );
+    });
+  });
+
+  describe(`getS3Storage`, () => {
+    it(`should always return the same instance`, () => {
+      expect(fileUploader.getS3Storage()).toBe(fileUploader.getS3Storage());
+    });
+  });
+
   describe(`storeFile`, () => {
     let getDriverStub: SinonStub;
     const fakeUploadedFileContent = faker.lorem.sentence();
@@ -37,6 +51,8 @@ describe('FileUploader Utility', function () {
         getDriverStub.restore();
       }
     });
+
+    // TODO: filename and directory parameters are optional
 
     it(`should rename the uploaded file on the local storage`, async () => {
       getDriverStub = mockGetDriver(FileSystemDriver.local);
