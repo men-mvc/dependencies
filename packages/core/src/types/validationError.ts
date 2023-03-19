@@ -1,4 +1,4 @@
-import { ErrorCodes } from './errorCodes';
+import { ErrorCodes } from '@men-mvc/globals';
 
 export class ValidationError extends Error {
   constructor(public errors: { [key: string]: string }) {

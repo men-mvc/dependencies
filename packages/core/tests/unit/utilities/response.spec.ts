@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { faker } from '@faker-js/faker';
+import { ErrorCodes } from '@men-mvc/globals';
 import {
   successResponse,
   errorResponse,
@@ -7,14 +8,11 @@ import {
   emptyResponse,
   validationErrorResponse,
   unauthorisedErrorResponse,
-  insufficientPermissionsResponse
-} from '../../../src/utilities/response';
-import { ValidationError } from '../../../src/types/validationError';
-import {
-  ErrorCodes,
+  insufficientPermissionsResponse,
+  ValidationError,
   InsufficientPermissionError,
   StatusCodes
-} from '../../../src/types';
+} from '../../../src';
 
 class FakeExpressResponse {
   status = (status: number) => {

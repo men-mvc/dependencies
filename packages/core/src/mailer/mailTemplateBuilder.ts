@@ -1,7 +1,7 @@
 import handlebars from 'handlebars';
 import path from 'path';
 import fs from 'fs';
-import { getSourceCodeDirectory } from '../utilities/app';
+import { getSourceCodeDirectory } from '../utilities';
 
 type TemplateData = { [key: string]: unknown };
 

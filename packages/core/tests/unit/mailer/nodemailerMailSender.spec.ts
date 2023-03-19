@@ -17,7 +17,7 @@ import {
   HtmlSendMailOptions,
   TemplateSendMailOptions,
   SendMailOptions
-} from '../../../src/mailer';
+} from '../../../src';
 
 describe(`NodemailerMailSender`, () => {
   describe(`send`, () => {

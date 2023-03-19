@@ -27,10 +27,7 @@ export class AppProjectConfig implements ConfigContract {
       defaultConfigFilename
     );
     if (fs.existsSync(appProjectConfigFilePath)) {
-      const defaultConfig = require(appProjectConfigFilePath);
-      if (defaultConfig) {
-        return defaultConfig as Record<string, unknown>;
-      }
+      return this.getAppProjectConfigFileConfig(appProjectConfigFilePath);
     }
 
     return {};
@@ -150,5 +147,16 @@ export class AppProjectConfig implements ConfigContract {
     });
 
     return appProjectConfig as T;
+  };
+
+  private getAppProjectConfigFileConfig = (
+    filepath: string
+  ): Record<string, unknown> => {
+    const fileContentBuffer = fs.readFileSync(filepath);
+    if (!fileContentBuffer) {
+      return {};
+    }
+
+    return JSON.parse(fileContentBuffer.toString());
   };
 }

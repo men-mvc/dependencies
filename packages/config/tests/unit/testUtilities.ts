@@ -14,11 +14,17 @@ export const mockGetAppProjectConfigDirectory = (dir: string): SinonStub => {
 export const mockGetEnvVariables = (
   mockVars: Record<string, unknown>
 ): SinonStub => {
-  const subjectFuncStub = stub(utilities, `getEnvVariables`);
-  return subjectFuncStub.callsFake(jest.fn().mockReturnValue(mockVars));
+  return stub(utilities, `getEnvVariables`).returns(
+    mockVars as Record<string, undefined>
+  );
 };
 
 export const mockIsRunningFrameworkTests = (value: boolean): SinonStub => {
   const subjectFuncStub = sinon.stub(utilities, `isRunningFrameworkTests`);
   return subjectFuncStub.returns(value);
+};
+
+export const mockIsTestEnvironment = (returnValue: boolean): SinonStub => {
+  const subjectFuncStub = sinon.stub(utilities, `isTestEnvironment`);
+  return subjectFuncStub.returns(returnValue);
 };

@@ -13,7 +13,7 @@
     "redis": {
       "port": 6345,
       "host": "127.0.0.1",
-      "password": "stating-redis-password",
+      "password": "staging-redis-password",
       "database": 2
     }
   },

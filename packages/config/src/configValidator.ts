@@ -5,6 +5,7 @@ import {
   MailAuthType,
   MailDriver
 } from './types';
+import { isTestEnvironment } from './utilities';
 
 export class ConfigValidator {
   constructor(private config: BaseConfig) {}
@@ -55,8 +56,32 @@ export class ConfigValidator {
       .some(
         (driver) =>
           driver.toLowerCase() ===
-          this.config.fileSystem.storageDriver?.toLowerCase()
+          this.config.fileSystem.storageDriver?.toString().toLowerCase()
       );
+  };
+
+  // checking if the driver is s3 is already done before calling this function
+  private validateS3FileSystemConfig = (): boolean => {
+    if (
+      !this.config.fileSystem?.s3 ||
+      Object.keys(this.config.fileSystem.s3).length < 1
+    ) {
+      throw new Error(`AWS credentials are not set for s3 filesystem driver.`);
+    }
+    if (!this.config.fileSystem.s3.region) {
+      throw new Error(`AWS S3 Bucket region is not set.`);
+    }
+    if (!this.config.fileSystem.s3.accessKeyId) {
+      throw new Error(`Access key id is not set for the AWS S3 bucket.`);
+    }
+    if (!this.config.fileSystem.s3.secretAccessKey) {
+      throw new Error(`Secret access key is not set for the AWS S3 bucket.`);
+    }
+    if (!this.config.fileSystem.s3.bucket) {
+      throw new Error(`Bucket name is not set for the AWS S3.`);
+    }
+
+    return true;
   };
 
   public validate = () => {
@@ -77,8 +102,18 @@ export class ConfigValidator {
     /**
      * ! add more rules.
      */
-    if (!this.hasValidFileSystemDriver()) {
-      // TODO: in the future, when more driver is added, add validation rule that test supports only local driver.
+    if (this.hasValidFileSystemDriver()) {
+      // if this.config.fileSystem?.storageDriver is undefined is already checked by hasValidFileSystemDriver funciton
+      if (
+        isTestEnvironment() &&
+        this.config.fileSystem?.storageDriver !== FileSystemDriver.local
+      ) {
+        throw new Error(`Tests only support local filesystem driver.`);
+      }
+      if (this.config.fileSystem?.storageDriver === FileSystemDriver.s3) {
+        this.validateS3FileSystemConfig();
+      }
+    } else {
       throw new Error(`Invalid file system storage driver.`);
     }
   };

@@ -31,7 +31,13 @@ export const frameworkTestConfig: BaseConfig = {
   },
   fileSystem: {
     storageDriver: FileSystemDriver.local, // it's always local for tests
-    maxUploadLimit: 1000 * 1024 * 512
+    maxUploadLimit: 1000 * 1024 * 512,
+    s3: {
+      region: `eu-west-1`,
+      accessKeyId: `framework-test-access-key-id`,
+      secretAccessKey: `framework-test-secret-access-key`,
+      bucket: `framework-test-bucket`
+    }
   }
 };
 

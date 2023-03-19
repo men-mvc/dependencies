@@ -12,7 +12,13 @@
     "authType": "MAIL_AUTH_TYPE"
   },
   "fileSystem": {
-    "storageDriver": "FILESYSTEM_STORAGE_DRIVER"
+    "storageDriver": "FILESYSTEM_STORAGE_DRIVER",
+    "s3": {
+      "region": "AWS_S3_REGION",
+      "accessKeyId": "AWS_S3_ACCESS_KEY_ID",
+      "secretAccessKey": "AWS_S3_SECRET_ACCESS_KEY",
+      "bucket": "AWS_S3_BUCKET_NAME"
+    }
   },
   "cache": {
     "driver": "CACHE_DRIVER"

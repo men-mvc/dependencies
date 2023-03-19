@@ -12,5 +12,5 @@
     "declaration": true
   },
   "include": ["src/**/*", "globals.d.ts"],
-  "files": ["typings/change-case/index.d.ts"]
+  "files": ["typings/@men-mvc/s3-adapter/index.d.ts"]
 }

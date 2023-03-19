@@ -1,5 +1,5 @@
-import rimraf from 'rimraf';
-import { DeepPartial, getAppStorageDirectory, UploadedFile } from '../src';
+import { DeepPartial } from '@men-mvc/globals';
+import { UploadedFile } from '../src';
 import { faker } from '@faker-js/faker';
 
 export const delay = (milliseconds: number = 500): Promise<boolean> => {
@@ -9,9 +9,6 @@ export const delay = (milliseconds: number = 500): Promise<boolean> => {
     }, milliseconds);
   });
 };
-
-export const deleteStorageDirectory = () =>
-  rimraf.sync(getAppStorageDirectory());
 
 export const generateUploadedFile = (
   data: DeepPartial<UploadedFile> = {}

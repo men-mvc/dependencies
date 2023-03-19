@@ -1,9 +1,8 @@
 import findUpOne from 'findup-sync';
 import { appProjectConfigDir } from './globals';
-import {
-  EnvVarDeclaration,
-  isEnvVarDeclaration
-} from './types/envVarDeclaration';
+import { EnvVarDeclaration, isEnvVarDeclaration } from './types';
+
+// TODO: write tests for the utility functions inside this file
 
 export const getAppEnv = () => getEnvVariable(`NODE_ENV`, `local`);
 
@@ -30,9 +29,18 @@ export const setEnvVariable = (key: string, value: string): void => {
   process.env[key] = value;
 };
 
+export const unsetEnvVariable = (key: string): void => {
+  if (!envVars) {
+    envVars = getEnvVariables();
+  }
+  delete envVars[key];
+  delete process.env[key];
+};
+
+export const isTestEnvironment = (): boolean => getAppEnv() === 'test';
+
 /**
  * the functions inside this file are available within the core package only
- * TODO: rename this to is running framework tests
  */
 export const isRunningFrameworkTests = (): boolean =>
   process.env.CORE_TEST ? true : false;
