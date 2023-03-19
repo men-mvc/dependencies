@@ -69,14 +69,6 @@ export type StoreFilesParams = {
   directory?: string;
 };
 
-export class UploadMaxFileSizeException extends Error {
-  public message: string = `Payload is too large.`;
-  constructor() {
-    super(`Payload is too large.`);
-    this.name = ErrorCodes.UPLOAD_MAX_FILESIZE_LIMIT;
-  }
-}
-
 export class InvalidPayloadFormatException extends Error {
   public message: string;
 

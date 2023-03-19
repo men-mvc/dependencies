@@ -5,13 +5,13 @@ import {
   FileArray,
   UploadedFile as OriginalUploadedFile
 } from 'express-fileupload';
-import { DeepPartial, isNumber, UploadedFile } from '@men-mvc/globals';
+import { DeepPartial, isNumber, UploadedFile, UploadMaxFileSizeError } from '@men-mvc/globals';
+import { FileSystemDriver } from '@men-mvc/config';
 import {
   BaseFileUploader,
   InvalidPayloadFormatException,
   StoreFileParams,
   StoreFilesParams,
-  UploadMaxFileSizeException
 } from './types';
 import { LocalStorage } from './localStorage';
 import {
@@ -21,7 +21,6 @@ import {
   getUploadFilesizeLimit
 } from './utilities';
 import { S3Storage } from './s3/s3Storage';
-import { FileSystemDriver } from '@men-mvc/config';
 
 type SubFieldMetaData = {
   openBracketIndex: number;
@@ -77,7 +76,7 @@ export class FileUploader implements BaseFileUploader {
         throw new InvalidPayloadFormatException();
       }
       if (this._isPayloadTooLarge(req.files)) {
-        throw new UploadMaxFileSizeException();
+        throw new UploadMaxFileSizeError();
       }
 
       for (let field in req.files) {

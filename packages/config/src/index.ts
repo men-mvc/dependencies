@@ -1,4 +1,4 @@
-import { BaseConfig } from './types/baseConfig';
+import { BaseConfig } from './types';
 import { Config } from './config';
 
 export const baseConfig: BaseConfig = Config.getConfig();
