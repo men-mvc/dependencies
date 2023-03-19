@@ -14,8 +14,9 @@ export const mockGetAppProjectConfigDirectory = (dir: string): SinonStub => {
 export const mockGetEnvVariables = (
   mockVars: Record<string, unknown>
 ): SinonStub => {
-  const subjectFuncStub = stub(utilities, `getEnvVariables`);
-  return subjectFuncStub.callsFake(jest.fn().mockReturnValue(mockVars));
+  return stub(utilities, `getEnvVariables`).returns(
+    mockVars as Record<string, undefined>
+  );
 };
 
 export const mockIsRunningFrameworkTests = (value: boolean): SinonStub => {

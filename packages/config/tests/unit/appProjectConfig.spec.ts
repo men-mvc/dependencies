@@ -573,10 +573,10 @@ describe(`AppProjectConfig`, () => {
       testDefaultConfigJson.cache.redis.host
     );
     expect(actualConfig.cache.redis?.password).toBe(
-      testDefaultConfigJson.cache.redis.password
+      testStagingConfigJson.cache.redis.password
     );
     expect(actualConfig.cache.redis?.database).toBe(
-      testDefaultConfigJson.cache.redis.database
+      testStagingConfigJson.cache.redis.database
     );
     expect(actualConfig.fileSystem?.storageDriver).toBe(
       testDefaultConfigJson.fileSystem.storageDriver

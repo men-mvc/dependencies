@@ -1,7 +1,6 @@
 import sinon from 'sinon';
 import path from 'path';
-import { Config } from '../../src/config';
-import { frameworkTestConfig } from '../../src/globals';
+import { Config, frameworkTestConfig } from '../../src';
 import {
   mockGetAppEnv,
   mockGetAppProjectConfigDirectory,
@@ -17,6 +16,7 @@ import {
   FileSystemDriver,
   appProjectConfigDir
 } from '../../src';
+import { faker } from '@faker-js/faker';
 
 const testEnvVarsWithValidEnumValues = {
   MAIL_DRIVER: MailDriver.mail,
@@ -98,9 +98,6 @@ describe(`Config`, () => {
       isRunningCoreTestsStub.restore();
       getAppEnvStub.restore();
       getAppProjectConfigDirectoryStub.restore();
-      if (isTestEnvironmentStub) {
-        isTestEnvironmentStub.restore();
-      }
     });
 
     beforeEach(() => {
@@ -110,6 +107,9 @@ describe(`Config`, () => {
     afterEach(() => {
       if (getEnvVariablesStub) {
         getEnvVariablesStub.restore();
+      }
+      if (isTestEnvironmentStub) {
+        isTestEnvironmentStub.restore();
       }
     });
 
@@ -139,11 +139,16 @@ describe(`Config`, () => {
 
     Object.entries(FileSystemDriver)
       .map((tuple) => tuple[1])
-      .forEach((driver) => {
+      .every((driver) => {
         it(`should allow file system storage driver value to be ${driver}`, () => {
+          isTestEnvironmentStub = mockIsTestEnvironment(false);
           getEnvVariablesStub = mockGetEnvVariables({
             ...testEnvVarsWithValidEnumValues,
-            FILESYSTEM_STORAGE_DRIVER: driver
+            FILESYSTEM_STORAGE_DRIVER: driver,
+            AWS_S3_REGION: 'eu-west-1',
+            AWS_S3_ACCESS_KEY_ID: faker.datatype.uuid(),
+            AWS_S3_SECRET_ACCESS_KEY: faker.datatype.uuid(),
+            AWS_S3_BUCKET_NAME: faker.lorem.word()
           });
           const config = Config.getConfig<BaseConfig>();
 
@@ -174,7 +179,7 @@ describe(`Config`, () => {
 
     Object.entries(MailAuthType)
       .map((tuple) => tuple[0])
-      .forEach((expectedAuthType) => {
+      .every((expectedAuthType) => {
         it(`should be allowed to set ${expectedAuthType} for mail auth type`, () => {
           getEnvVariablesStub = mockGetEnvVariables({
             ...testEnvVarsWithValidEnumValues,
@@ -218,6 +223,78 @@ describe(`Config`, () => {
       expect(() => {
         Config.getConfig<BaseConfig>();
       }).toThrow(`Invalid cache driver.`);
+    });
+
+    it(`should throw error when AWS S3 credentials are not set`, async () => {
+      isTestEnvironmentStub = mockIsTestEnvironment(false);
+      getEnvVariablesStub = mockGetEnvVariables({
+        ...testEnvVarsWithValidEnumValues,
+        FILESYSTEM_STORAGE_DRIVER: FileSystemDriver.s3
+      });
+
+      expect(() => {
+        Config.getConfig<BaseConfig>();
+      }).toThrow(`AWS credentials are not set for s3 filesystem driver.`);
+    });
+
+    it(`should throw error when the S3 bucket region is not set`, async () => {
+      isTestEnvironmentStub = mockIsTestEnvironment(false);
+      getEnvVariablesStub = mockGetEnvVariables({
+        ...testEnvVarsWithValidEnumValues,
+        FILESYSTEM_STORAGE_DRIVER: FileSystemDriver.s3,
+        AWS_S3_ACCESS_KEY_ID: faker.datatype.uuid(),
+        AWS_S3_SECRET_ACCESS_KEY: faker.datatype.uuid(),
+        AWS_S3_BUCKET_NAME: faker.datatype.uuid()
+      });
+
+      expect(() => {
+        Config.getConfig<BaseConfig>();
+      }).toThrow(`AWS S3 Bucket region is not set.`);
+    });
+
+    it(`should throw error when aws access key id is not set for S3`, async () => {
+      isTestEnvironmentStub = mockIsTestEnvironment(false);
+      getEnvVariablesStub = mockGetEnvVariables({
+        ...testEnvVarsWithValidEnumValues,
+        FILESYSTEM_STORAGE_DRIVER: FileSystemDriver.s3,
+        AWS_S3_REGION: `eu-west-1`,
+        AWS_S3_SECRET_ACCESS_KEY: faker.datatype.uuid(),
+        AWS_S3_BUCKET_NAME: faker.datatype.uuid()
+      });
+
+      expect(() => {
+        Config.getConfig<BaseConfig>();
+      }).toThrow(`Access key id is not set for the AWS S3 bucket.`);
+    });
+
+    it(`should throw error when secret access key is not set for S3`, async () => {
+      isTestEnvironmentStub = mockIsTestEnvironment(false);
+      getEnvVariablesStub = mockGetEnvVariables({
+        ...testEnvVarsWithValidEnumValues,
+        FILESYSTEM_STORAGE_DRIVER: FileSystemDriver.s3,
+        AWS_S3_REGION: `eu-west-1`,
+        AWS_S3_ACCESS_KEY_ID: faker.datatype.uuid(),
+        AWS_S3_BUCKET_NAME: faker.datatype.uuid()
+      });
+
+      expect(() => {
+        Config.getConfig<BaseConfig>();
+      }).toThrow(`Secret access key is not set for the AWS S3 bucket.`);
+    });
+
+    it(`should throw error when bucket name is not set for S3`, async () => {
+      isTestEnvironmentStub = mockIsTestEnvironment(false);
+      getEnvVariablesStub = mockGetEnvVariables({
+        ...testEnvVarsWithValidEnumValues,
+        FILESYSTEM_STORAGE_DRIVER: FileSystemDriver.s3,
+        AWS_S3_REGION: `eu-west-1`,
+        AWS_S3_ACCESS_KEY_ID: faker.datatype.uuid(),
+        AWS_S3_SECRET_ACCESS_KEY: faker.datatype.uuid()
+      });
+
+      expect(() => {
+        Config.getConfig<BaseConfig>();
+      }).toThrow(`Bucket name is not set for the AWS S3.`);
     });
   });
 });

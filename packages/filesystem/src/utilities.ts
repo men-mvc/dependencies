@@ -20,20 +20,14 @@ export const getUploadFilesizeLimit = (): number =>
 export const getFileSystemDriver = (): FileSystemDriver =>
   baseConfig.fileSystem.storageDriver;
 
-// export const getAwsS3Bucket = (): string => baseConfig.fileSystem.s3?.bucket ?? ``;
-export const getAwsS3Bucket = (): string => `men-mvc-local`;
+export const getAwsS3Bucket = (): string =>
+  baseConfig.fileSystem.s3?.bucket ?? ``;
 
 export const getAwsS3Credentials = () => ({
-  region: `eu-west-2`,
-  accessKeyId: `AKIAYKM4VUKOA7X64F5W`,
-  secretAccessKey: `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`
+  region: baseConfig.fileSystem?.s3?.region,
+  accessKeyId: baseConfig.fileSystem?.s3?.accessKeyId ?? ``,
+  secretAccessKey: baseConfig.fileSystem?.s3?.secretAccessKey ?? ``
 });
-
-// export const getAwsS3Credentials = () => ({
-//   region: baseConfig.fileSystem?.s3?.region,
-//   accessKeyId: baseConfig.fileSystem?.s3?.accessKeyId??``,
-//   secretAccessKey: baseConfig.fileSystem?.s3?.secretAccessKey??``
-// });
 
 export const generateUuid = (): string => globalGenerateUuid();
 
