@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/globals",
-  "version": "0.66.0",
+  "version": "0.67.0",
   "description": "Package that includes shared variables, types and utility functions for MEN MVC framework.",
   "private": false,
   "type": "commonjs",
