@@ -7,3 +7,4 @@ export * from './fileSystem';
 export * from './localStorage';
 export * from './fileUploader';
 export * from './utilities';
+export * from './middlewares';
