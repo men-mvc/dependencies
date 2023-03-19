@@ -165,7 +165,7 @@ export class FileUploader implements BaseFileUploader {
     }
   };
 
-  public storeFiles = async ({
+  public storeFiles = ({
     uploadedFiles,
     directory
   }: StoreFilesParams): Promise<string[]> => {
@@ -177,7 +177,7 @@ export class FileUploader implements BaseFileUploader {
         })
     );
 
-    return await Promise.all(storeFilePromises);
+    return Promise.all(storeFilePromises);
   };
 
   private isNestedField = (fieldName: string): boolean => {
