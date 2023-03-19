@@ -15,7 +15,6 @@ import { getAwsS3Bucket, getAwsS3Credentials } from './utilities';
 import { MenS3PutObjectCommandOutput } from './types';
 
 // referene link -> https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html?fbclid=IwAR0gIsyNLqKN0wJd1-C4RG0izXxFy0u8fjU3FyE9exJ_Swfji6eEIWgzegg
-// TODO: unit test.
 export class MenS3Adapter {
   private s3Client: S3Client | undefined;
 
