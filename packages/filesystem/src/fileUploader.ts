@@ -129,7 +129,7 @@ export class FileUploader implements BaseFileUploader {
     const content = await this.getLocalStorage().readFile(
       uploadedFile.filepath
     );
-    await this.getS3Storage().writeFile(targetKey, content.toString());
+    await this.getS3Storage().writeFile(targetKey, content);
     await this.getLocalStorage().deleteFile(uploadedFile.filepath);
 
     return targetKey;

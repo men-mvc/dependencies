@@ -2,7 +2,6 @@ import { LoggerContract } from './types';
 import { ConsoleLogger } from './consoleLogger';
 
 export class Logger {
-  // TODO: do not use static
   private static instance: LoggerContract | null;
 
   public static getInstance = (): LoggerContract => {

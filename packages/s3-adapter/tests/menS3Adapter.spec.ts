@@ -1,5 +1,6 @@
 import sinon, { SinonStub } from 'sinon';
 import { Readable } from 'stream';
+import { Buffer } from 'buffer';
 import { faker } from '@faker-js/faker';
 import {
   CopyObjectCommand,
@@ -20,9 +21,7 @@ import {
 import { ReadableString, readReadableAsString } from '@men-mvc/globals';
 import { MenS3Adapter } from '../src';
 import * as utilities from '../src/utilities';
-import { Buffer } from 'buffer';
 
-// TODO: add more tests
 const adapter = new MenS3Adapter();
 const fakeBucketName = `fake-bucket`;
 describe(`MenS3Adapter Utility`, () => {

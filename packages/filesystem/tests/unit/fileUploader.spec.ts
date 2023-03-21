@@ -109,7 +109,7 @@ describe('FileUploader Utility', function () {
       sinon.assert.calledOnceWithExactly(
         s3WriteFileStub,
         createdObjectKey,
-        fakeUploadedFileContent
+        Buffer.from(fakeUploadedFileContent),
       );
       s3WriteFileStub.restore();
     });
