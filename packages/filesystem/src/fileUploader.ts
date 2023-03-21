@@ -125,9 +125,13 @@ export class FileUploader implements BaseFileUploader {
     targetKey = directory
       ? `${directory.toLowerCase()}/${targetKey}`
       : targetKey;
+
+    // TODO: update unit test.
+    const localTempFileWithExtension = `${generateUuid()}-${generateUuid()}${path.extname(uploadedFile.originalFilename).toLowerCase()}`;
+    await this.getLocalStorage().rename(uploadedFile.filepath, localTempFileWithExtension);
     // move the temp file on the local filesystem to the S3
     const content = await this.getLocalStorage().readFile(
-      uploadedFile.filepath
+        localTempFileWithExtension
     );
     await this.getS3Storage().writeFile(targetKey, content);
     await this.getLocalStorage().deleteFile(uploadedFile.filepath);
