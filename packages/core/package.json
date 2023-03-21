@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/core",
-  "version": "0.70.0",
+  "version": "0.71.0",
   "description": "Core package for Men MVC framework.",
   "private": false,
   "publishConfig": {
@@ -23,8 +23,8 @@
     "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
-    "@men-mvc/config": "^0.70.0",
-    "@men-mvc/globals": "^0.70.0",
+    "@men-mvc/config": "^0.71.0",
+    "@men-mvc/globals": "^0.71.0",
     "axios": "^1.2.1",
     "express-fileupload": "^1.4.0",
     "handlebars": "^4.7.7",
@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
-    "@men-mvc/test": "^0.70.0",
+    "@men-mvc/test": "^0.71.0",
     "@types/axios": "^0.14.0",
     "@types/express-fileupload": "^1.4.1",
     "@types/handlebars": "^4.1.0",
