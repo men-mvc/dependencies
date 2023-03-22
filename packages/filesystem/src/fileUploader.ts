@@ -132,10 +132,6 @@ export class FileUploader implements BaseFileUploader {
       ? `${directory.toLowerCase()}/${targetKey}`
       : targetKey;
 
-    // TODO: update tests.
-    /**
-     * ! TODO: after creating request id middleware, we also need to update this
-     */
     const newTempFilepath = `${uploadedFile.filepath}${path.extname(
       uploadedFile.originalFilename
     )}`;
