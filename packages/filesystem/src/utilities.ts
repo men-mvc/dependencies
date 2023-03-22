@@ -20,15 +20,6 @@ export const getUploadFilesizeLimit = (): number =>
 export const getFileSystemDriver = (): FileSystemDriver =>
   baseConfig.fileSystem.storageDriver;
 
-export const getAwsS3Bucket = (): string =>
-  baseConfig.fileSystem.s3?.bucket ?? ``;
-
-export const getAwsS3Credentials = () => ({
-  region: baseConfig.fileSystem?.s3?.region,
-  accessKeyId: baseConfig.fileSystem?.s3?.accessKeyId ?? ``,
-  secretAccessKey: baseConfig.fileSystem?.s3?.secretAccessKey ?? ``
-});
-
 export const generateUuid = (): string => globalGenerateUuid();
 
 export const getDriver = (): FileSystemDriver =>
