@@ -7,7 +7,6 @@ import { ReadStream } from 'fs';
 import { Readable } from 'stream';
 import { readReadableAsString } from '@men-mvc/globals';
 
-// TODO: finish
 const storage = new S3Storage();
 describe(`S3Storage`, () => {
   describe(`createReadStream`, () => {

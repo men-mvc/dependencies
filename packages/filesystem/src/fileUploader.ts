@@ -5,13 +5,18 @@ import {
   FileArray,
   UploadedFile as OriginalUploadedFile
 } from 'express-fileupload';
-import { DeepPartial, isNumber, UploadedFile, UploadMaxFileSizeError } from '@men-mvc/globals';
+import {
+  DeepPartial,
+  isNumber,
+  UploadedFile,
+  UploadMaxFileSizeError
+} from '@men-mvc/globals';
 import { FileSystemDriver } from '@men-mvc/config';
 import {
   BaseFileUploader,
   InvalidPayloadFormatException,
   StoreFileParams,
-  StoreFilesParams,
+  StoreFilesParams
 } from './types';
 import { LocalStorage } from './localStorage';
 import {
@@ -66,6 +71,7 @@ export class FileUploader implements BaseFileUploader {
     } catch (e) {
       // fail silently intentionally (race condition - clearing the same temp directory)
     }
+    this.resetTempDirId();
   };
 
   public parseFormData = async <T>(req: Request): Promise<DeepPartial<T>> => {
@@ -126,15 +132,18 @@ export class FileUploader implements BaseFileUploader {
       ? `${directory.toLowerCase()}/${targetKey}`
       : targetKey;
 
-    // TODO: update unit test.
-    const localTempFileWithExtension = `${generateUuid()}-${generateUuid()}${path.extname(uploadedFile.originalFilename).toLowerCase()}`;
-    await this.getLocalStorage().rename(uploadedFile.filepath, localTempFileWithExtension);
+    // TODO: update tests.
+    /**
+     * ! TODO: after creating request id middleware, we also need to update this
+     */
+    const newTempFilepath = `${uploadedFile.filepath}${path.extname(
+      uploadedFile.originalFilename
+    )}`;
+    await this.getLocalStorage().rename(uploadedFile.filepath, newTempFilepath);
     // move the temp file on the local filesystem to the S3
-    const content = await this.getLocalStorage().readFile(
-        localTempFileWithExtension
-    );
+    const content = await this.getLocalStorage().readFile(newTempFilepath);
     await this.getS3Storage().writeFile(targetKey, content);
-    await this.getLocalStorage().deleteFile(uploadedFile.filepath);
+    await this.getLocalStorage().deleteFile(newTempFilepath);
 
     return targetKey;
   };
@@ -316,6 +325,10 @@ export class FileUploader implements BaseFileUploader {
     }
 
     return this.tempDirId;
+  };
+
+  private resetTempDirId = () => {
+    this.tempDirId = undefined;
   };
 
   _isPayloadTooLarge = (files: FileArray | null | undefined): boolean => {

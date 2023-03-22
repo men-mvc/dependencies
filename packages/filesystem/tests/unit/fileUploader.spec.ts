@@ -105,13 +105,66 @@ describe('FileUploader Utility', function () {
       expect(createdObjectKey).toBe(
         `${directory}/${fileKey}.txt`.toLowerCase()
       );
-      expect(fs.existsSync(uploadedFilepath)).toBeFalsy();
       sinon.assert.calledOnceWithExactly(
         s3WriteFileStub,
         createdObjectKey,
-        Buffer.from(fakeUploadedFileContent),
+        Buffer.from(fakeUploadedFileContent)
       );
       s3WriteFileStub.restore();
+    });
+
+    it(`should delete the uploaded temp files after uploading file to S3`, async () => {
+      getDriverStub = mockGetDriver(FileSystemDriver.s3);
+      const originalFilename = `testfile.txt`;
+      const uploadedFilepath = createTestUploadedFile(`testfile`);
+      const uploadedFile = await generateUploadedFile({
+        filepath: uploadedFilepath,
+        originalFilename
+      });
+      const s3WriteFileStub = sinon.stub(
+        fileUploader.getS3Storage(),
+        `writeFile`
+      );
+      await fileUploader.storeFile({
+        uploadedFile,
+        filename: `testFileKey`,
+        directory: `testFileDirectory`
+      });
+
+      expect(fs.existsSync(uploadedFilepath)).toBeFalsy();
+      expect(fs.existsSync(`${uploadedFilepath}.txt`)).toBeFalsy();
+      s3WriteFileStub.restore();
+    });
+
+    it(`should rename uploaded temp file adding file extension before uploading to S3`, async () => {
+      const localStorageRenameSpy = sinon.spy(
+        fileUploader.getLocalStorage(),
+        `rename`
+      );
+      getDriverStub = mockGetDriver(FileSystemDriver.s3);
+      const originalFilename = `testfile.txt`;
+      const uploadedFilepath = createTestUploadedFile(`testfile`);
+      const uploadedFile = await generateUploadedFile({
+        filepath: uploadedFilepath,
+        originalFilename
+      });
+      const s3WriteFileStub = sinon.stub(
+        fileUploader.getS3Storage(),
+        `writeFile`
+      );
+      await fileUploader.storeFile({
+        uploadedFile,
+        filename: `testFileKey`,
+        directory: `testFileDirectory`
+      });
+
+      sinon.assert.calledOnceWithExactly(
+        localStorageRenameSpy,
+        uploadedFile.filepath,
+        `${uploadedFile.filepath}.txt`
+      );
+      s3WriteFileStub.restore();
+      localStorageRenameSpy.restore();
     });
 
     const createTestUploadedFile = (filename: string): string => {
@@ -235,6 +288,12 @@ describe('FileUploader Utility', function () {
     });
   });
 
+  describe(`_getTempDirId`, () => {
+    it(`should always return the same temp dir id`, async () => {
+      expect(fileUploader._getTempDirId()).toBe(fileUploader._getTempDirId());
+    });
+  });
+
   describe(`getTempUploadDirectory`, () => {
     it(`should return expected temp storage dir path`, () => {
       const fakeUuid = faker.datatype.uuid();
@@ -283,6 +342,15 @@ describe('FileUploader Utility', function () {
 
       expect(getLocalStorageStub.threw()).toBeTruthy();
       getLocalStorageStub.restore();
+    });
+
+    it(`should reset temp dir id after clearing the temp directory`, async () => {
+      await createTempDirAndContents();
+      const tempDirBefore = fileUploader._getTempDirId();
+      await fileUploader.clearTempUploadDirectory();
+      await delay();
+      expect(tempDirBefore).not.toBe(fileUploader._getTempDirId());
+      deleteStorageDirectory();
     });
 
     const createTempDirAndContents = async (): Promise<string> => {
