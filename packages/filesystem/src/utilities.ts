@@ -1,6 +1,15 @@
+import { Response } from 'express';
 import { baseConfig, FileSystemDriver, getEnvVariable } from '@men-mvc/config';
-import { generateUuid as globalGenerateUuid } from '@men-mvc/globals';
+import {
+  generateUuid as globalGenerateUuid,
+  UploadedFile
+} from '@men-mvc/globals';
 import path from 'path';
+import { isNil } from 'lodash';
+import { MultipartRequest } from './types';
+// import {resolveValidationError, validateRequestAsync, ValidationError, validationErrorResponse} from "@men-mvc/core";
+// import joi from "@men-mvc/core/lib/joi";
+import { FileSystem } from './fileSystem'; // TODO: move these to globals
 
 export const getAppStorageDirectory = (): string => {
   let storageDirectory: string;
@@ -24,3 +33,35 @@ export const generateUuid = (): string => globalGenerateUuid();
 
 export const getDriver = (): FileSystemDriver =>
   baseConfig.fileSystem?.storageDriver ?? FileSystemDriver.local;
+
+// TODO: unit test the following functions
+// export const isUploadedFile = (value: unknown): value is UploadedFile => (!isNil(value) && value instanceof UploadedFile);
+//
+// export const ValidateMultipartRequestAsync = (schema: joi.ObjectSchema) => {
+//   return function (
+//       scope: unknown,
+//       methodName: string,
+//       descriptor: PropertyDescriptor
+//   ) {
+//     const originalMethod = descriptor.value;
+//
+//     descriptor.value = async function (
+//         req: MultipartRequest<Record<string, unknown>>,
+//         res: Response,
+//         ...args: unknown[]
+//     ) {
+//       try {
+//         req.parsedFormData = await FileSystem.getInstance().parseFormData(req);
+//         await validateRequestAsync(schema, req.parsedFormData);
+//       } catch (e) {
+//         if (e instanceof ValidationError) {
+//           return validationErrorResponse(res, e);
+//         } else if (e instanceof joi.ValidationError) {
+//           return validationErrorResponse(res, resolveValidationError(e));
+//         }
+//       }
+//
+//       return originalMethod.apply(this, [req, res, ...args]);
+//     };
+//   };
+// };

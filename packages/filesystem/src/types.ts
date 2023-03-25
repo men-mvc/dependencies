@@ -54,6 +54,8 @@ export interface BaseFileUploader {
   getTempUploadDirectory: () => string;
 
   clearTempUploadDirectory: () => Promise<void>;
+
+  resetTempUploadDirId: () => void;
 }
 
 export interface BaseFileSystem extends Storage, BaseFileUploader {}
@@ -118,4 +120,8 @@ export declare class MenS3Adapter {
   public readFile: (key: string) => Promise<Buffer>;
   public isFile: (key: string) => Promise<boolean>;
   public isDir: (pathOrKey: string) => Promise<boolean>;
+}
+
+export interface MultipartRequest<T> extends Request {
+  parsedFormData: T;
 }

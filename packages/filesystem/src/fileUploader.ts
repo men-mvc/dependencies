@@ -68,10 +68,14 @@ export class FileUploader implements BaseFileUploader {
       if (await this.getLocalStorage().exists(tempDir)) {
         await this.getLocalStorage().rmdir(tempDir, true);
       }
+      this.resetTempUploadDirId();
     } catch (e) {
       // fail silently intentionally (race condition - clearing the same temp directory)
     }
-    this.resetTempDirId();
+  };
+
+  public resetTempUploadDirId = () => {
+    this.tempDirId = undefined;
   };
 
   public parseFormData = async <T>(req: Request): Promise<DeepPartial<T>> => {
@@ -321,10 +325,6 @@ export class FileUploader implements BaseFileUploader {
     }
 
     return this.tempDirId;
-  };
-
-  private resetTempDirId = () => {
-    this.tempDirId = undefined;
   };
 
   _isPayloadTooLarge = (files: FileArray | null | undefined): boolean => {

@@ -57,6 +57,9 @@ export class FileSystem implements BaseFileSystem {
   public clearTempUploadDirectory = (): Promise<void> =>
     this.getUploaderInstance().clearTempUploadDirectory();
 
+  public resetTempUploadDirId = (): void =>
+    this.getUploaderInstance().resetTempUploadDirId();
+
   public parseFormData = async <T>(req: Request) =>
     this.getUploaderInstance().parseFormData<DeepPartial<T>>(req);
 
@@ -79,7 +82,7 @@ export class FileSystem implements BaseFileSystem {
   public deleteFile = async (path: string): Promise<void> =>
     this.getStorageInstance().deleteFile(path);
 
-  deleteFiles = async (pathsOrKeys: string[]): Promise<void> =>
+  public deleteFiles = async (pathsOrKeys: string[]): Promise<void> =>
     this.getStorageInstance().deleteFiles(pathsOrKeys);
 
   public rename = async (from: string, to: string): Promise<void> =>
