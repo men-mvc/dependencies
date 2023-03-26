@@ -3,7 +3,7 @@ import { baseConfig, FileSystemDriver, getEnvVariable } from '@men-mvc/config';
 import {
   generateUuid as globalGenerateUuid,
   UploadedFile
-} from '@men-mvc/globals';
+} from '@men-mvc/foundation';
 import path from 'path';
 import { isNil } from 'lodash';
 import { MultipartRequest } from './types';
@@ -34,8 +34,6 @@ export const generateUuid = (): string => globalGenerateUuid();
 export const getDriver = (): FileSystemDriver =>
   baseConfig.fileSystem?.storageDriver ?? FileSystemDriver.local;
 
-// TODO: unit test the following functions
-// export const isUploadedFile = (value: unknown): value is UploadedFile => (!isNil(value) && value instanceof UploadedFile);
 //
 // export const ValidateMultipartRequestAsync = (schema: joi.ObjectSchema) => {
 //   return function (

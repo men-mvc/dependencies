@@ -96,7 +96,7 @@ export class AppProjectConfig implements ConfigContract {
      */
     configKeyEnvVarMappings.forEach((envVarDeclaration, key) => {
       if (isEnvVarDeclaration(envVarDeclaration)) {
-        const envVarValue = getEnvVariable<string | undefined>(
+        const envVarValue = getEnvVariable(
           envVarDeclaration.name,
           undefined
         );
@@ -135,7 +135,7 @@ export class AppProjectConfig implements ConfigContract {
           }
         }
       } else {
-        const envVarValue = getEnvVariable<string | undefined>(
+        const envVarValue = getEnvVariable(
           envVarDeclaration,
           undefined
         );

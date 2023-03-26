@@ -10,7 +10,7 @@ import {
   isNumber,
   UploadedFile,
   UploadMaxFileSizeError
-} from '@men-mvc/globals';
+} from '@men-mvc/foundation';
 import { FileSystemDriver } from '@men-mvc/config';
 import {
   BaseFileUploader,

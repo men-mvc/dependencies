@@ -18,7 +18,7 @@ import {
   PutObjectCommand,
   PutObjectCommandOutput
 } from '@aws-sdk/client-s3';
-import { ReadableString, readReadableAsString } from '@men-mvc/globals';
+import { ReadableString, readReadableAsString } from '@men-mvc/foundation';
 import { MenS3Adapter } from '../src';
 import * as utilities from '../src/utilities';
 

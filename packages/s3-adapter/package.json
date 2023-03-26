@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.289.0",
-    "@men-mvc/config": "^0.72.0"
+    "@men-mvc/config": "^0.72.0",
+    "@men-mvc/foundation": "^0.72.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",

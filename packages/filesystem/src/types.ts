@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { DeepPartial, ErrorCodes, UploadedFile } from '@men-mvc/globals';
+import { DeepPartial, ErrorCodes, UploadedFile } from '@men-mvc/foundation';
 import { WriteFileOptions, ReadStream } from 'fs';
 
 export interface Storage {

@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { ReadStream, WriteFileOptions } from 'fs';
 import { FileSystemDriver } from '@men-mvc/config';
-import { DeepPartial } from '@men-mvc/globals';
+import { DeepPartial } from '@men-mvc/foundation';
 import {
   BaseFileSystem,
   BaseFileUploader,
