@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 
-// TODO: move this into globals too.
 export const extractBearerToken = (request: Request): string | null => {
   const authHeader = request.header('Authorization');
   if (!authHeader) {

@@ -11,7 +11,7 @@ import {
   ValidationError,
   InsufficientPermissionError,
   StatusCodes,
-    ErrorCodes,
+  ErrorCodes
 } from '../../../src';
 
 class FakeExpressResponse {

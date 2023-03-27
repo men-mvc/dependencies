@@ -8,3 +8,4 @@ export * from './localStorage';
 export * from './fileUploader';
 export * from './utilities';
 export * from './middlewares';
+export * from './decorators';

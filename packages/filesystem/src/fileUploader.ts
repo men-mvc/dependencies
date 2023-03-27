@@ -3,7 +3,7 @@ import path from 'path';
 import _ from 'lodash';
 import {
   FileArray,
-  UploadedFile as OriginalUploadedFile
+  UploadedFile as ExpressUploadedFile
 } from 'express-fileupload';
 import {
   DeepPartial,
@@ -92,12 +92,12 @@ export class FileUploader implements BaseFileUploader {
       for (let field in req.files) {
         let fieldValue: UploadedFile | UploadedFile[];
         if (Array.isArray(req.files[field])) {
-          fieldValue = (req.files[field] as OriginalUploadedFile[]).map(
-            (file) => this._makeUploadedFileCompatible(file)
+          fieldValue = (req.files[field] as ExpressUploadedFile[]).map((file) =>
+            this._makeUploadedFileCompatible(file)
           );
         } else {
           fieldValue = this._makeUploadedFileCompatible(
-            req.files[field] as OriginalUploadedFile
+            req.files[field] as ExpressUploadedFile
           );
         }
         if (this.isNestedField(field)) {
@@ -352,7 +352,7 @@ export class FileUploader implements BaseFileUploader {
   };
 
   _makeUploadedFileCompatible = (
-    originalFile: OriginalUploadedFile
+    originalFile: ExpressUploadedFile
   ): UploadedFile => {
     return new UploadedFile({
       originalFilename: originalFile.name,

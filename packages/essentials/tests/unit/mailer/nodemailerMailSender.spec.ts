@@ -1,10 +1,7 @@
 import nodemailer from 'nodemailer';
 import sinon, { SinonStub } from 'sinon';
 import { MailAuthType } from '@men-mvc/config';
-import {
-  NodemailerMailSender,
-  TransportOptions
-} from '../../../src';
+import { NodemailerMailSender, TransportOptions } from '../../../src';
 import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
 import {
   generateLoginTransportOptions,

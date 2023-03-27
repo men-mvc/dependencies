@@ -16,11 +16,12 @@ export const getEnvVariables = () => {
   return envVars;
 };
 
-// TODO: always return string|null
-// TODO: research - how to return string instead or string|undefined when default value is provided?
-export const getEnvVariable = (key: string, defaultValue?: string): string|undefined => {
+export const getEnvVariable = (
+  key: string,
+  defaultValue?: string
+): string | undefined => {
   const vars = getEnvVariables();
-  return vars[key] ? vars[key] as string : defaultValue;
+  return vars[key] ? (vars[key] as string) : defaultValue;
 };
 
 export const setEnvVariable = (key: string, value: string): void => {

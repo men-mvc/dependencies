@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
-import {faker} from "@faker-js/faker";
-import { requestHandler, asyncRequestHandler, extractBearerToken } from '../../../src';
+import { faker } from '@faker-js/faker';
+import {
+  requestHandler,
+  asyncRequestHandler,
+  extractBearerToken
+} from '../../../src';
 
 describe(`Request Utility`, () => {
   describe(`extractBearerToken`, () => {
@@ -16,7 +20,7 @@ describe(`Request Utility`, () => {
     it(`should return null when Authorization header value has more than two segments`, () => {
       const req = {
         header: (header) =>
-            `Bearer ${faker.datatype.uuid()} ${faker.datatype.uuid()}`
+          `Bearer ${faker.datatype.uuid()} ${faker.datatype.uuid()}`
       } as Request;
 
       const token = extractBearerToken(req);
