@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/essentials",
-  "version": "0.72.0",
+  "version": "0.73.0",
   "description": "Package that contain essential components/ helper functions for Men MVC framework.",
   "private": false,
   "publishConfig": {
@@ -23,7 +23,7 @@
     "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
-    "@men-mvc/foundation": "^0.72.0",
+    "@men-mvc/foundation": "^0.73.0",
     "axios": "^1.2.1",
     "express-fileupload": "^1.4.0",
     "handlebars": "^4.7.7",
@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
-    "@men-mvc/test": "^0.72.0",
+    "@men-mvc/test": "^0.73.0",
     "@types/axios": "^0.14.0",
     "@types/express-fileupload": "^1.4.1",
     "@types/handlebars": "^4.1.0",
