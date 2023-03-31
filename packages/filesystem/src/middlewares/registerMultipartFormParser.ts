@@ -1,6 +1,6 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import fileUpload from 'express-fileupload';
-import { asyncRequestHandler } from '@men-mvc/globals';
+import { asyncRequestHandler } from '@men-mvc/foundation';
 import { getUploadFilesizeLimit } from '../utilities';
 import { fileSystem } from '..';
 

@@ -3,14 +3,14 @@ import path from 'path';
 import _ from 'lodash';
 import {
   FileArray,
-  UploadedFile as OriginalUploadedFile
+  UploadedFile as ExpressUploadedFile
 } from 'express-fileupload';
 import {
   DeepPartial,
   isNumber,
   UploadedFile,
   UploadMaxFileSizeError
-} from '@men-mvc/globals';
+} from '@men-mvc/foundation';
 import { FileSystemDriver } from '@men-mvc/config';
 import {
   BaseFileUploader,
@@ -68,10 +68,14 @@ export class FileUploader implements BaseFileUploader {
       if (await this.getLocalStorage().exists(tempDir)) {
         await this.getLocalStorage().rmdir(tempDir, true);
       }
+      this.resetTempUploadDirId();
     } catch (e) {
       // fail silently intentionally (race condition - clearing the same temp directory)
     }
-    this.resetTempDirId();
+  };
+
+  public resetTempUploadDirId = () => {
+    this.tempDirId = undefined;
   };
 
   public parseFormData = async <T>(req: Request): Promise<DeepPartial<T>> => {
@@ -88,12 +92,12 @@ export class FileUploader implements BaseFileUploader {
       for (let field in req.files) {
         let fieldValue: UploadedFile | UploadedFile[];
         if (Array.isArray(req.files[field])) {
-          fieldValue = (req.files[field] as OriginalUploadedFile[]).map(
-            (file) => this._makeUploadedFileCompatible(file)
+          fieldValue = (req.files[field] as ExpressUploadedFile[]).map((file) =>
+            this._makeUploadedFileCompatible(file)
           );
         } else {
           fieldValue = this._makeUploadedFileCompatible(
-            req.files[field] as OriginalUploadedFile
+            req.files[field] as ExpressUploadedFile
           );
         }
         if (this.isNestedField(field)) {
@@ -323,10 +327,6 @@ export class FileUploader implements BaseFileUploader {
     return this.tempDirId;
   };
 
-  private resetTempDirId = () => {
-    this.tempDirId = undefined;
-  };
-
   _isPayloadTooLarge = (files: FileArray | null | undefined): boolean => {
     return this._getTotalUploadedFileSize(files) > getUploadFilesizeLimit();
   };
@@ -352,7 +352,7 @@ export class FileUploader implements BaseFileUploader {
   };
 
   _makeUploadedFileCompatible = (
-    originalFile: OriginalUploadedFile
+    originalFile: ExpressUploadedFile
   ): UploadedFile => {
     return new UploadedFile({
       originalFilename: originalFile.name,

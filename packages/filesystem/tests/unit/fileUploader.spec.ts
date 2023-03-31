@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import Sinon, { SinonStub } from 'sinon';
-import { DeepPartial, UploadedFile } from '@men-mvc/globals';
+import { DeepPartial, UploadedFile } from '@men-mvc/foundation';
 import { FileSystemDriver } from '@men-mvc/config';
 import {
   FileArray,

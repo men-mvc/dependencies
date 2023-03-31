@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import supertest from 'supertest';
 import fs from 'fs';
-import { ErrorCodes, DeepPartial } from '@men-mvc/globals';
+import { ErrorCodes, DeepPartial } from '@men-mvc/foundation';
 import { FakeUploadedFile, makePostFormDataRequest } from '@men-mvc/test';
 import { getTestExpressApp, initTestApplication } from '../utilities';
 import { ComplexFormData, SimpleFormData } from './support/types';
@@ -25,7 +25,7 @@ type StoreFilesPayload = {
   files: FakeUploadedFile;
   directory?: string;
 };
-// TODO: test storeFile and storeFiles call rename
+
 const primaryTempStorageDir = path.join(getAppStorageDirectory(), `temp`);
 const originalFilesDir = path.join(
   __dirname,
@@ -37,7 +37,6 @@ describe('FileSystem', () => {
   });
 
   describe(`parseFormData`, () => {
-    // TODO: try using deleteStorageDirectory function
     it(`should parse complex form data with nested fields`, async () => {
       const formData = generateComplexFormDataPayload();
       const { body } = await makeFormDataRequest(formData);
@@ -137,7 +136,7 @@ describe('FileSystem', () => {
       const result = body.data as SimpleFormData;
       expect(result.name).toBe(formData.name);
       expect(result.photoFile.originalFilename).toBe(`node.png`);
-      await delay(1000);
+      await delay(2000); // wait for request finished event to finish
       expect((await localStorage.readDir(primaryTempStorageDir)).length).toBe(
         0
       );

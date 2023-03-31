@@ -5,7 +5,7 @@ import { MenS3PutObjectCommandOutput } from '../../src';
 import { Buffer } from 'buffer';
 import { ReadStream } from 'fs';
 import { Readable } from 'stream';
-import { readReadableAsString } from '@men-mvc/globals';
+import { readReadableAsString } from '@men-mvc/foundation';
 
 const storage = new S3Storage();
 describe(`S3Storage`, () => {

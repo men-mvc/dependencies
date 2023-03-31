@@ -16,9 +16,12 @@ export const getEnvVariables = () => {
   return envVars;
 };
 
-export const getEnvVariable = <T>(key: string, defaultValue: T): T => {
+export const getEnvVariable = (
+  key: string,
+  defaultValue?: string
+): string | undefined => {
   const vars = getEnvVariables();
-  return vars[key] ? (vars[key] as T) : defaultValue;
+  return vars[key] ? (vars[key] as string) : defaultValue;
 };
 
 export const setEnvVariable = (key: string, value: string): void => {

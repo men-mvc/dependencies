@@ -96,10 +96,7 @@ export class AppProjectConfig implements ConfigContract {
      */
     configKeyEnvVarMappings.forEach((envVarDeclaration, key) => {
       if (isEnvVarDeclaration(envVarDeclaration)) {
-        const envVarValue = getEnvVariable<string | undefined>(
-          envVarDeclaration.name,
-          undefined
-        );
+        const envVarValue = getEnvVariable(envVarDeclaration.name, undefined);
         if (envVarValue === null || envVarValue === undefined) {
           return;
         }
@@ -135,10 +132,7 @@ export class AppProjectConfig implements ConfigContract {
           }
         }
       } else {
-        const envVarValue = getEnvVariable<string | undefined>(
-          envVarDeclaration,
-          undefined
-        );
+        const envVarValue = getEnvVariable(envVarDeclaration, undefined);
         if (isNil(envVarValue)) {
           return;
         }

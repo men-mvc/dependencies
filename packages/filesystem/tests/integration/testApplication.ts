@@ -1,8 +1,8 @@
 import express, { Express } from 'express';
 import { baseConfig } from '@men-mvc/config';
-import { AbstractApplication } from '@men-mvc/globals';
+import { AbstractApplication } from '@men-mvc/foundation';
 import { configureTestRoutes } from './testRoutes';
-import { registerMultipartFormParser } from '../../src/middlewares/registerMultipartFormParser';
+import { registerMultipartFormParser } from '../../src';
 
 export class TestApplication extends AbstractApplication {
   constructor(public app: Express) {
