@@ -26,7 +26,8 @@ type StoreFilesPayload = {
   directory?: string;
 };
 
-const primaryTempStorageDir = path.join(getAppStorageDirectory(), `temp`);
+const tempDirname = `temp`
+const primaryTempStorageDir = path.join(getAppStorageDirectory(), tempDirname);
 const originalFilesDir = path.join(
   __dirname,
   `support${path.sep}files${path.sep}original`
@@ -129,15 +130,15 @@ describe('FileSystem', () => {
       );
     });
 
+    // TODO: flaky - fixable by checking primaryTempStorageDir exists as it could be deleted by other process/ thread
     it(`should clear the temp upload dir when the request finished`, async () => {
-      const localStorage = new LocalStorage();
       const formData = generateSimpleFormDataPayload();
       const { body } = await makeFormDataRequest(formData);
       const result = body.data as SimpleFormData;
       expect(result.name).toBe(formData.name);
       expect(result.photoFile.originalFilename).toBe(`node.png`);
       await delay(2000); // wait for request finished event to finish
-      expect((await localStorage.readDir(primaryTempStorageDir)).length).toBe(
+      expect(fs.readdirSync(primaryTempStorageDir).length).toBe(
         0
       );
     });

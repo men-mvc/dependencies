@@ -21,7 +21,7 @@ export const registerMultipartFormParser = (app: Express) => {
     fileUpload({
       limits: { fileSize: getUploadFilesizeLimit() },
       useTempFiles: true,
-      tempFileDir: fileSystem.getTempUploadDirectory(),
+      tempFileDir: fileSystem.getAbsoluteTempUploadDirPath(),
       // parseNested: true,
       // safeFileNames: true
       // uploadTimeout: 60000 // default

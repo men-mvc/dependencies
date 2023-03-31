@@ -1,13 +1,13 @@
 import express from 'express';
 import sinon from 'sinon';
-import { ErrorCodes } from '@men-mvc/globals';
+import { ErrorCodes } from '@men-mvc/foundation';
 import { configureTestRoutes } from '../testRoutes';
 import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
 } from './utilities';
 import * as utilities from '../../../src/utilities';
-import { registerMultipartFormParser } from '../../../src/middlewares/registerMultipartFormParser';
+import { registerMultipartFormParser } from '../../../src';
 
 describe('FileSystem - UploadFilesizeLimit', function () {
   // TODO: figure out why uploaded file sie is sometimes 1 and sometimes 2
