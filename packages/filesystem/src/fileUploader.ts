@@ -21,12 +21,10 @@ import {
 import { LocalStorage } from './localStorage';
 import {
   generateUuid,
-  getAppStorageDirectory,
   getDriver,
   getUploadFilesizeLimit, readFileAsync, renameAsync, rmdirAsync, unlinkAsync
 } from './utilities';
 import { S3Storage } from './s3/s3Storage';
-import fs from "fs";
 
 const tempDirname = 'temp';
 type SubFieldMetaData = {

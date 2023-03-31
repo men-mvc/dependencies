@@ -130,7 +130,7 @@ describe('FileSystem', () => {
       );
     });
 
-    // TODO: flaky - fixable by checking primaryTempStorageDir exists as it could be deleted by other process/ thread
+    // @FIXME: flaky
     it(`should clear the temp upload dir when the request finished`, async () => {
       const formData = generateSimpleFormDataPayload();
       const { body } = await makeFormDataRequest(formData);
