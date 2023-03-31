@@ -23,10 +23,12 @@ import {
   generateUuid,
   getAppStorageDirectory,
   getDriver,
-  getUploadFilesizeLimit
+  getUploadFilesizeLimit, readFileAsync, renameAsync, rmdirAsync, unlinkAsync
 } from './utilities';
 import { S3Storage } from './s3/s3Storage';
+import fs from "fs";
 
+const tempDirname = 'temp';
 type SubFieldMetaData = {
   openBracketIndex: number;
   closeBracketIndex: number;
@@ -56,18 +58,14 @@ export class FileUploader implements BaseFileUploader {
     return this.s3Storage;
   };
 
-  public getTempUploadDirectory(): string {
-    const tempDirectory = path.join(getAppStorageDirectory(), 'temp');
-
+  public getAbsoluteTempUploadDirPath(): string {
+    const tempDirectory = this.getLocalStorage().getAbsolutePath(tempDirname);
     return path.join(tempDirectory, this._getTempDirId());
   }
 
   public clearTempUploadDirectory = async (): Promise<void> => {
     try {
-      const tempDir = this.getTempUploadDirectory();
-      if (await this.getLocalStorage().exists(tempDir)) {
-        await this.getLocalStorage().rmdir(tempDir, true);
-      }
+      await rmdirAsync(this.getAbsoluteTempUploadDirPath(), { recursive: true });
       this.resetTempUploadDirId();
     } catch (e) {
       // fail silently intentionally (race condition - clearing the same temp directory)
@@ -139,11 +137,12 @@ export class FileUploader implements BaseFileUploader {
     const newTempFilepath = `${uploadedFile.filepath}${path.extname(
       uploadedFile.originalFilename
     )}`;
-    await this.getLocalStorage().rename(uploadedFile.filepath, newTempFilepath);
+
+    await renameAsync(uploadedFile.filepath, newTempFilepath);
     // move the temp file on the local filesystem to the S3
-    const content = await this.getLocalStorage().readFile(newTempFilepath);
+    const content = await readFileAsync(newTempFilepath);
     await this.getS3Storage().writeFile(targetKey, content);
-    await this.getLocalStorage().deleteFile(newTempFilepath);
+    await unlinkAsync(newTempFilepath);
 
     return targetKey;
   };
@@ -153,18 +152,18 @@ export class FileUploader implements BaseFileUploader {
     filename,
     directory
   }: StoreFileParams): Promise<string> => {
-    const destDir = this.buildLocalDestinationDir(directory);
-    if (!(await this.getLocalStorage().exists(destDir))) {
-      await this.getLocalStorage().mkdir(destDir);
+    if (directory) {
+      if (!(await this.getLocalStorage().exists(directory))) {
+        await this.getLocalStorage().mkdir(directory);
+      }
     }
 
     const targetFilepath = this.getLocalTargetFilepath(
       uploadedFile,
-      destDir,
+      directory ?? '',
       filename
     );
-
-    await this.getLocalStorage().rename(uploadedFile.filepath, targetFilepath);
+    await renameAsync(uploadedFile.filepath, this.getLocalStorage().getAbsolutePath(targetFilepath));
 
     return targetFilepath;
   };
@@ -201,15 +200,6 @@ export class FileUploader implements BaseFileUploader {
       closeBracketIndex > -1 &&
       closeBracketIndex - openBracketIndex > 0
     );
-  };
-
-  private buildLocalDestinationDir = (destDir?: string): string => {
-    let destDirectory = getAppStorageDirectory();
-    if (!destDir) {
-      destDir = path.sep;
-    }
-
-    return path.join(destDirectory, destDir).toLowerCase();
   };
 
   private getFileExtension = (filepath: string | null) => {

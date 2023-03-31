@@ -1,36 +1,53 @@
-import sinon from 'sinon';
+import sinon, { SinonStub } from 'sinon';
 import { faker } from '@faker-js/faker';
+import {readStreamAsBuffer} from "@men-mvc/foundation";
 import fs from 'fs';
 import path from 'path';
 import stream from 'stream';
 import { LocalStorage, ReadStreamOptions } from '../../src';
-import { delay } from '../testUtilities';
+import * as utilities from '../../src/utilities';
 
 const localStorage = new LocalStorage();
-const fakeFileContent: string = `Greeting from Wai.`;
+const fakeFileContent: string = faker.lorem.paragraph();
 class FakeFileError extends Error {
   public code: string | null = null;
   constructor(message: string) {
     super(message);
   }
 }
-const testFilesDir = path.join(__dirname, 'testFiles');
+const testStoragePath = path.join(__dirname, 'testStorage');
 describe(`LocalStorage Utility`, () => {
+  let getAppStorageDirectoryStub: SinonStub;
   beforeEach(() => {
-    createDirectoryIfNotExist(testFilesDir);
+    getAppStorageDirectoryStub = sinon
+      .stub(utilities, `getAppStorageDirectory`)
+      .returns(testStoragePath);
+    createDirectoryIfNotExist(testStoragePath);
   });
   afterEach(() => {
-    deleteDirectoryIfExists(testFilesDir);
+    deleteDirectoryIfExists(testStoragePath);
+    if (getAppStorageDirectoryStub) {
+      getAppStorageDirectoryStub.restore();
+    }
+  });
+
+  describe(`getAbsolutePath`, () => {
+    it(`should return prepend storage path`, () => {
+      const filename = `${faker.datatype.uuid()}.txt`;
+      expect(localStorage.getAbsolutePath(filename)).toBe(path.join(testStoragePath, filename));
+    });
   });
 
   describe(`readDir`, () => {
     it(`should list down the direct child files and directories in the directory`, async () => {
-      createFile(`file1.txt`);
-      createFile(`file2.txt`);
-      const subDir = createDirectoryIfNotExist(`subDir`);
-      createFile(path.join(subDir, `file3.txt`)); // to make sure that it does not list the files in sub dir
+      createFileInTestStorage(`file1.txt`);
+      createFileInTestStorage(`file2.txt`);
 
-      const result = await localStorage.readDir(testFilesDir);
+      const subDir = `subDir`;
+      createDirectoryIfNotExist(path.join(testStoragePath, subDir));
+      createFileInTestStorage(path.join(subDir, `file3.txt`)); // to make sure that it does not list the files in sub dir
+
+      const result = await localStorage.readDir('/');
 
       expect(result.length).toBe(3);
       expect(result[0]).toBe(`file1.txt`);
@@ -39,64 +56,50 @@ describe(`LocalStorage Utility`, () => {
     });
 
     it(`should throw error when directory does not exist`, async () => {
-      try {
-        await localStorage.readDir(path.join(testFilesDir, `i-do-not-exist`));
-        throw new Error(`Expected error was not thrown`);
-      } catch (e) {
-        if (!e || typeof e !== 'object' || !(`code` in e)) {
-          throw new Error(`Expected error was not thrown.`);
-        }
-        expect(e.code).toBe(`ENOENT`);
-      }
+      await expect(
+        localStorage.readDir(path.join(testStoragePath, `i-do-not-exist`))
+      ).rejects.toThrow(`ENOENT`);
     });
   });
 
   describe(`readFile`, () => {
     it(`should read and return file's content as buffer`, async () => {
-      const filepath = createFile(`testing.txt`);
-      const result = await localStorage.readFile(filepath);
+      const filename = `testing.txt`;
+      createFileInTestStorage(filename);
+      const result = await localStorage.readFile(filename);
       expect(result instanceof Buffer).toBeTruthy();
       expect(result.toString()).toBe(fakeFileContent);
     });
 
     it(`should throw error when the file does not exist`, async () => {
-      try {
-        const filepath = path.join(testFilesDir, `i-do-not-exist.txt`);
-        await localStorage.readFile(filepath);
-        throw new Error(`Expected error was not thrown`);
-      } catch (e) {
-        expect(
-          typeof e === 'object' && e && `code` in e && e.code === `ENOENT`
-        ).toBe(true);
-      }
+      await expect(
+        localStorage.readFile(path.join(testStoragePath, `i-do-not-exist.txt`))
+      ).rejects.toThrow(`ENOENT`);
     });
 
-    it(`should invoke readFile with the right options`, async () => {
-      const filepath = path.join(testFilesDir, `test.txt`);
-      const readFileStub = sinon.stub(fs, 'readFile');
-      const fakeReadFileFunc = jest
-        .fn()
-        .mockImplementation((filepath, options, cb) => {
-          cb(null, fakeFileContent);
-        });
-      readFileStub.callsFake(fakeReadFileFunc);
-      await localStorage.readFile(filepath, {
+    it(`should invoke readFileAsync with the right options`, async () => {
+      const filename = `test.txt`;
+      const absoluteFilepath = path.join(testStoragePath, `test.txt`);
+      const readFileAsyncStub = sinon
+        .stub(utilities, 'readFileAsync')
+        .returns(Promise.resolve(Buffer.from(fakeFileContent)));
+      await localStorage.readFile(filename, {
         encoding: `utf-8`
       });
-      expect(fakeReadFileFunc.mock.calls.length).toBe(1);
-      const funCall = fakeReadFileFunc.mock.calls[0];
-      expect(funCall[0]).toBe(filepath);
-      expect(funCall[1].encoding).toBe(`utf-8`);
-      readFileStub.restore();
+      sinon.assert.calledOnceWithExactly(readFileAsyncStub, absoluteFilepath, {
+        encoding: `utf-8`
+      });
+      readFileAsyncStub.restore();
     });
   });
 
   describe(`createReadStream`, () => {
     it(`should return readable stream of the file`, async () => {
-      const filepath = createFile(`test.txt`);
-      const stream = await localStorage.createReadStream(filepath);
+      const filename = `test.txt`;
+      createFileInTestStorage(filename);
+      const stream = await localStorage.createReadStream(filename);
       expect(stream instanceof fs.ReadStream).toBeTruthy();
-      const buffer = await readStream(stream);
+      const buffer = await readStreamAsBuffer(stream);
       expect(buffer.toString()).toBe(fakeFileContent);
     });
 
@@ -113,15 +116,17 @@ describe(`LocalStorage Utility`, () => {
           });
         });
       createReadStreamStub.callsFake(fakeCreateReadStreamFunc);
-      const filepath = createFile(`test.txt`);
+      const filename = `test.txt`;
+      const absoluteFilepath = path.join(testStoragePath, filename);
+      createFileInTestStorage(filename);
       const options: ReadStreamOptions = {
         encoding: `utf-8`,
         highWaterMark: 16
       };
-      await localStorage.createReadStream(filepath, options);
+      await localStorage.createReadStream(filename, options);
       expect(fakeCreateReadStreamFunc.mock.calls.length).toBe(1);
       const funCall = fakeCreateReadStreamFunc.mock.calls[0];
-      expect(funCall[0]).toBe(filepath);
+      expect(funCall[0]).toBe(absoluteFilepath);
       expect(funCall[1].encoding).toBe(options.encoding);
       expect(funCall[1].highWaterMark).toBe(options.highWaterMark);
       createReadStreamStub.restore();
@@ -131,73 +136,52 @@ describe(`LocalStorage Utility`, () => {
   describe(`writeFile`, () => {
     it(`should create file with the content`, async () => {
       const expectedContent = faker.lorem.paragraph(2);
-      const filepath = path.join(testFilesDir, `test.txt`);
-      await localStorage.writeFile(filepath, expectedContent);
+      const filename = `test.txt`;
+      const absoluteFilepath = path.join(testStoragePath, filename);
+      await localStorage.writeFile(filename, expectedContent);
 
-      expect(fs.existsSync(filepath)).toBeTruthy();
-      const actualContent = fs.readFileSync(filepath, { encoding: 'utf-8' });
-      expect(actualContent).toBe(expectedContent);
-    });
-
-    it(`should update the existing file content`, async () => {
-      const existingFilepath = createFile(`existing-file.txt`);
-      const expectedContent = faker.lorem.paragraphs(4);
-      await localStorage.writeFile(existingFilepath, expectedContent);
-      const actualContent = fs.readFileSync(existingFilepath, {
+      expect(fs.existsSync(absoluteFilepath)).toBeTruthy();
+      const actualContent = fs.readFileSync(absoluteFilepath, {
         encoding: 'utf-8'
       });
       expect(actualContent).toBe(expectedContent);
     });
 
-    it(`should throw error when there is a problem writing file`, async () => {
-      const fakeFileError = new FakeFileError(`Problem writing file`);
-      fakeFileError.code = `DISK_FULL`;
-      const writeFileStub = sinon.stub(fs, 'writeFile');
-      const fakeWriteFileFunc = jest
-        .fn()
-        .mockImplementation((filepath, data, options, cb) => {
-          cb(fakeFileError);
-        });
-      writeFileStub.callsFake(fakeWriteFileFunc);
-      const filepath = path.join(testFilesDir, `testing.txt`);
-      try {
-        await localStorage.writeFile(filepath, faker.lorem.words(4));
-        throw new Error(`Expected error was not thrown.`);
-      } catch (e) {
-        expect(
-          e instanceof FakeFileError && e.code === fakeFileError.code
-        ).toBe(true);
-      }
-      expect(fs.existsSync(filepath)).toBeFalsy();
-      writeFileStub.restore();
+    it(`should update the existing file content`, async () => {
+      const filename = `existing-file.txt`;
+      createFileInTestStorage(filename);
+      const expectedContent = faker.lorem.paragraphs(4);
+      await localStorage.writeFile(filename, expectedContent);
+      const actualContent = fs.readFileSync(
+        path.join(testStoragePath, filename),
+        {
+          encoding: 'utf-8'
+        }
+      );
+      expect(actualContent).toBe(expectedContent);
     });
 
     it(`should write files with the right options`, async () => {
-      const writeFileStub = sinon.stub(fs, 'writeFile');
-      const fakeWriteFileFunc = jest
-        .fn()
-        .mockImplementation((filepath, data, options, cb) => {
-          cb();
-        });
-      writeFileStub.callsFake(fakeWriteFileFunc);
-      const filepath = path.join(testFilesDir, `testing.txt`);
+      const writeFileAsyncStub = sinon.stub(utilities, 'writeFileAsync');
+      const filename = `testing.txt`;
       const content = faker.lorem.words(4);
       const options = 'base64';
-      await localStorage.writeFile(filepath, content, options);
-      expect(fakeWriteFileFunc.mock.calls.length).toBe(1);
-      const expectedFuncCall = fakeWriteFileFunc.mock.calls[0];
-      expect(expectedFuncCall[0]).toBe(filepath);
-      expect(expectedFuncCall[1]).toBe(content);
-      expect(expectedFuncCall[2]).toBe(options);
-      writeFileStub.restore();
+      await localStorage.writeFile(filename, content, options);
+      sinon.assert.calledOnceWithExactly(
+        writeFileAsyncStub,
+        path.join(testStoragePath, filename),
+        content,
+        options
+      );
+      writeFileAsyncStub.restore();
     });
 
     it(`should return expected result`, async () => {
       const expectedContent = faker.lorem.paragraph(2);
-      const filepath = path.join(testFilesDir, `test.txt`);
-      const result = await localStorage.writeFile(filepath, expectedContent);
+      const filename = `test.txt`;
+      const result = await localStorage.writeFile(filename, expectedContent);
 
-      expect(result.filepath).toBe(result.filepath);
+      expect(result.filepath).toBe(path.join(testStoragePath, filename));
       expect(result.ServerSideEncryption).toBeUndefined();
       expect(result.ETag).toBeUndefined();
       expect(result.$metadata).toBeUndefined();
@@ -208,54 +192,40 @@ describe(`LocalStorage Utility`, () => {
 
   describe(`deleteFile`, () => {
     it(`should delete the local file`, async () => {
-      const filepath = createFile(`waiyanhein-greeting.txt`);
-      expect(fs.existsSync(filepath)).toBeTruthy();
-      await localStorage.deleteFile(filepath);
-      expect(fs.existsSync(filepath)).toBeFalsy();
-    });
-
-    it(`should throw error when file does not exist`, async () => {
-      let unlinkStub = sinon.stub(fs, 'unlink');
-      let fakeUnlinkFunc = jest.fn((filepath, cb) => {
-        cb(new Error(`File does not exist.`));
-      });
-      unlinkStub.callsFake(fakeUnlinkFunc);
-      try {
-        const filepath = path.join(testFilesDir, `waiy-greeting.txt`);
-        await localStorage.deleteFile(filepath);
-        throw new Error(`Expected error was not thrown.`);
-      } catch (e) {
-        if (!(e instanceof Error)) {
-          throw new Error(`Expected error was not thrown.`);
-        }
-        expect(e.message).toBe(`File does not exist.`);
-      }
-      unlinkStub.restore();
+      const filename = `waiyanhein-greeting.txt`;
+      const absolutePath = path.join(testStoragePath, filename);
+      createFileInTestStorage(filename);
+      expect(fs.existsSync(absolutePath)).toBeTruthy();
+      await localStorage.deleteFile(filename);
+      expect(fs.existsSync(absolutePath)).toBeFalsy();
     });
   });
 
   describe(`exists`, () => {
     it(`should return true if the file exist`, async () => {
-      const filepath = createFile(`waiyanhein-greeting.txt`);
+      const filename = `${faker.datatype.uuid()}.txt`;
+      createFileInTestStorage(filename);
 
-      expect(await localStorage.exists(filepath)).toBeTruthy();
-      deleteFileIfExists(filepath);
+      expect(await localStorage.exists(filename)).toBeTruthy();
+      fs.unlinkSync(path.join(testStoragePath, filename));
     });
 
     it(`should return false if the file does not exist`, async () => {
-      const filepath = path.join(testFilesDir, `waiyanhein-greeting.txt`);
-      expect(await localStorage.exists(filepath)).toBeFalsy();
+      expect(
+        await localStorage.exists(`${faker.datatype.uuid()}.txt`)
+      ).toBeFalsy();
     });
 
     it(`should return true if the directory exists`, async () => {
-      const dirpath = path.join(testFilesDir, `waiyanhein`);
-      await fs.mkdirSync(dirpath);
-      expect(await localStorage.exists(dirpath)).toBeTruthy();
+      const dirname = faker.datatype.uuid();
+      const absolutePath = path.join(testStoragePath, dirname);
+      await fs.mkdirSync(absolutePath);
+      expect(await localStorage.exists(dirname)).toBeTruthy();
+      fs.rmdirSync(absolutePath);
     });
 
     it(`should return false if the directory does not exist`, async () => {
-      const dirpath = path.join(testFilesDir, `doesnotexist`);
-      expect(await localStorage.exists(dirpath)).toBeFalsy();
+      expect(await localStorage.exists(`doesnotexist`)).toBeFalsy();
     });
 
     it(`should throw error when the error code is not ENOENT`, async () => {
@@ -266,294 +236,198 @@ describe(`LocalStorage Utility`, () => {
         cb(fakeError);
       });
       statStub.callsFake(fakeStatFunc);
-      try {
-        const filepath = path.join(testFilesDir, `fakefile.txt`);
-        await localStorage.exists(filepath);
-        throw new Error(`Expected error was not thrown.`);
-      } catch (e) {
-        expect(
-          e instanceof FakeFileError && e.code === fakeError.code
-        ).toBeTruthy();
-      }
+      await expect(
+        localStorage.exists(`${faker.datatype.uuid()}.txt`)
+      ).rejects.toThrow(fakeError.message);
       statStub.restore();
     });
   });
 
   describe(`rename`, () => {
     it(`should rename file`, async () => {
-      const filepath = createFile(`waiyanhein-greeting.txt`);
-      const newFilepath = path.join(
-        testFilesDir,
-        `waiyanhein-greeting-new.txt`
-      );
-      await localStorage.rename(filepath, newFilepath);
-      expect(fs.existsSync(newFilepath)).toBeTruthy();
-      expect(fs.existsSync(filepath)).toBeFalsy();
-      const content = fs.readFileSync(newFilepath, { encoding: 'utf-8' });
+      const filename = `${faker.datatype.uuid()}.txt`;
+      const newFilename = `${faker.datatype.uuid()}.txt`;
+      createFileInTestStorage(filename);
+      await localStorage.rename(filename, newFilename);
+      expect(
+        fs.existsSync(path.join(testStoragePath, newFilename))
+      ).toBeTruthy();
+      expect(fs.existsSync(path.join(testStoragePath, filename))).toBeFalsy();
+      const content = fs.readFileSync(path.join(testStoragePath, newFilename), {
+        encoding: 'utf-8'
+      });
       expect(content).toBe(fakeFileContent);
     });
 
     it(`should rename directory`, async () => {
-      const dirpath = path.join(testFilesDir, `waiyanhein`);
-      await fs.mkdirSync(dirpath);
-      const newDirpath = path.join(testFilesDir, `waiyanhein-new`);
-      await localStorage.rename(dirpath, newDirpath);
-      expect(fs.existsSync(newDirpath)).toBeTruthy();
-    });
-
-    it(`should throw error when file does not exist`, async () => {
-      const fakeError = new FakeFileError(`File does not exist.`);
-      fakeError.code = `FILE_NOT_FOUND`;
-      const renameStub = sinon.stub(fs, `rename`);
-      const fakeRenameFunc = jest.fn((from, to, cb) => {
-        cb(fakeError);
-      });
-      renameStub.callsFake(fakeRenameFunc);
-      try {
-        const filepath = path.join(testFilesDir, `does-not-exist.txt`);
-        await localStorage.rename(filepath, `newfile.txt`);
-        throw new Error(`Expected error was not thrown`);
-      } catch (e) {
-        expect(
-          e instanceof FakeFileError && e.code === fakeError.code
-        ).toBeTruthy();
-      }
-      renameStub.restore();
+      const dirname = faker.datatype.uuid();
+      const absolutePath = path.join(testStoragePath, dirname);
+      const newDirname = faker.datatype.uuid();
+      await fs.mkdirSync(absolutePath);
+      await localStorage.rename(dirname, newDirname);
+      expect(
+        fs.existsSync(path.join(testStoragePath, newDirname))
+      ).toBeTruthy();
     });
   });
 
   describe('copy', () => {
     it('should create a copy fil with the same content with the new filename', async () => {
-      const from = 'test.txt';
-      createFile(from);
-      const absoluteFrom = path.join(testFilesDir, from);
-      const absoluteTo = path.join(testFilesDir, 'to.txt');
+      const from = `${faker.datatype.uuid()}.txt`;
+      const to = `${faker.datatype.uuid()}.txt`;
+      createFileInTestStorage(from);
+      const absoluteTo = path.join(testStoragePath, to);
 
-      await localStorage.copy(absoluteFrom, absoluteTo);
+      await localStorage.copy(from, to);
 
-      const content = fs.readFileSync(absoluteTo);
+      const toContent = fs.readFileSync(absoluteTo);
 
       expect(fs.existsSync(absoluteTo)).toBeTruthy();
-      expect(content.toString()).toBe(fakeFileContent);
+      expect(toContent.toString()).toBe(fakeFileContent);
     });
 
     it('should not delete the source file after the copy is created', async () => {
-      const from = 'from.txt';
-      createFile(from);
-      const absoluteFrom = path.join(testFilesDir, from);
+      const from = `${faker.datatype.uuid()}.txt`;
+      const to = `${faker.datatype.uuid()}.txt`;
+      createFileInTestStorage(from);
 
-      await localStorage.copy(absoluteFrom, path.join(testFilesDir, 'to.txt'));
+      await localStorage.copy(from, to);
 
+      const absoluteFrom = path.join(testStoragePath, from);
+      const fromContent = fs.readFileSync(absoluteFrom);
       expect(fs.existsSync(absoluteFrom)).toBeTruthy();
+      expect(fromContent.toString()).toBe(fakeFileContent);
     });
 
-    it('should not invoke copyFile when source and destination filenames are the same', async () => {
-      const copyFileSpy = sinon.spy(fs, 'copyFile');
+    it('should not invoke copyFileAsync when source and destination filenames are the same', async () => {
+      const copyFileAsyncSpy = sinon.spy(utilities, 'copyFileAsync');
       const from = 'from.txt';
-      createFile(from);
-      const absoluteFrom = path.join(testFilesDir, from);
+      createFileInTestStorage(from);
+      await localStorage.copy(from, from);
 
-      await localStorage.copy(absoluteFrom, absoluteFrom);
-
-      sinon.assert.notCalled(copyFileSpy);
-      copyFileSpy.restore();
-    });
-
-    it('should throw unexpected error when something went wrong with copying file', async () => {
-      const copyFileStub = sinon
-        .stub(fs, 'copyFile')
-        .throws(new Error('Something went wrong!'));
-      const from = 'from.txt';
-      createFile(from);
-
-      await expect(
-        localStorage.copy(
-          path.join(testFilesDir, from),
-          path.join(testFilesDir, 'tox.txt')
-        )
-      ).rejects.toThrow('Something went wrong!');
-      copyFileStub.restore();
+      sinon.assert.notCalled(copyFileAsyncSpy);
+      copyFileAsyncSpy.restore();
     });
   });
 
   describe(`mkdir`, () => {
     it(`should create directory`, async () => {
-      const dirPath = path.join(testFilesDir, `test-directory`);
-      await localStorage.mkdir(dirPath);
-      expect(fs.existsSync(dirPath)).toBeTruthy();
+      const dirname = faker.datatype.uuid();
+      await localStorage.mkdir(dirname);
+      expect(fs.existsSync(path.join(testStoragePath, dirname))).toBeTruthy();
     });
 
-    it(`should throw error`, async () => {
-      const fakeFileError = new FakeFileError(`Insufficient permissions.`);
-      fakeFileError.code = `INSUFFICIENT_PERMISSIONS`;
-      const fsMkdirStub = sinon.stub(fs.promises, `mkdir`);
-      const fakeMkdirFunc = jest.fn().mockImplementation((dirPath, options) => {
-        return new Promise((resolve, reject) => {
-          reject(fakeFileError);
-        });
-      });
-      fsMkdirStub.callsFake(fakeMkdirFunc);
-      try {
-        const dirPath = path.join(testFilesDir, `test-directory`);
-        await localStorage.mkdir(dirPath);
-        throw new Error(`Expected error was not thrown`);
-      } catch (e) {
-        expect(
-          e instanceof FakeFileError && e.code === fakeFileError.code
-        ).toBeTruthy();
-      }
-      fsMkdirStub.restore();
+    it(`should create directory recursively`, async () => {
+      const dirname = path.join(faker.datatype.uuid(), faker.datatype.uuid());
+      await localStorage.mkdir(dirname);
+      expect(fs.existsSync(path.join(testStoragePath, dirname))).toBeTruthy();
     });
   });
 
   describe(`rmdir`, () => {
     it(`should delete directory`, async () => {
-      const dirpath = createDirectoryIfNotExist(`wai`);
-      expect(fs.existsSync(dirpath)).toBeTruthy();
-      await localStorage.rmdir(dirpath);
-      expect(fs.existsSync(dirpath)).toBeFalsy();
+      const dirname = faker.datatype.uuid();
+      const absolutePath = path.join(testStoragePath, dirname);
+      fs.mkdirSync(absolutePath);
+      expect(fs.existsSync(absolutePath)).toBeTruthy();
+      await localStorage.rmdir(dirname);
+      expect(fs.existsSync(absolutePath)).toBeFalsy();
     });
 
     it(`should not delete directory and throw error instead by default when there is a file in it`, async () => {
-      const dirpath = createDirectoryIfNotExist(`waiyan`);
-      createFile(`waiyan/testfiletxt`);
-      try {
-        await localStorage.rmdir(dirpath);
-        throw new Error(`Expected error was not thrown.`);
-      } catch (e) {
-        if (!e || typeof e !== 'object') {
-          throw new Error(`Expected error was not thrown.`);
-        }
-        if (!('code' in e)) {
-          throw new Error(`Expected error was not thrown.`);
-        }
-        expect(e.code).toBe(`ENOTEMPTY`);
-      }
+      const dirname = faker.datatype.uuid();
+      fs.mkdirSync(path.join(testStoragePath, dirname));
+      createFileInTestStorage(path.join(dirname, `${faker.datatype.uuid()}.txt`));
+      await expect(localStorage.rmdir(dirname)).rejects.toThrow(`ENOTEMPTY`);
     });
 
     it(`should delete the directory with files in it when forceDelete flag is true`, async () => {
-      const dirpath = createDirectoryIfNotExist(`waiyan`);
-      const filepath = createFile(`waiyan/testfiletxt`);
-      await localStorage.rmdir(dirpath, true);
-      await delay(1000);
-
-      expect(fs.existsSync(dirpath)).toBeFalsy();
-      expect(fs.existsSync(filepath)).toBeFalsy();
+      const dirname = faker.datatype.uuid();
+      const absolutePath = path.join(testStoragePath, dirname);
+      fs.mkdirSync(absolutePath);
+      createFileInTestStorage(path.join(dirname, `${faker.datatype.uuid()}.txt`));
+      await localStorage.rmdir(dirname, true);
+      expect(fs.existsSync(absolutePath)).toBeFalsy();
     });
   });
 
   describe(`isDir`, () => {
     it(`should return true when the path is directory`, async () => {
-      const dirpath = createDirectoryIfNotExist(`test`);
-      expect(await localStorage.isDir(dirpath)).toBeTruthy();
+      const dirname = faker.datatype.uuid();
+      fs.mkdirSync(path.join(testStoragePath, dirname));
+      expect(await localStorage.isDir(dirname)).toBeTruthy();
     });
 
     it(`should return false when the path is file`, async () => {
-      const filepath = createFile(`testing.txt`);
-      expect(await localStorage.isDir(filepath)).toBeFalsy();
+      const filename = faker.datatype.uuid();
+      createFileInTestStorage(filename);
+      expect(await localStorage.isDir(filename)).toBeFalsy();
     });
 
     it(`should throw error when the file does not exist`, async () => {
-      try {
-        await localStorage.isDir(`i-do-not-exist`);
-        throw new Error(`Expected error was not thrown.`);
-      } catch (e) {
-        if (!e || typeof e !== 'object' || !(`code` in e)) {
-          throw new Error(`Expected error was not thrown.`);
-        }
-        expect(e.code).toBe(`ENOENT`);
-      }
+      await expect(localStorage.isDir(`i-do-not-exist`)).rejects.toThrow(`ENOENT`);
     });
   });
 
   describe(`isFile`, () => {
     it(`should return true when the path is file`, async () => {
-      const filepath = createFile(`test.txt`);
-      expect(await localStorage.isFile(filepath)).toBeTruthy();
+      const filename = `${faker.datatype.uuid()}.txt`;
+      createFileInTestStorage(filename);
+      expect(await localStorage.isFile(filename)).toBeTruthy();
     });
 
     it(`should return false when the path is directory`, async () => {
-      const dir = createDirectoryIfNotExist(`testing`);
-      expect(await localStorage.isFile(dir)).toBeFalsy();
+      const dirname = faker.datatype.uuid();
+      fs.mkdirSync(path.join(testStoragePath, dirname))
+      expect(await localStorage.isFile(dirname)).toBeFalsy();
     });
 
     it(`should throw error when the dir does not exist`, async () => {
-      try {
-        await localStorage.isFile(`i-do-not-exist.txt`);
-        throw new Error(`Expected error was not thrown.`);
-      } catch (e) {
-        if (!e || typeof e !== 'object' || !(`code` in e)) {
-          throw new Error(`Expected error was not thrown.`);
-        }
-        expect(e.code).toBe(`ENOENT`);
-      }
+      await expect(localStorage.isFile(`i-do-not-exist.txt`)).rejects.toThrow(`ENOENT`);
     });
   });
 
   describe(`deleteFiles`, () => {
     it(`should delete the multiple files`, async () => {
-      const file1Path = createFile(`file1.txt`);
-      const file2Path = createFile(`file2.txt`);
+      const file1name = `${faker.datatype.uuid()}.txt`;
+      const file2name = `${faker.datatype.uuid()}.txt`;
+      createFileInTestStorage(file1name);
+      createFileInTestStorage(file2name);
 
-      await localStorage.deleteFiles([file1Path, file2Path]);
+      await localStorage.deleteFiles([file1name, file2name]);
 
-      expect(fs.existsSync(file1Path)).toBeFalsy();
-      expect(fs.existsSync(file2Path)).toBeFalsy();
+      expect(fs.existsSync(path.join(testStoragePath, file1name))).toBeFalsy();
+      expect(fs.existsSync(path.join(testStoragePath, file2name))).toBeFalsy();
     });
 
-    it(`should not delete the files the other files`, async () => {
-      const file1Path = createFile(`file1.txt`);
-      const file2Path = createFile(`file2.txt`);
+    it(`should not delete the other file`, async () => {
+      const file1name = `${faker.datatype.uuid()}.txt`;
+      const file2name = `${faker.datatype.uuid()}.txt`;
+      createFileInTestStorage(file1name);
+      createFileInTestStorage(file2name);
 
-      await localStorage.deleteFiles([file1Path]);
+      await localStorage.deleteFiles([file1name]);
 
-      expect(fs.existsSync(file2Path)).toBeTruthy();
+      expect(fs.existsSync(path.join(testStoragePath, file1name))).toBeFalsy();
+      expect(fs.existsSync(path.join(testStoragePath, file2name))).toBeTruthy();
     });
   });
 
-  const createFile = (filename: string): string => {
-    const filepath = filename.startsWith(testFilesDir)
-      ? filename
-      : path.join(testFilesDir, filename);
+  // returns absolute path
+  const createFileInTestStorage = (filename: string): void => {
+    const filepath = path.join(testStoragePath, filename);
     fs.writeFileSync(filepath, fakeFileContent);
-    return filepath;
   };
 
-  const createDirectoryIfNotExist = (dirname: string): string => {
-    const dirpath = dirname.startsWith(testFilesDir)
-      ? dirname
-      : path.join(testFilesDir, dirname);
-    if (!fs.existsSync(dirpath)) {
-      fs.mkdirSync(dirpath);
+  const createDirectoryIfNotExist = (dirname: string): void => {
+    if (!fs.existsSync(dirname)) {
+      fs.mkdirSync(dirname);
     }
-
-    return dirpath;
   };
 
-  const deleteDirectoryIfExists = (dirpath: string) => {
+  const deleteDirectoryIfExists = (dirpath: string): void => {
     if (fs.existsSync(dirpath)) {
       fs.rmdirSync(dirpath, { recursive: true });
     }
-  };
-
-  const deleteFileIfExists = (filepath: string) => {
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
-    }
-  };
-
-  const readStream = async (readStream: fs.ReadStream): Promise<Buffer> => {
-    return new Promise<Buffer>((resolve) => {
-      let data: Buffer[] = [];
-      readStream.on(`data`, (chunk) => {
-        data.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-      });
-      readStream.on(`end`, () => {
-        resolve(Buffer.concat(data));
-      });
-      readStream.on(`error`, (err) => {
-        throw err;
-      });
-    });
   };
 });

@@ -69,8 +69,10 @@ export class FileSystem implements BaseFileSystem {
   public storeFiles = async (params: StoreFilesParams): Promise<string[]> =>
     this.getUploaderInstance().storeFiles(params);
 
-  public getTempUploadDirectory = (): string =>
-    this.getUploaderInstance().getTempUploadDirectory();
+  public getAbsoluteTempUploadDirPath = (): string =>
+    this.getUploaderInstance().getAbsoluteTempUploadDirPath();
+
+  public getAbsolutePath = (path: string) => this.getStorageInstance().getAbsolutePath(path);
 
   public writeFile = async (
     filepath: string,

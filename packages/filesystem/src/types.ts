@@ -5,6 +5,8 @@ import { WriteFileOptions, ReadStream } from 'fs';
 export interface Storage {
   readDir: (dir: string) => Promise<string[]>;
 
+  getAbsolutePath: (path: string) => string;
+
   readFile: (
     filepath: string,
     options?: {
@@ -34,7 +36,6 @@ export interface Storage {
 
   exists: (pathOrKey: string) => Promise<boolean>;
 
-  // TODO: test it creates recursively.
   mkdir: (path: string) => Promise<void>;
 
   rmdir: (path: string, forceDelete?: boolean) => Promise<void>;
@@ -51,7 +52,7 @@ export interface BaseFileUploader {
 
   storeFiles: (params: StoreFilesParams) => Promise<string[]>;
 
-  getTempUploadDirectory: () => string;
+  getAbsoluteTempUploadDirPath: () => string;
 
   clearTempUploadDirectory: () => Promise<void>;
 

@@ -9,6 +9,13 @@ import { readReadableAsString } from '@men-mvc/foundation';
 
 const storage = new S3Storage();
 describe(`S3Storage`, () => {
+  describe(`getAbsolutePath`, () => {
+    it(`should return filename as is`, async () => {
+        const filename = faker.datatype.uuid();
+        expect(storage.getAbsolutePath(filename)).toBe(filename);
+    });
+  });
+
   describe(`createReadStream`, () => {
     it(`should invoke adapter's createReadStream function with the right parameters`, async () => {
       const createReadStreamStub = sinon.stub(
