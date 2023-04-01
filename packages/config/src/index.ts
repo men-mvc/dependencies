@@ -10,3 +10,4 @@ export * from './frameworkTestConfig';
 export * from './configValidator';
 export * from './globals';
 export * from './utilities';
+export * from '@men-mvc/foundation';
