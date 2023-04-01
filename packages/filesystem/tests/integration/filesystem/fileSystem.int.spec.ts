@@ -137,7 +137,7 @@ describe('FileSystem', () => {
       const result = body.data as SimpleFormData;
       expect(result.name).toBe(formData.name);
       expect(result.photoFile.originalFilename).toBe(`node.png`);
-      await delay(2000); // wait for request finished event to finish
+      await delay(3000); // wait for request finished event to finish
       expect(fs.readdirSync(primaryTempStorageDir).length).toBe(
         0
       );
