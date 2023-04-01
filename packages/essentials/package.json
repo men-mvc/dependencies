@@ -26,12 +26,9 @@
     "@men-mvc/foundation": "^0.79.0",
     "axios": "^1.2.1",
     "bcryptjs": "^2.4.3",
-    "crypto": "^1.0.1",
     "express-fileupload": "^1.4.0",
     "express-rate-limit": "^6.7.0",
     "handlebars": "^4.7.7",
-    "install": "^0.13.0",
-    "jsonwebtoken": "^9.0.0",
     "nodemailer": "^6.8.0"
   },
   "devDependencies": {
@@ -43,7 +40,6 @@
     "@types/express-rate-limit": "^6.0.0",
     "@types/handlebars": "^4.1.0",
     "@types/jest": "^29.2.4",
-    "@types/jsonwebtoken": "^9.0.1",
     "@types/node": "^18.11.16",
     "@types/nodemailer": "^6.4.6",
     "@types/sinon": "^10.0.13",
