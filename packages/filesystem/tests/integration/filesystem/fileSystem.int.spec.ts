@@ -8,13 +8,14 @@ import { ErrorCodes, DeepPartial } from '@men-mvc/foundation';
 import { FakeUploadedFile, makePostFormDataRequest } from '@men-mvc/test';
 import { getTestExpressApp, initTestApplication } from '../utilities';
 import { ComplexFormData, SimpleFormData } from './support/types';
-import { getAppStorageDirectory, LocalStorage } from '../../../src';
+import { getAppStorageDirectory } from '../../../src';
 import { delay, deleteStorageDirectory } from '../../testUtilities';
 import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
 } from './utilities';
 import * as utilities from '../../../src/utilities';
+import {fileSystem} from "../../../lib";
 
 type StoreFilePayload = {
   file: FakeUploadedFile;
@@ -35,6 +36,9 @@ const originalFilesDir = path.join(
 describe('FileSystem', () => {
   beforeAll(async () => {
     await initTestApplication();
+  });
+  afterEach(() => {
+    fileSystem.resetTempUploadDirId();
   });
 
   describe(`parseFormData`, () => {
@@ -130,17 +134,17 @@ describe('FileSystem', () => {
       );
     });
 
-    // @FIXME: flaky
-    it(`should clear the temp upload dir when the request finished`, async () => {
+    // @FIXME: flaky - fixed the flakiness - keep an eye on this.
+    it(`should delete the unique temp upload dir when the request finished`, async () => {
       const formData = generateSimpleFormDataPayload();
       const { body } = await makeFormDataRequest(formData);
       const result = body.data as SimpleFormData;
       expect(result.name).toBe(formData.name);
       expect(result.photoFile.originalFilename).toBe(`node.png`);
-      await delay(3000); // wait for request finished event to finish
-      expect(fs.readdirSync(primaryTempStorageDir).length).toBe(
-        0
-      );
+      const tempDirIds = fs.readdirSync(primaryTempStorageDir);
+      expect(tempDirIds.length).toBe(1); // will be one as deleting the unique temp dir is async
+      await delay(2000); // wait for request finished event to finish
+      expect(fs.existsSync(path.join(primaryTempStorageDir, tempDirIds[0]))).toBeFalsy();
     });
 
     it(`should create temp storage for request`, async () => {
