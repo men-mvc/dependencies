@@ -9,7 +9,6 @@ import {
 export class S3Storage implements Storage {
   private adapter: MenS3Adapter | undefined;
 
-  // TODO: test
   public getAbsolutePath = (path: string): string => {
     return path;
   };
