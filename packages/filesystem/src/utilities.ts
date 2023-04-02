@@ -1,10 +1,13 @@
+import { Request, Response } from 'express';
 import { baseConfig, FileSystemDriver, getEnvVariable } from '@men-mvc/config';
-import { generateUuid as globalGenerateUuid } from '@men-mvc/foundation';
+import {
+  generateUuid as globalGenerateUuid,
+  invokeRequestErrorHandler
+} from '@men-mvc/foundation';
 import path from 'path';
 import util from 'util';
 import fs from 'fs';
 
-// TODO: do not use process.cwd
 export const getAppStorageDirectory = (): string => {
   let storageDirectory: string;
   const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
@@ -27,6 +30,12 @@ export const generateUuid = (): string => globalGenerateUuid();
 
 export const getDriver = (): FileSystemDriver =>
   baseConfig.fileSystem?.storageDriver ?? FileSystemDriver.local;
+
+export const invokeAppRequestErrorHandler = (
+  error: Error,
+  req: Request,
+  res: Response
+) => invokeRequestErrorHandler(error, req, res);
 
 export const readdirAsync = util.promisify(fs.readdir);
 export const rmdirAsync = util.promisify(fs.rmdir);

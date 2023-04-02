@@ -524,7 +524,9 @@ describe(`Validation Utility`, () => {
               name: 'I am not empty'
             }
           } as Request,
-          {} as Response
+          {
+            statusCode: 422
+          } as Response
         );
 
         sinon.assert.calledOnce(invokeRequestErrorHandlerStub);
@@ -533,10 +535,11 @@ describe(`Validation Utility`, () => {
         expect((callArgs[0] as Error).message).toBe(
           `Unable to retrieve data from request.`
         );
+        expect((callArgs[1] as Request).body.name).toBe('I am not empty');
+        expect((callArgs[2] as Response).statusCode).toBe(422);
       });
     });
 
-    // TODO: add tests using request validator class.
     describe(`ValidateRequestAsync`, () => {
       it(`should return validation error response when the validation fails and throws app validation error`, async () => {
         mockController.validateRequestAsync(
@@ -630,7 +633,9 @@ describe(`Validation Utility`, () => {
               codeConfirmation: 'TEST'
             }
           } as Request,
-          {} as Response
+          {
+            statusCode: 422
+          } as Response
         );
         await delay(1000); // async
 
@@ -640,6 +645,8 @@ describe(`Validation Utility`, () => {
         expect((callArgs[0] as Error).message).toBe(
           `Unable to retrieve the data from the request.`
         );
+        expect((callArgs[1] as Request).body.code).toBe(`TEST`);
+        expect((callArgs[2] as Response).statusCode).toBe(422);
       });
     });
 

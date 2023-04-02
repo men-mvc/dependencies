@@ -1,6 +1,8 @@
 import joi from 'joi';
 import { Response } from 'express';
 import {
+  isRequestValidator,
+  RequestValidator,
   resolveValidationError,
   validateRequest,
   validateRequestAsync,
@@ -9,6 +11,7 @@ import {
 } from '@men-mvc/foundation';
 import { MultipartRequest } from './types';
 import { FileSystem } from './fileSystem';
+import { invokeAppRequestErrorHandler } from './utilities';
 
 // ! to make the logic mockable
 export const buildValidationErrorResponse = (
@@ -18,7 +21,10 @@ export const buildValidationErrorResponse = (
   return validationErrorResponse(res, validationError);
 };
 
-export const ValidateMultipartRequestAsync = (schema: joi.ObjectSchema) => {
+// TODO: update test
+export const ValidateMultipartRequestAsync = (
+  schemaOrValidator: joi.ObjectSchema | RequestValidator
+) => {
   return function (
     scope: unknown,
     methodName: string,
@@ -33,12 +39,19 @@ export const ValidateMultipartRequestAsync = (schema: joi.ObjectSchema) => {
     ) {
       try {
         req.parsedFormData = await FileSystem.getInstance().parseFormData(req);
-        await validateRequestAsync(schema, req.parsedFormData);
+        await validateRequestAsync(
+          isRequestValidator(schemaOrValidator)
+            ? schemaOrValidator.getSchema(req, res)
+            : schemaOrValidator,
+          req.parsedFormData
+        );
       } catch (e) {
         if (e instanceof ValidationError) {
           return buildValidationErrorResponse(res, e);
         } else if (e instanceof joi.ValidationError) {
           return buildValidationErrorResponse(res, resolveValidationError(e));
+        } else {
+          return invokeAppRequestErrorHandler(e as Error, req, res);
         }
       }
 
@@ -47,7 +60,10 @@ export const ValidateMultipartRequestAsync = (schema: joi.ObjectSchema) => {
   };
 };
 
-export const ValidateMultipartRequest = (schema: joi.ObjectSchema) => {
+// TODO: update test
+export const ValidateMultipartRequest = (
+  schemaOrValidator: joi.ObjectSchema | RequestValidator
+) => {
   return (
     target: unknown,
     propertyKey: string,
@@ -62,10 +78,17 @@ export const ValidateMultipartRequest = (schema: joi.ObjectSchema) => {
     ) {
       try {
         req.parsedFormData = await FileSystem.getInstance().parseFormData(req);
-        validateRequest(schema, req.body);
+        validateRequest(
+          isRequestValidator(schemaOrValidator)
+            ? schemaOrValidator.getSchema(req, res)
+            : schemaOrValidator,
+          req.body
+        );
       } catch (e: unknown) {
         if (e instanceof ValidationError) {
           return buildValidationErrorResponse(res, e);
+        } else {
+          return invokeAppRequestErrorHandler(e as Error, req, res);
         }
       }
 
