@@ -21,7 +21,6 @@ export const buildValidationErrorResponse = (
   return validationErrorResponse(res, validationError);
 };
 
-// TODO: update test
 export const ValidateMultipartRequestAsync = (
   schemaOrValidator: joi.ObjectSchema | RequestValidator
 ) => {
@@ -60,7 +59,6 @@ export const ValidateMultipartRequestAsync = (
   };
 };
 
-// TODO: update test
 export const ValidateMultipartRequest = (
   schemaOrValidator: joi.ObjectSchema | RequestValidator
 ) => {
