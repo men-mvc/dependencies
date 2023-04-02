@@ -1,7 +1,7 @@
 import handlebars from 'handlebars';
 import path from 'path';
 import fs from 'fs';
-import { getSourceCodeDirectory } from '../utilities';
+import { getMailTemplatesDir } from './utilities';
 
 type TemplateData = { [key: string]: unknown };
 
@@ -93,11 +93,7 @@ export class MailTemplateBuilder {
     if (MailTemplateBuilder.emailTemplatesDir) {
       return MailTemplateBuilder.emailTemplatesDir;
     }
-    MailTemplateBuilder.emailTemplatesDir = path.join(
-      getSourceCodeDirectory(),
-      'views',
-      'emails'
-    );
+    MailTemplateBuilder.emailTemplatesDir = getMailTemplatesDir();
 
     return MailTemplateBuilder.emailTemplatesDir;
   };

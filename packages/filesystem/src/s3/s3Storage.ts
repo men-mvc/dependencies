@@ -12,7 +12,7 @@ export class S3Storage implements Storage {
   // TODO: test
   public getAbsolutePath = (path: string): string => {
     return path;
-  }
+  };
 
   public getS3Adapter = (): MenS3Adapter => {
     try {

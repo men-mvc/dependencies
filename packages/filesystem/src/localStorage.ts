@@ -3,7 +3,8 @@ import path from 'path';
 import { Storage, ReadStreamOptions, WriteFileResult } from './types';
 import {
   copyFileAsync,
-  getAppStorageDirectory, mkdirAsync,
+  getAppStorageDirectory,
+  mkdirAsync,
   readdirAsync,
   readFileAsync,
   renameAsync,
@@ -40,7 +41,7 @@ export class LocalStorage implements Storage {
   // TODO: test
   public getAbsolutePath = (dirOrFilePath: string): string => {
     return path.join(getAppStorageDirectory(), dirOrFilePath);
-  }
+  };
 
   public readDir = (dir: string): Promise<string[]> =>
     readdirAsync(this.createStorageCompatiblePath(dir));
@@ -141,8 +142,10 @@ export class LocalStorage implements Storage {
   };
 
   public mkdir = async (dirPath: string): Promise<void> => {
-    await mkdirAsync(this.createStorageCompatiblePath(dirPath), { recursive: true });
-  }
+    await mkdirAsync(this.createStorageCompatiblePath(dirPath), {
+      recursive: true
+    });
+  };
 
   public rmdir = async (
     dirPath: string,
@@ -155,7 +158,9 @@ export class LocalStorage implements Storage {
 
   public isDir = async (dirOrFilepath: string): Promise<boolean> => {
     try {
-      return await this.isDirPromise(this.createStorageCompatiblePath(dirOrFilepath));
+      return await this.isDirPromise(
+        this.createStorageCompatiblePath(dirOrFilepath)
+      );
     } catch (e) {
       throw e;
     }

@@ -1,6 +1,6 @@
 import sinon, { SinonStub } from 'sinon';
 import { faker } from '@faker-js/faker';
-import {readStreamAsBuffer} from "@men-mvc/foundation";
+import { readStreamAsBuffer } from '@men-mvc/foundation';
 import fs from 'fs';
 import path from 'path';
 import stream from 'stream';
@@ -34,7 +34,9 @@ describe(`LocalStorage Utility`, () => {
   describe(`getAbsolutePath`, () => {
     it(`should return prepend storage path`, () => {
       const filename = `${faker.datatype.uuid()}.txt`;
-      expect(localStorage.getAbsolutePath(filename)).toBe(path.join(testStoragePath, filename));
+      expect(localStorage.getAbsolutePath(filename)).toBe(
+        path.join(testStoragePath, filename)
+      );
     });
   });
 
@@ -337,7 +339,9 @@ describe(`LocalStorage Utility`, () => {
     it(`should not delete directory and throw error instead by default when there is a file in it`, async () => {
       const dirname = faker.datatype.uuid();
       fs.mkdirSync(path.join(testStoragePath, dirname));
-      createFileInTestStorage(path.join(dirname, `${faker.datatype.uuid()}.txt`));
+      createFileInTestStorage(
+        path.join(dirname, `${faker.datatype.uuid()}.txt`)
+      );
       await expect(localStorage.rmdir(dirname)).rejects.toThrow(`ENOTEMPTY`);
     });
 
@@ -345,7 +349,9 @@ describe(`LocalStorage Utility`, () => {
       const dirname = faker.datatype.uuid();
       const absolutePath = path.join(testStoragePath, dirname);
       fs.mkdirSync(absolutePath);
-      createFileInTestStorage(path.join(dirname, `${faker.datatype.uuid()}.txt`));
+      createFileInTestStorage(
+        path.join(dirname, `${faker.datatype.uuid()}.txt`)
+      );
       await localStorage.rmdir(dirname, true);
       expect(fs.existsSync(absolutePath)).toBeFalsy();
     });
@@ -365,7 +371,9 @@ describe(`LocalStorage Utility`, () => {
     });
 
     it(`should throw error when the file does not exist`, async () => {
-      await expect(localStorage.isDir(`i-do-not-exist`)).rejects.toThrow(`ENOENT`);
+      await expect(localStorage.isDir(`i-do-not-exist`)).rejects.toThrow(
+        `ENOENT`
+      );
     });
   });
 
@@ -378,12 +386,14 @@ describe(`LocalStorage Utility`, () => {
 
     it(`should return false when the path is directory`, async () => {
       const dirname = faker.datatype.uuid();
-      fs.mkdirSync(path.join(testStoragePath, dirname))
+      fs.mkdirSync(path.join(testStoragePath, dirname));
       expect(await localStorage.isFile(dirname)).toBeFalsy();
     });
 
     it(`should throw error when the dir does not exist`, async () => {
-      await expect(localStorage.isFile(`i-do-not-exist.txt`)).rejects.toThrow(`ENOENT`);
+      await expect(localStorage.isFile(`i-do-not-exist.txt`)).rejects.toThrow(
+        `ENOENT`
+      );
     });
   });
 

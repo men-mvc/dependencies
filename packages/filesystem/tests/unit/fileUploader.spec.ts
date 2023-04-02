@@ -92,18 +92,13 @@ describe('FileUploader Utility', function () {
         originalFilename: `${originalFilename}.txt`
       });
       const storeFileParams = {
-        uploadedFile,
+        uploadedFile
       };
       const result = await fileUploader.storeFile(storeFileParams);
 
       expect(result.length).toBe(40);
       expect(
-          fs.existsSync(
-              path.join(
-                  getAppStorageDirectory(),
-                  result
-              )
-          )
+        fs.existsSync(path.join(getAppStorageDirectory(), result))
       ).toBeTruthy();
     });
 
@@ -115,12 +110,9 @@ describe('FileUploader Utility', function () {
         filepath: uploadedFilepath,
         originalFilename
       });
-      s3WriteFileStub = sinon.stub(
-          fileUploader.getS3Storage(),
-          `writeFile`
-      );
+      s3WriteFileStub = sinon.stub(fileUploader.getS3Storage(), `writeFile`);
       const storeFileParams = {
-        uploadedFile,
+        uploadedFile
       };
       const createdObjectKey = await fileUploader.storeFile(storeFileParams);
       expect(createdObjectKey.length).toBe(40);
@@ -137,18 +129,18 @@ describe('FileUploader Utility', function () {
       const storeFileParams = {
         uploadedFile,
         directory: path.join(faker.datatype.uuid(), faker.datatype.uuid()),
-        filename: faker.datatype.uuid(),
+        filename: faker.datatype.uuid()
       };
       await fileUploader.storeFile(storeFileParams);
 
       expect(
-          fs.existsSync(
-              path.join(
-                  getAppStorageDirectory(),
-                  storeFileParams.directory,
-                  `${storeFileParams.filename}.txt`
-              )
+        fs.existsSync(
+          path.join(
+            getAppStorageDirectory(),
+            storeFileParams.directory,
+            `${storeFileParams.filename}.txt`
           )
+        )
       ).toBeTruthy();
     });
 
@@ -162,10 +154,7 @@ describe('FileUploader Utility', function () {
       });
       const fileKey = `testFileKey`;
       const directory = `testFileDirectory`;
-      s3WriteFileStub = sinon.stub(
-        fileUploader.getS3Storage(),
-        `writeFile`
-      );
+      s3WriteFileStub = sinon.stub(fileUploader.getS3Storage(), `writeFile`);
       const storeFileParams = {
         uploadedFile,
         filename: fileKey,
@@ -191,10 +180,7 @@ describe('FileUploader Utility', function () {
         filepath: uploadedFilepath,
         originalFilename
       });
-      s3WriteFileStub = sinon.stub(
-        fileUploader.getS3Storage(),
-        `writeFile`
-      );
+      s3WriteFileStub = sinon.stub(fileUploader.getS3Storage(), `writeFile`);
       await fileUploader.storeFile({
         uploadedFile,
         filename: `testFileKey`,
@@ -206,7 +192,7 @@ describe('FileUploader Utility', function () {
     });
 
     it(`should rename uploaded temp file adding file extension before uploading to S3`, async () => {
-      const renameAsyncSpy = sinon.spy(fileSystemUtilities, `renameAsync`)
+      const renameAsyncSpy = sinon.spy(fileSystemUtilities, `renameAsync`);
       getDriverStub = mockGetDriver(FileSystemDriver.s3);
       const originalFilename = `testfile.txt`;
       const uploadedFilepath = createTestUploadedFile(`testfile`);
@@ -214,10 +200,7 @@ describe('FileUploader Utility', function () {
         filepath: uploadedFilepath,
         originalFilename
       });
-      s3WriteFileStub = sinon.stub(
-        fileUploader.getS3Storage(),
-        `writeFile`
-      );
+      s3WriteFileStub = sinon.stub(fileUploader.getS3Storage(), `writeFile`);
       await fileUploader.storeFile({
         uploadedFile,
         filename: `testFileKey`,
@@ -225,7 +208,7 @@ describe('FileUploader Utility', function () {
       });
 
       sinon.assert.calledOnceWithExactly(
-          renameAsyncSpy,
+        renameAsyncSpy,
         uploadedFile.filepath,
         `${uploadedFile.filepath}.txt`
       );
@@ -242,11 +225,13 @@ describe('FileUploader Utility', function () {
       });
       const storeFileParams = {
         uploadedFile,
-        directory:  faker.datatype.uuid(),
-        filename: faker.datatype.uuid(),
+        directory: faker.datatype.uuid(),
+        filename: faker.datatype.uuid()
       };
       const result = await fileUploader.storeFile(storeFileParams);
-      expect(result).toBe(path.join(storeFileParams.directory, `${storeFileParams.filename}.txt`));
+      expect(result).toBe(
+        path.join(storeFileParams.directory, `${storeFileParams.filename}.txt`)
+      );
     });
 
     it(`should return relative path - s3`, async () => {
@@ -257,10 +242,7 @@ describe('FileUploader Utility', function () {
         filepath: uploadedFilepath,
         originalFilename
       });
-      s3WriteFileStub = sinon.stub(
-          fileUploader.getS3Storage(),
-          `writeFile`
-      );
+      s3WriteFileStub = sinon.stub(fileUploader.getS3Storage(), `writeFile`);
       const params = {
         uploadedFile,
         filename: faker.datatype.uuid(),
@@ -268,7 +250,9 @@ describe('FileUploader Utility', function () {
       };
       const result = await fileUploader.storeFile(params);
 
-      expect(result).toBe(path.join(params.directory, `${params.filename}.txt`));
+      expect(result).toBe(
+        path.join(params.directory, `${params.filename}.txt`)
+      );
     });
 
     const createTestUploadedFile = (filename: string): string => {

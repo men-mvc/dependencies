@@ -5,8 +5,7 @@ import { NodemailerMailSender, TransportOptions } from '../../../src';
 import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
 import {
   generateLoginTransportOptions,
-  generateMailConfig,
-  mockGetSourceCodeDirectory
+  generateMailConfig
 } from './testUtilities';
 import { MailConfig } from '@men-mvc/config';
 import { faker } from '@faker-js/faker';
@@ -15,7 +14,10 @@ import {
   TemplateSendMailOptions,
   SendMailOptions
 } from '../../../src';
+import { getServerDirectory, setServerDirectory } from '../../../src';
+import path from 'path';
 
+const serverDirectoryBeforeTests = getServerDirectory();
 describe(`NodemailerMailSender`, () => {
   describe(`send`, () => {
     const fakeTransportOptions: TransportOptions =
@@ -26,12 +28,13 @@ describe(`NodemailerMailSender`, () => {
     let createTransportStub: sinon.SinonStub;
     let createTransportMockFunc: jest.Mock;
     let getTransportOptionsStub: SinonStub;
-    let getSourceCodeDirectoryStub: SinonStub;
 
-    beforeAll(
-      () => (getSourceCodeDirectoryStub = mockGetSourceCodeDirectory())
-    );
-    afterAll(() => getSourceCodeDirectoryStub.restore());
+    beforeAll(() => {
+      setServerDirectory(path.join(process.cwd(), 'tests'));
+    });
+    afterAll(() => {
+      setServerDirectory(serverDirectoryBeforeTests);
+    });
 
     beforeEach(() => {
       mockGetTransportOptions();

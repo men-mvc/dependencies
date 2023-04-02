@@ -1,16 +1,19 @@
-import sinon from 'sinon';
 import { MailTemplateBuilder } from '../../../src/mailer/mailTemplateBuilder';
-import { mockGetSourceCodeDirectory } from './testUtilities';
 import { faker } from '@faker-js/faker';
+import { getServerDirectory, setServerDirectory } from '../../../src';
+import path from 'path';
 
 const templateBuilder: MailTemplateBuilder = MailTemplateBuilder.getInstance();
+const originalServerDirectory: string = getServerDirectory();
 
 describe(`MailTemplateBuilder`, () => {
-  let getSourceCodeDirectoryStub: sinon.SinonStub;
+  beforeAll(() => {
+    setServerDirectory(path.join(process.cwd(), 'tests'));
+  });
 
-  beforeAll(() => (getSourceCodeDirectoryStub = mockGetSourceCodeDirectory()));
-
-  afterAll(() => getSourceCodeDirectoryStub.restore());
+  afterAll(() => {
+    setServerDirectory(originalServerDirectory);
+  });
 
   describe(`getInstance`, () => {
     it(`should return the same instance`, async () => {

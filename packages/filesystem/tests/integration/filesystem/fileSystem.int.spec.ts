@@ -15,7 +15,7 @@ import {
   makeFormDataRequest
 } from './utilities';
 import * as utilities from '../../../src/utilities';
-import {fileSystem} from "../../../lib";
+import { fileSystem } from '../../../lib';
 
 type StoreFilePayload = {
   file: FakeUploadedFile;
@@ -27,7 +27,7 @@ type StoreFilesPayload = {
   directory?: string;
 };
 
-const tempDirname = `temp`
+const tempDirname = `temp`;
 const primaryTempStorageDir = path.join(getAppStorageDirectory(), tempDirname);
 const originalFilesDir = path.join(
   __dirname,
@@ -134,7 +134,7 @@ describe('FileSystem', () => {
       );
     });
 
-    // @FIXME: flaky - fixed the flakiness - keep an eye on this.
+    // @FIXME: flaky - fix by mocking the function for getting the temp dir id
     it(`should delete the unique temp upload dir when the request finished`, async () => {
       const formData = generateSimpleFormDataPayload();
       const { body } = await makeFormDataRequest(formData);
@@ -144,7 +144,9 @@ describe('FileSystem', () => {
       const tempDirIds = fs.readdirSync(primaryTempStorageDir);
       expect(tempDirIds.length).toBe(1); // will be one as deleting the unique temp dir is async
       await delay(2000); // wait for request finished event to finish
-      expect(fs.existsSync(path.join(primaryTempStorageDir, tempDirIds[0]))).toBeFalsy();
+      expect(
+        fs.existsSync(path.join(primaryTempStorageDir, tempDirIds[0]))
+      ).toBeFalsy();
     });
 
     it(`should create temp storage for request`, async () => {

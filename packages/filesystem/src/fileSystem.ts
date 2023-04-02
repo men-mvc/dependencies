@@ -72,7 +72,8 @@ export class FileSystem implements BaseFileSystem {
   public getAbsoluteTempUploadDirPath = (): string =>
     this.getUploaderInstance().getAbsoluteTempUploadDirPath();
 
-  public getAbsolutePath = (path: string) => this.getStorageInstance().getAbsolutePath(path);
+  public getAbsolutePath = (path: string) =>
+    this.getStorageInstance().getAbsolutePath(path);
 
   public writeFile = async (
     filepath: string,

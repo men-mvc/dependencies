@@ -11,8 +11,8 @@ const storage = new S3Storage();
 describe(`S3Storage`, () => {
   describe(`getAbsolutePath`, () => {
     it(`should return filename as is`, async () => {
-        const filename = faker.datatype.uuid();
-        expect(storage.getAbsolutePath(filename)).toBe(filename);
+      const filename = faker.datatype.uuid();
+      expect(storage.getAbsolutePath(filename)).toBe(filename);
     });
   });
 

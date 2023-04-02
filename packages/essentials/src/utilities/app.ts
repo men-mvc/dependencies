@@ -4,10 +4,16 @@ import { getEnvVariable, setEnvVariable, srcDirectory } from '@men-mvc/config';
 export const setServerDirectory = (dir: string) =>
   setEnvVariable('SERVER_DIRECTORY', dir);
 
-export const getServerDirectory = () => getEnvVariable('SERVER_DIRECTORY', '');
+export const getServerDirectory = (): string =>
+  getEnvVariable('SERVER_DIRECTORY', '') ?? ``;
 
 // if the server is inside the /src folder, this function returns true.
+let isInSourceDirCachedValue: boolean | null = null;
 export const isInSourceDirectory = (): boolean => {
+  if (isInSourceDirCachedValue !== null) {
+    return isInSourceDirCachedValue;
+  }
+
   let serverDir = getServerDirectory();
   if (!serverDir) {
     throw new Error(`Application server is missing.`);
@@ -23,11 +29,11 @@ export const isInSourceDirectory = (): boolean => {
     );
   }
 
-  return lastSegment.toLowerCase() === srcDirectory;
+  isInSourceDirCachedValue = lastSegment.toLowerCase() === srcDirectory;
+
+  return isInSourceDirCachedValue;
 };
 
-export const getSourceCodeDirectory = (): string =>
-  path.join(
-    process.cwd(),
-    isInSourceDirectory() ? srcDirectory : '' // for dist, the process.cwd will be current directory as it is starting server.js executing "node server.js"
-  );
+export const clearIsInSourceDirCachedValue = () => {
+  isInSourceDirCachedValue = null;
+};
