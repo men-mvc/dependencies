@@ -6,8 +6,14 @@ import joi, {
   ValidationOptions
 } from 'joi';
 import { getEnvVariable } from '@men-mvc/config';
-import { ValidationError, UploadedFile } from '../types';
+import {
+  ValidationError,
+  UploadedFile,
+  isRequestValidator,
+  RequestValidator
+} from '../types';
 import { validationErrorResponse } from './response';
+import { invokeRequestErrorHandler } from './error';
 
 export const resolveValidationError = (
   valError: JoiValidationError | undefined
@@ -171,7 +177,9 @@ export const validateFileExtension = (
   }
 };
 
-export function ValidateRequest(schema: joi.ObjectSchema) {
+export function ValidateRequest(
+  schemaOrValidator: joi.ObjectSchema | RequestValidator
+) {
   return (
     target: unknown,
     propertyKey: string,
@@ -185,10 +193,18 @@ export function ValidateRequest(schema: joi.ObjectSchema) {
       next?: NextFunction
     ) {
       try {
-        validateRequest(schema, req.body);
+        validateRequest(
+          isRequestValidator(schemaOrValidator)
+            ? schemaOrValidator.getSchema(req, res)
+            : schemaOrValidator,
+          req.body
+        );
       } catch (e: unknown) {
         if (e instanceof ValidationError) {
           return validationErrorResponse(res, e);
+        } else {
+          // TODO: test this logic
+          return invokeRequestErrorHandler(e as Error, req, res);
         }
       }
 
@@ -199,7 +215,9 @@ export function ValidateRequest(schema: joi.ObjectSchema) {
   };
 }
 
-export const ValidateRequestAsync = (schema: joi.ObjectSchema) => {
+export const ValidateRequestAsync = (
+  schemaOrValidator: joi.ObjectSchema | RequestValidator
+) => {
   return function (
     scope: unknown,
     methodName: string,
@@ -213,12 +231,20 @@ export const ValidateRequestAsync = (schema: joi.ObjectSchema) => {
       ...args: unknown[]
     ) {
       try {
-        await validateRequestAsync(schema, req.body);
+        await validateRequestAsync(
+          isRequestValidator(schemaOrValidator)
+            ? schemaOrValidator.getSchema(req, res)
+            : schemaOrValidator,
+          req.body
+        ); // TODO: update test
       } catch (e) {
         if (e instanceof ValidationError) {
           return validationErrorResponse(res, e);
         } else if (e instanceof joi.ValidationError) {
           return validationErrorResponse(res, resolveValidationError(e));
+        } else {
+          // TODO: test this logic
+          return invokeRequestErrorHandler(e as Error, req, res);
         }
       }
 
