@@ -8,12 +8,10 @@ declare type RequestErrorHandlerFunc = (
   res: Response
 ) => Response;
 
-// TODO: unit test
 // ! module path does not have file extension
 export const getApplicationErrorHandlerModulePath = (): string =>
   path.join(getServerDirectory(), 'errors', 'requestErrorHandler');
 
-// TODO: unit test if possible
 export const invokeRequestErrorHandler = (
   error: Error,
   req: Request,
