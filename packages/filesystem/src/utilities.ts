@@ -8,6 +8,7 @@ import path from 'path';
 import util from 'util';
 import fs from 'fs';
 
+// TODO: fix - do not use process.cwd
 export const getAppStorageDirectory = (): string => {
   let storageDirectory: string;
   const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);

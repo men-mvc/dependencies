@@ -16,19 +16,10 @@ import {
 /**
  * TODO: improvement
  * - readDir recursive
- * TODO: do we need to add a function called getAbsolutePath
  * TODO: writeFilePublicly or pass additional argument?
- * TODO: writeFiler result- add absoluteFilepath keeping filepath for both s3 and local
  */
 export class LocalStorage implements Storage {
   public static instance: LocalStorage;
-
-  // TODO: finish
-  private createStorageCompatiblePath = (dirOrFilePath: string) => {
-    // TODO: is this not getting absolute path?
-    // TODO: check if leading slash matter
-    return path.join(getAppStorageDirectory(), dirOrFilePath);
-  };
 
   public static getInstance = (): LocalStorage => {
     if (!LocalStorage.instance) {
@@ -38,7 +29,15 @@ export class LocalStorage implements Storage {
     return LocalStorage.instance;
   };
 
-  // TODO: test
+  // public - to unit test
+  public createStorageCompatiblePath = (dirOrFilePath: string) => {
+    if (dirOrFilePath.startsWith("/")) {
+      dirOrFilePath = dirOrFilePath.substring(1);
+    }
+
+    return path.join(getAppStorageDirectory(), dirOrFilePath);
+  };
+
   public getAbsolutePath = (dirOrFilePath: string): string => {
     return path.join(getAppStorageDirectory(), dirOrFilePath);
   };

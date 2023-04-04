@@ -31,6 +31,16 @@ describe(`LocalStorage Utility`, () => {
     }
   });
 
+  describe(`createStorageCompatiblePath`, () => {
+    it(`should return storage path + filepath`, () => {
+      expect(localStorage.createStorageCompatiblePath("testing.txt")).toBe(path.join(testStoragePath, "testing.txt"));
+    });
+
+    it(`should remove a leading fore slash`, () => {
+      expect(localStorage.createStorageCompatiblePath("/testing.txt")).toBe(path.join(testStoragePath, "testing.txt"));
+    });
+  });
+
   describe(`getAbsolutePath`, () => {
     it(`should return prepend storage path`, () => {
       const filename = `${faker.datatype.uuid()}.txt`;
