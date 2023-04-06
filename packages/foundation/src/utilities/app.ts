@@ -1,4 +1,3 @@
-// TODO: move this file to foundation
 import path from 'path';
 import { getEnvVariable, setEnvVariable, srcDirectory } from '@men-mvc/config';
 
@@ -40,7 +39,6 @@ export const clearAppRootDirectoryCache = () => {
   cachedAppRootDirectory = null;
 };
 
-// TODO - this function should be using getAppRootDirectory
 // if the server is inside the /src folder, this function returns true.
 let isInSourceDirCachedValue: boolean | null = null;
 export const isInSourceDirectory = (): boolean => {
