@@ -1,21 +1,22 @@
-import { baseConfig, MailDriver } from '@men-mvc/config';
+import { baseConfig, MailConfig, MailDriver } from '@men-mvc/config';
 import path from 'path';
 import {
   getServerDirectory,
   getAppRootDirectory
 } from '../utilities/foundation';
 
+// exposing the function just to be able to mock in the test.
+export const getMailConfig = (): MailConfig => baseConfig.mail;
+
 export const getMailDriver = (): MailDriver | undefined =>
-  baseConfig.mail.driver;
+  getMailConfig().driver;
 
-// TODO: unit test
 export const isOAuth2AuthType = (): boolean =>
-  baseConfig.mail.authType?.toLowerCase() === 'oauth2';
+  getMailConfig().authType?.toLowerCase() === 'oauth2';
 
-// TODO: unit test
 export const isLoginAuthType = (): boolean =>
-  baseConfig.mail.authType?.toLowerCase() === 'login' ||
-  !baseConfig.mail.authType; // default.
+  getMailConfig().authType?.toLowerCase() === 'login' ||
+  !getMailConfig().authType; // default.
 
 // TODO: add custom method auth type
 

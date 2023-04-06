@@ -1,21 +1,20 @@
 import nodemailer from 'nodemailer';
 import sinon, { SinonStub } from 'sinon';
-import { MailAuthType } from '@men-mvc/config';
+import { MailAuthType, MailConfig } from '@men-mvc/config';
+import { faker } from '@faker-js/faker';
+import path from 'path';
 import { NodemailerMailSender, TransportOptions } from '../../../src';
-import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
 import {
   generateLoginTransportOptions,
   generateMailConfig
 } from './testUtilities';
-import { MailConfig } from '@men-mvc/config';
-import { faker } from '@faker-js/faker';
 import {
   HtmlSendMailOptions,
   TemplateSendMailOptions,
   SendMailOptions
 } from '../../../src';
 import { getServerDirectory, setServerDirectory } from '../../../src';
-import path from 'path';
+import * as mailUtilities from '../../../src/mailer/utilities';
 
 const serverDirectoryBeforeTests = getServerDirectory();
 describe(`NodemailerMailSender`, () => {
@@ -211,7 +210,7 @@ describe(`NodemailerMailSender`, () => {
     });
 
     const mockGetMailConfig = (fakeMailConfig: MailConfig) => {
-      const stub = sinon.stub(nodemailerSenderModule, 'getMailConfig');
+      const stub = sinon.stub(mailUtilities, 'getMailConfig');
       stub.callsFake(jest.fn().mockReturnValue(fakeMailConfig));
 
       return stub;
