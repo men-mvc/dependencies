@@ -482,9 +482,7 @@ describe(`Validation Utility`, () => {
         const mockController = new MockValidationController();
         mockController.validateRequestWithValidatorClass(
           {
-            header: (field: string): string => {
-              return `valid`;
-            },
+            header: (field: string): string => `valid`,
             body: {
               name: ''
             }
@@ -498,9 +496,7 @@ describe(`Validation Utility`, () => {
       it(`should not return validation error response - using RequestValidator class`, async () => {
         const response = mockController.validateRequestWithValidatorClass(
           {
-            header: (field: string): string => {
-              return `valid`;
-            },
+            header: (field: string): string => `valid`,
             body: {
               name: 'I am not empty'
             }
@@ -517,9 +513,7 @@ describe(`Validation Utility`, () => {
       it(`should invoke app request handler function when the error is not validation error`, async () => {
         mockController.validateRequestWithValidatorClass(
           {
-            header: (field: string): string => {
-              return `invalid`;
-            },
+            header: (field: string): string => `invalid`,
             body: {
               name: 'I am not empty'
             }
@@ -587,9 +581,7 @@ describe(`Validation Utility`, () => {
       it(`should pass validation - using Request Validator class`, async () => {
         mockController.validateRequestAsyncWithValidatorClass(
           {
-            header: (field: string): string => {
-              return `valid`;
-            },
+            header: (field: string): string => `valid`,
             body: {
               code: 'TEST',
               codeConfirmation: 'TEST'
@@ -606,9 +598,7 @@ describe(`Validation Utility`, () => {
       it(`should return validation error response - using Request Validator class`, async () => {
         mockController.validateRequestAsyncWithValidatorClass(
           {
-            header: (field: string): string => {
-              return `valid`;
-            },
+            header: (field: string): string => `valid`,
             body: {
               code: 'TEST',
               codeConfirmation: 'TES!!'
@@ -625,9 +615,7 @@ describe(`Validation Utility`, () => {
       it(`should invoke app request error handler when error is not validation error`, async () => {
         mockController.validateRequestAsyncWithValidatorClass(
           {
-            header: (field: string): string => {
-              return `invalid`;
-            },
+            header: (field: string): string => `invalid`,
             body: {
               code: 'TEST',
               codeConfirmation: 'TEST'

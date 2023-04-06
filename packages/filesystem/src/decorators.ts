@@ -49,9 +49,9 @@ export const ValidateMultipartRequestAsync = (
           return buildValidationErrorResponse(res, e);
         } else if (e instanceof joi.ValidationError) {
           return buildValidationErrorResponse(res, resolveValidationError(e));
-        } else {
-          return invokeAppRequestErrorHandler(e as Error, req, res);
         }
+
+        return invokeAppRequestErrorHandler(e as Error, req, res);
       }
 
       return originalMethod.apply(this, [req, res, ...args]);
@@ -85,9 +85,9 @@ export const ValidateMultipartRequest = (
       } catch (e: unknown) {
         if (e instanceof ValidationError) {
           return buildValidationErrorResponse(res, e);
-        } else {
-          return invokeAppRequestErrorHandler(e as Error, req, res);
         }
+
+        return invokeAppRequestErrorHandler(e as Error, req, res);
       }
 
       return originalMethod.apply(this, [req, res, ...args]);

@@ -202,10 +202,9 @@ export function ValidateRequest(
       } catch (e: unknown) {
         if (e instanceof ValidationError) {
           return validationErrorResponse(res, e);
-        } else {
-          // TODO: test this logic
-          return invokeRequestErrorHandler(e as Error, req, res);
         }
+
+        return invokeRequestErrorHandler(e as Error, req, res);
       }
 
       return originalMethod.apply(this, [req, res, next]);
@@ -236,16 +235,15 @@ export const ValidateRequestAsync = (
             ? schemaOrValidator.getSchema(req, res)
             : schemaOrValidator,
           req.body
-        ); // TODO: update test
+        );
       } catch (e) {
         if (e instanceof ValidationError) {
           return validationErrorResponse(res, e);
         } else if (e instanceof joi.ValidationError) {
           return validationErrorResponse(res, resolveValidationError(e));
-        } else {
-          // TODO: test this logic
-          return invokeRequestErrorHandler(e as Error, req, res);
         }
+
+        return invokeRequestErrorHandler(e as Error, req, res);
       }
 
       return originalMethod.apply(this, [req, res, ...args]);
