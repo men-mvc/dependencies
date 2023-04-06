@@ -4,9 +4,17 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import supertest from 'supertest';
 import fs from 'fs';
-import { ErrorCodes, DeepPartial } from '@men-mvc/foundation';
+import {
+  ErrorCodes,
+  DeepPartial,
+  setServerDirectory
+} from '@men-mvc/foundation';
 import { FakeUploadedFile, makePostFormDataRequest } from '@men-mvc/test';
-import { getTestExpressApp, initTestApplication } from '../utilities';
+import {
+  getTestExpressApp,
+  initTestApplication,
+  resetTestExpressApp
+} from '../utilities';
 import { ComplexFormData, SimpleFormData } from './support/types';
 import { getAppStorageDirectory } from '../../../src';
 import { delay, deleteStorageDirectory } from '../../testUtilities';
@@ -15,7 +23,7 @@ import {
   makeFormDataRequest
 } from './utilities';
 import * as utilities from '../../../src/utilities';
-import {fileSystem} from "../../../lib";
+import { fileSystem, FileSystem } from '../../../src';
 
 type StoreFilePayload = {
   file: FakeUploadedFile;
@@ -27,16 +35,24 @@ type StoreFilesPayload = {
   directory?: string;
 };
 
-const tempDirname = `temp`
-const primaryTempStorageDir = path.join(getAppStorageDirectory(), tempDirname);
+const tempDirname = `temp`;
 const originalFilesDir = path.join(
   __dirname,
   `support${path.sep}files${path.sep}original`
 );
 describe('FileSystem', () => {
+  let primaryTempStorageDir: string;
+
   beforeAll(async () => {
+    setServerDirectory(process.cwd());
+    primaryTempStorageDir = path.join(getAppStorageDirectory(), tempDirname);
     await initTestApplication();
   });
+
+  afterAll(() => {
+    setServerDirectory('');
+  });
+
   afterEach(() => {
     fileSystem.resetTempUploadDirId();
   });
@@ -134,17 +150,29 @@ describe('FileSystem', () => {
       );
     });
 
-    // @FIXME: flaky - fixed the flakiness - keep an eye on this.
     it(`should delete the unique temp upload dir when the request finished`, async () => {
+      resetTestExpressApp();
+      const fakeTempDirPath = path.join(
+        process.cwd(),
+        `storage`,
+        `temp`,
+        `fake-temp-dir-id`
+      );
+      const getAbsoluteTempUploadDirPathStub = sinon
+        .stub(
+          (FileSystem.getInstance() as FileSystem).getUploaderInstance(),
+          `getAbsoluteTempUploadDirPath`
+        )
+        .returns(fakeTempDirPath);
       const formData = generateSimpleFormDataPayload();
       const { body } = await makeFormDataRequest(formData);
+      expect(fs.existsSync(fakeTempDirPath)).toBeTruthy();
       const result = body.data as SimpleFormData;
       expect(result.name).toBe(formData.name);
-      expect(result.photoFile.originalFilename).toBe(`node.png`);
-      const tempDirIds = fs.readdirSync(primaryTempStorageDir);
-      expect(tempDirIds.length).toBe(1); // will be one as deleting the unique temp dir is async
-      await delay(2000); // wait for request finished event to finish
-      expect(fs.existsSync(path.join(primaryTempStorageDir, tempDirIds[0]))).toBeFalsy();
+      expect(result.photoFile.originalFilename).toBe(`node.png`); // will be one as deleting the unique temp dir is async
+      await delay(1000); // wait for request finished event to finish
+      expect(fs.existsSync(fakeTempDirPath)).toBeFalsy();
+      getAbsoluteTempUploadDirPathStub.restore();
     });
 
     it(`should create temp storage for request`, async () => {
@@ -372,7 +400,6 @@ describe('FileSystem', () => {
     };
   });
 
-  // TODO: unit test - it invoke rename
   describe(`storeFiles`, () => {
     const generatedFilenames = [faker.datatype.uuid(), faker.datatype.uuid()];
     const fakeFilePaths = [

@@ -12,3 +12,4 @@ export * from './readableString';
 export * from './statusCodes';
 export * from './uploadedFile';
 export * from './validationErrorResponse';
+export * from './requestValidator';

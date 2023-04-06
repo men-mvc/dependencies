@@ -20,6 +20,7 @@ import {
   validationErrorResponse
 } from '../../../src';
 import * as responseUtilities from '../../../src/utilities/response';
+import * as errorUtilities from '../../../src/utilities/error';
 import { delay, generateUploadedFile } from '../../../testUtilities';
 import { MockValidationController } from './mocks/mockValidationController';
 
@@ -422,18 +423,29 @@ describe(`Validation Utility`, () => {
 
   describe(`Validation decorators`, () => {
     let validationErrorResponseStub: SinonStub;
+    let invokeRequestErrorHandlerStub: SinonStub;
     const mockController = new MockValidationController();
 
     beforeAll(() => {
       validationErrorResponseStub = stubValidationErrorResponse();
     });
 
-    afterEach(() => {
-      validationErrorResponseStub.reset();
-    });
-
     afterAll(() => {
       validationErrorResponseStub.restore();
+    });
+
+    beforeEach(() => {
+      invokeRequestErrorHandlerStub = sinon.stub(
+        errorUtilities,
+        'invokeRequestErrorHandler'
+      );
+    });
+
+    afterEach(() => {
+      validationErrorResponseStub.reset();
+      if (invokeRequestErrorHandlerStub) {
+        invokeRequestErrorHandlerStub.restore();
+      }
     });
 
     describe(`ValidateRequest`, () => {
@@ -462,7 +474,63 @@ describe(`Validation Utility`, () => {
         );
 
         sinon.assert.notCalled(validationErrorResponseStub);
+        sinon.assert.notCalled(invokeRequestErrorHandlerStub);
         expect(response).toBeTruthy();
+      });
+
+      it(`should return validation error response - using RequestValidator class`, async () => {
+        const mockController = new MockValidationController();
+        mockController.validateRequestWithValidatorClass(
+          {
+            header: (field: string): string => `valid`,
+            body: {
+              name: ''
+            }
+          } as Request,
+          {} as Response
+        );
+
+        sinon.assert.calledOnce(validationErrorResponseStub);
+      });
+
+      it(`should not return validation error response - using RequestValidator class`, async () => {
+        const response = mockController.validateRequestWithValidatorClass(
+          {
+            header: (field: string): string => `valid`,
+            body: {
+              name: 'I am not empty'
+            }
+          } as Request,
+          {} as Response
+        );
+
+        sinon.assert.notCalled(validationErrorResponseStub);
+        sinon.assert.notCalled(invokeRequestErrorHandlerStub);
+        expect(response).toBeTruthy();
+      });
+
+      // ! this test also ensure that request validator class can do something with request object
+      it(`should invoke app request handler function when the error is not validation error`, async () => {
+        mockController.validateRequestWithValidatorClass(
+          {
+            header: (field: string): string => `invalid`,
+            body: {
+              name: 'I am not empty'
+            }
+          } as Request,
+          {
+            statusCode: 422
+          } as Response
+        );
+
+        sinon.assert.calledOnce(invokeRequestErrorHandlerStub);
+        const callArgs = invokeRequestErrorHandlerStub.getCalls()[0].args;
+        expect(callArgs[0] instanceof Error).toBeTruthy();
+        expect((callArgs[0] as Error).message).toBe(
+          `Unable to retrieve data from request.`
+        );
+        expect((callArgs[1] as Request).body.name).toBe('I am not empty');
+        expect((callArgs[2] as Response).statusCode).toBe(422);
       });
     });
 
@@ -507,6 +575,66 @@ describe(`Validation Utility`, () => {
         await delay(1000); // async
 
         sinon.assert.notCalled(validationErrorResponseStub);
+        sinon.assert.notCalled(invokeRequestErrorHandlerStub);
+      });
+
+      it(`should pass validation - using Request Validator class`, async () => {
+        mockController.validateRequestAsyncWithValidatorClass(
+          {
+            header: (field: string): string => `valid`,
+            body: {
+              code: 'TEST',
+              codeConfirmation: 'TEST'
+            }
+          } as Request,
+          {} as Response
+        );
+        await delay(1000); // async
+
+        sinon.assert.notCalled(validationErrorResponseStub);
+        sinon.assert.notCalled(invokeRequestErrorHandlerStub);
+      });
+
+      it(`should return validation error response - using Request Validator class`, async () => {
+        mockController.validateRequestAsyncWithValidatorClass(
+          {
+            header: (field: string): string => `valid`,
+            body: {
+              code: 'TEST',
+              codeConfirmation: 'TES!!'
+            }
+          } as Request,
+          {} as Response
+        );
+        await delay(1000); // async
+
+        sinon.assert.calledOnce(validationErrorResponseStub);
+      });
+
+      // ! this test also ensure that request validator class can do something with request object
+      it(`should invoke app request error handler when error is not validation error`, async () => {
+        mockController.validateRequestAsyncWithValidatorClass(
+          {
+            header: (field: string): string => `invalid`,
+            body: {
+              code: 'TEST',
+              codeConfirmation: 'TEST'
+            }
+          } as Request,
+          {
+            statusCode: 422
+          } as Response
+        );
+        await delay(1000); // async
+
+        sinon.assert.calledOnce(invokeRequestErrorHandlerStub);
+        const callArgs = invokeRequestErrorHandlerStub.getCalls()[0].args;
+        expect(callArgs[0] instanceof Error).toBeTruthy();
+        expect((callArgs[0] as Error).message).toBe(
+          `Unable to retrieve the data from the request.`
+        );
+        expect((callArgs[1] as Request).body.code).toBe(`TEST`);
+        expect((callArgs[2] as Response).statusCode).toBe(422);
       });
     });
 

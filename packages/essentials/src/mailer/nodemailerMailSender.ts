@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { baseConfig, MailAuthType, MailConfig } from '@men-mvc/config';
+import { MailAuthType } from '@men-mvc/config';
 import {
   CommonTransportOptions,
   isHtmlSendMailOptions,
@@ -11,9 +11,7 @@ import {
 } from './types';
 import { MailSender } from './mailSender';
 import { MailTemplateBuilder } from './mailTemplateBuilder';
-
-// exposing the function just to be able to mock in the test.
-export const getMailConfig = (): MailConfig => baseConfig.mail;
+import { getMailConfig } from './utilities';
 
 //https://nodemailer.com/smtp/customauth/ for custom auth/
 // TODO: custom auth method support.

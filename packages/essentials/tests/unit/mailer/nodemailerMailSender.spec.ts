@@ -1,21 +1,22 @@
 import nodemailer from 'nodemailer';
 import sinon, { SinonStub } from 'sinon';
-import { MailAuthType } from '@men-mvc/config';
+import { MailAuthType, MailConfig } from '@men-mvc/config';
+import { faker } from '@faker-js/faker';
+import path from 'path';
 import { NodemailerMailSender, TransportOptions } from '../../../src';
-import * as nodemailerSenderModule from '../../../src/mailer/nodemailerMailSender';
 import {
   generateLoginTransportOptions,
-  generateMailConfig,
-  mockGetSourceCodeDirectory
+  generateMailConfig
 } from './testUtilities';
-import { MailConfig } from '@men-mvc/config';
-import { faker } from '@faker-js/faker';
 import {
   HtmlSendMailOptions,
   TemplateSendMailOptions,
   SendMailOptions
 } from '../../../src';
+import { getServerDirectory, setServerDirectory } from '../../../src';
+import * as mailUtilities from '../../../src/mailer/utilities';
 
+const serverDirectoryBeforeTests = getServerDirectory();
 describe(`NodemailerMailSender`, () => {
   describe(`send`, () => {
     const fakeTransportOptions: TransportOptions =
@@ -26,12 +27,13 @@ describe(`NodemailerMailSender`, () => {
     let createTransportStub: sinon.SinonStub;
     let createTransportMockFunc: jest.Mock;
     let getTransportOptionsStub: SinonStub;
-    let getSourceCodeDirectoryStub: SinonStub;
 
-    beforeAll(
-      () => (getSourceCodeDirectoryStub = mockGetSourceCodeDirectory())
-    );
-    afterAll(() => getSourceCodeDirectoryStub.restore());
+    beforeAll(() => {
+      setServerDirectory(path.join(process.cwd(), 'tests'));
+    });
+    afterAll(() => {
+      setServerDirectory(serverDirectoryBeforeTests);
+    });
 
     beforeEach(() => {
       mockGetTransportOptions();
@@ -208,7 +210,7 @@ describe(`NodemailerMailSender`, () => {
     });
 
     const mockGetMailConfig = (fakeMailConfig: MailConfig) => {
-      const stub = sinon.stub(nodemailerSenderModule, 'getMailConfig');
+      const stub = sinon.stub(mailUtilities, 'getMailConfig');
       stub.callsFake(jest.fn().mockReturnValue(fakeMailConfig));
 
       return stub;

@@ -3,7 +3,8 @@ import path from 'path';
 import { Storage, ReadStreamOptions, WriteFileResult } from './types';
 import {
   copyFileAsync,
-  getAppStorageDirectory, mkdirAsync,
+  getAppStorageDirectory,
+  mkdirAsync,
   readdirAsync,
   readFileAsync,
   renameAsync,
@@ -15,19 +16,10 @@ import {
 /**
  * TODO: improvement
  * - readDir recursive
- * TODO: do we need to add a function called getAbsolutePath
  * TODO: writeFilePublicly or pass additional argument?
- * TODO: writeFiler result- add absoluteFilepath keeping filepath for both s3 and local
  */
 export class LocalStorage implements Storage {
   public static instance: LocalStorage;
-
-  // TODO: finish
-  private createStorageCompatiblePath = (dirOrFilePath: string) => {
-    // TODO: is this not getting absolute path?
-    // TODO: check if leading slash matter
-    return path.join(getAppStorageDirectory(), dirOrFilePath);
-  };
 
   public static getInstance = (): LocalStorage => {
     if (!LocalStorage.instance) {
@@ -37,10 +29,18 @@ export class LocalStorage implements Storage {
     return LocalStorage.instance;
   };
 
-  // TODO: test
+  // public - to unit test
+  public createStorageCompatiblePath = (dirOrFilePath: string) => {
+    if (dirOrFilePath.startsWith('/')) {
+      dirOrFilePath = dirOrFilePath.substring(1);
+    }
+
+    return path.join(getAppStorageDirectory(), dirOrFilePath);
+  };
+
   public getAbsolutePath = (dirOrFilePath: string): string => {
     return path.join(getAppStorageDirectory(), dirOrFilePath);
-  }
+  };
 
   public readDir = (dir: string): Promise<string[]> =>
     readdirAsync(this.createStorageCompatiblePath(dir));
@@ -141,8 +141,10 @@ export class LocalStorage implements Storage {
   };
 
   public mkdir = async (dirPath: string): Promise<void> => {
-    await mkdirAsync(this.createStorageCompatiblePath(dirPath), { recursive: true });
-  }
+    await mkdirAsync(this.createStorageCompatiblePath(dirPath), {
+      recursive: true
+    });
+  };
 
   public rmdir = async (
     dirPath: string,
@@ -155,7 +157,9 @@ export class LocalStorage implements Storage {
 
   public isDir = async (dirOrFilepath: string): Promise<boolean> => {
     try {
-      return await this.isDirPromise(this.createStorageCompatiblePath(dirOrFilepath));
+      return await this.isDirPromise(
+        this.createStorageCompatiblePath(dirOrFilepath)
+      );
     } catch (e) {
       throw e;
     }

@@ -18,7 +18,7 @@ import { S3Storage } from './s3/s3Storage';
 
 // TODO: add writeFiles
 export class FileSystem implements BaseFileSystem {
-  private static instance: BaseFileSystem | null;
+  private static instance: FileSystem | null;
   private storageInstance: Storage | undefined;
   private uploaderInstance: BaseFileUploader | undefined;
 
@@ -72,7 +72,8 @@ export class FileSystem implements BaseFileSystem {
   public getAbsoluteTempUploadDirPath = (): string =>
     this.getUploaderInstance().getAbsoluteTempUploadDirPath();
 
-  public getAbsolutePath = (path: string) => this.getStorageInstance().getAbsolutePath(path);
+  public getAbsolutePath = (path: string) =>
+    this.getStorageInstance().getAbsolutePath(path);
 
   public writeFile = async (
     filepath: string,

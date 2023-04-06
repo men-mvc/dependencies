@@ -1,20 +1,39 @@
+import { Request, Response } from 'express';
 import { baseConfig, FileSystemDriver, getEnvVariable } from '@men-mvc/config';
-import { generateUuid as globalGenerateUuid } from '@men-mvc/foundation';
+import {
+  generateUuid as globalGenerateUuid,
+  invokeRequestErrorHandler
+} from '@men-mvc/foundation';
 import path from 'path';
 import util from 'util';
 import fs from 'fs';
+import { getAppRootDirectory } from './foundation';
 
+export const getDefaultAppStorageDirectory = (): string =>
+  path.join(getAppRootDirectory(), `storage`);
+
+
+let appStorageDirectoryCache: string|null = null;
 export const getAppStorageDirectory = (): string => {
+  if (appStorageDirectoryCache) {
+    return appStorageDirectoryCache;
+  }
   let storageDirectory: string;
   const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
   if (envVarStorageDir) {
     storageDirectory = envVarStorageDir;
   } else {
-    storageDirectory = path.join(process.cwd(), `storage`);
+    storageDirectory = getDefaultAppStorageDirectory();
   }
 
-  return storageDirectory;
+  appStorageDirectoryCache = storageDirectory;
+
+  return appStorageDirectoryCache;
 };
+
+export const clearAppStorageDirectoryCache = () => {
+  appStorageDirectoryCache = null;
+}
 
 export const getUploadFilesizeLimit = (): number =>
   baseConfig.fileSystem.maxUploadLimit;
@@ -26,6 +45,12 @@ export const generateUuid = (): string => globalGenerateUuid();
 
 export const getDriver = (): FileSystemDriver =>
   baseConfig.fileSystem?.storageDriver ?? FileSystemDriver.local;
+
+export const invokeAppRequestErrorHandler = (
+  error: Error,
+  req: Request,
+  res: Response
+) => invokeRequestErrorHandler(error, req, res);
 
 export const readdirAsync = util.promisify(fs.readdir);
 export const rmdirAsync = util.promisify(fs.rmdir);

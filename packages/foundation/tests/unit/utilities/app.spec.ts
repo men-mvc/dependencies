@@ -1,14 +1,49 @@
-import { srcDirectory } from '@men-mvc/config';
+import { srcDirectory, unsetEnvVariable } from '@men-mvc/config';
 import { faker } from '@faker-js/faker';
 import {
+  clearAppRootDirectoryCache,
+  clearIsInSourceDirCachedValue,
+  getAppRootDirectory,
   getServerDirectory,
-  getSourceCodeDirectory,
   isInSourceDirectory,
   setServerDirectory
 } from '../../../src';
 
 describe(`App Utility`, () => {
-  afterEach(() => (process.env['SERVER_DIRECTORY'] = undefined));
+  afterEach(() => {
+    unsetEnvVariable('SERVER_DIRECTORY');
+    clearIsInSourceDirCachedValue();
+  });
+
+  describe(`getAppRootDirectory`, () => {
+    afterEach(() => {
+      clearAppRootDirectoryCache();
+    });
+
+    it(`it should throw error when the server directory is empty`, () => {
+      setServerDirectory(``);
+      expect(() => {
+        getAppRootDirectory();
+      }).toThrow(
+        `Unable to get app project directory as the server directory is not set.`
+      );
+    });
+
+    it(`should return server directory if the server file is not in source directory`, () => {
+      setServerDirectory(`/test/dist`);
+      expect(getAppRootDirectory()).toBe(`/test/dist`);
+    });
+
+    it(`should return server directory without src when the server file is in source directory`, () => {
+      setServerDirectory(`/test/app/src`);
+      expect(getAppRootDirectory()).toBe(`/test/app`);
+    });
+
+    it(`should ignore the last path.sep if the path ends with path.sep`, () => {
+      setServerDirectory(`/test/app/src/`);
+      expect(getAppRootDirectory()).toBe(`/test/app`);
+    });
+  });
 
   describe(`setServerDirectory & getServerDirectory`, () => {
     it(`should set SERVER_DIRECTORY env variable`, () => {
@@ -33,28 +68,18 @@ describe(`App Utility`, () => {
   describe(`isInSourceDirectory`, () => {
     it(`should throw error when the server directory is not set`, () => {
       setServerDirectory('');
-      try {
+      expect(() => {
         isInSourceDirectory();
-        throw new Error(`Expected error was not thrown`);
-      } catch (e) {
-        expect(
-          e instanceof Error && e.message === 'Application server is missing.'
-        ).toBeTruthy();
-      }
+      }).toThrow('Application server is missing.');
     });
 
     it(`should throw error when the last segment of the path is empty`, () => {
       setServerDirectory('/dist//'); // function will remove the trailing slash
-      try {
+      expect(() => {
         isInSourceDirectory();
-        throw new Error(`Expected error was not thrown`);
-      } catch (e) {
-        expect(
-          e instanceof Error &&
-            e.message ===
-              'Application server does not exist in the src or dist folder.'
-        ).toBeTruthy();
-      }
+      }).toThrow(
+        'Application server does not exist in the src or dist folder.'
+      );
     });
 
     it(`should return true when the last segment of the path is src`, () => {
@@ -75,18 +100,6 @@ describe(`App Utility`, () => {
     it(`should be case-insensitive`, () => {
       setServerDirectory('/app/Src');
       expect(isInSourceDirectory()).toBeTruthy();
-    });
-  });
-
-  describe(`getSourceCodeDirectory`, () => {
-    it(`should return path with src when the server is in the src directory`, () => {
-      setServerDirectory(`/app/${srcDirectory}`);
-      expect(getSourceCodeDirectory()).toBe(`${process.cwd()}/${srcDirectory}`);
-    });
-
-    it(`should return path with dist when the server is in the dist directory`, () => {
-      setServerDirectory(`/app/`);
-      expect(getSourceCodeDirectory()).toBe(`${process.cwd()}`);
     });
   });
 });

@@ -1,9 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { MailAuthType, MailConfig, MailDriver } from '@men-mvc/config';
-import sinon from 'sinon';
 import _ from 'lodash';
-import * as appUtilities from '../../../src/utilities/app';
-import { LoginTransportOptions } from '../../../lib';
+import { LoginTransportOptions } from '../../../src';
 
 export const generateSendMailData = () => ({
   subject: faker.lorem.word(2),
@@ -11,20 +9,6 @@ export const generateSendMailData = () => ({
   body: faker.lorem.paragraphs(3),
   to: faker.internet.email()
 });
-
-export const mockGetSourceCodeDirectory = (
-  testSourceCodeDirectory: string = `${process.cwd()}/tests`
-): sinon.SinonStub => {
-  const getSourceCodeDirectoryStub = sinon.stub(
-    appUtilities,
-    `getSourceCodeDirectory`
-  );
-  getSourceCodeDirectoryStub.callsFake(
-    jest.fn().mockReturnValue(testSourceCodeDirectory)
-  );
-
-  return getSourceCodeDirectoryStub;
-};
 
 export const generateMailConfig = (
   override: Partial<MailConfig> = {}

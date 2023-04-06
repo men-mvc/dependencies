@@ -22,7 +22,11 @@ import { LocalStorage } from './localStorage';
 import {
   generateUuid,
   getDriver,
-  getUploadFilesizeLimit, readFileAsync, renameAsync, rmdirAsync, unlinkAsync
+  getUploadFilesizeLimit,
+  readFileAsync,
+  renameAsync,
+  rmdirAsync,
+  unlinkAsync
 } from './utilities';
 import { S3Storage } from './s3/s3Storage';
 
@@ -63,7 +67,9 @@ export class FileUploader implements BaseFileUploader {
 
   public clearTempUploadDirectory = async (): Promise<void> => {
     try {
-      await rmdirAsync(this.getAbsoluteTempUploadDirPath(), { recursive: true });
+      await rmdirAsync(this.getAbsoluteTempUploadDirPath(), {
+        recursive: true
+      });
       this.resetTempUploadDirId();
     } catch (e) {
       // fail silently intentionally (race condition - clearing the same temp directory)
@@ -161,7 +167,10 @@ export class FileUploader implements BaseFileUploader {
       directory ?? '',
       filename
     );
-    await renameAsync(uploadedFile.filepath, this.getLocalStorage().getAbsolutePath(targetFilepath));
+    await renameAsync(
+      uploadedFile.filepath,
+      this.getLocalStorage().getAbsolutePath(targetFilepath)
+    );
 
     return targetFilepath;
   };
