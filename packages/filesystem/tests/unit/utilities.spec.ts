@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import path from 'path';
 import { faker } from '@faker-js/faker';
 import {
+  clearAppStorageDirectoryCache,
   getAppStorageDirectory,
   getDefaultAppStorageDirectory
 } from '../../src';
@@ -12,6 +13,7 @@ import * as utilities from '../../src/utilities';
 describe(`App Utility`, () => {
   afterEach(() => {
     unsetEnvVariable('SERVER_DIRECTORY');
+    clearAppStorageDirectoryCache();
   });
 
   describe(`getDefaultAppStorageDirectory`, () => {

@@ -12,8 +12,12 @@ import { getAppRootDirectory } from './foundation';
 export const getDefaultAppStorageDirectory = (): string =>
   path.join(getAppRootDirectory(), `storage`);
 
-// TODO: cache;
+
+let appStorageDirectoryCache: string|null = null;
 export const getAppStorageDirectory = (): string => {
+  if (appStorageDirectoryCache) {
+    return appStorageDirectoryCache;
+  }
   let storageDirectory: string;
   const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
   if (envVarStorageDir) {
@@ -22,8 +26,14 @@ export const getAppStorageDirectory = (): string => {
     storageDirectory = getDefaultAppStorageDirectory();
   }
 
-  return storageDirectory;
+  appStorageDirectoryCache = storageDirectory;
+
+  return appStorageDirectoryCache;
 };
+
+export const clearAppStorageDirectoryCache = () => {
+  appStorageDirectoryCache = null;
+}
 
 export const getUploadFilesizeLimit = (): number =>
   baseConfig.fileSystem.maxUploadLimit;
