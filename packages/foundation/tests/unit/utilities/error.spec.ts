@@ -1,4 +1,4 @@
-import { getServerDirectory, setServerDirectory } from '@men-mvc/essentials';
+import { getServerDirectory, setServerDirectory } from '@men-mvc/essentials'; // TODO: foundation should not import essentials
 import path from 'path';
 import sinon, { SinonSpy } from 'sinon';
 import * as mockRequestErrorHandler from './mocks/errors/requestErrorHandler';

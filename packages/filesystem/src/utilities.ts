@@ -7,15 +7,19 @@ import {
 import path from 'path';
 import util from 'util';
 import fs from 'fs';
+import { getAppRootDirectory } from './foundation';
 
-// TODO: fix - do not use process.cwd
+export const getDefaultAppStorageDirectory = (): string =>
+  path.join(getAppRootDirectory(), `storage`);
+
+// TODO: cache;
 export const getAppStorageDirectory = (): string => {
   let storageDirectory: string;
   const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
   if (envVarStorageDir) {
     storageDirectory = envVarStorageDir;
   } else {
-    storageDirectory = path.join(process.cwd(), `storage`);
+    storageDirectory = getDefaultAppStorageDirectory();
   }
 
   return storageDirectory;

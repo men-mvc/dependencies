@@ -1,3 +1,5 @@
+import sinon, { SinonStub } from 'sinon';
+import path from 'path';
 import {
   clearCachedMailLogsDirname,
   getMailLogsDir,
@@ -5,9 +7,7 @@ import {
   setServerDirectory,
   getMailTemplatesDir
 } from '../../../src';
-import * as utilities from '../../../src/utilities/app';
-import sinon, { SinonStub } from 'sinon';
-import path from 'path';
+import * as foundationUtilities from '../../../src/utilities/foundation';
 
 const serverDirectoryBeforeTests = getServerDirectory();
 
@@ -18,38 +18,22 @@ describe(`Mail Utilities`, () => {
 
   describe(`getMailLogsDir`, () => {
     const mailLogsDirname = `mailLogs`;
-    let isInSourceDirectoryStub: SinonStub;
+    let getAppRootDirectoryStub: SinonStub;
 
     afterEach(() => {
-      if (isInSourceDirectoryStub) {
-        isInSourceDirectoryStub.restore();
-      }
       clearCachedMailLogsDirname();
+      if (getAppRootDirectoryStub) {
+        getAppRootDirectoryStub.restore();
+      }
     });
 
-    it(`should return sever path + mail logs dirname when it's not running ts source code`, async () => {
-      const serverDir = `tests/dist`;
-      setServerDirectory(serverDir);
-      isInSourceDirectoryStub = sinon
-        .stub(utilities, 'isInSourceDirectory')
-        .returns(false);
-      expect(getMailLogsDir()).toBe(path.join(serverDir, mailLogsDirname));
-    });
+    it(`should return app root dir + dirname`, async () => {
+      const appRootDir = `tests/app/src`;
+      getAppRootDirectoryStub = sinon
+        .stub(foundationUtilities, `getAppRootDirectory`)
+        .returns(appRootDir);
 
-    it(`should return mail logs dirname name when server dir is empty when running ts source code`, async () => {
-      setServerDirectory('');
-      isInSourceDirectoryStub = sinon
-        .stub(utilities, 'isInSourceDirectory')
-        .returns(true);
-      expect(getMailLogsDir()).toBe(mailLogsDirname);
-    });
-
-    it(`should return server dir without src + mail logs dirname when running ts source code`, async () => {
-      setServerDirectory(`tests/src`);
-      isInSourceDirectoryStub = sinon
-        .stub(utilities, 'isInSourceDirectory')
-        .returns(true);
-      expect(getMailLogsDir()).toBe(path.join(`tests`, mailLogsDirname));
+      expect(getMailLogsDir()).toBe(path.join(appRootDir, mailLogsDirname));
     });
   });
 

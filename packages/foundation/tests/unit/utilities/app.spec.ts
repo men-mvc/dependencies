@@ -1,7 +1,9 @@
 import { srcDirectory, unsetEnvVariable } from '@men-mvc/config';
 import { faker } from '@faker-js/faker';
 import {
+  clearAppRootDirectoryCache,
   clearIsInSourceDirCachedValue,
+  getAppRootDirectory,
   getServerDirectory,
   isInSourceDirectory,
   setServerDirectory
@@ -11,6 +13,36 @@ describe(`App Utility`, () => {
   afterEach(() => {
     unsetEnvVariable('SERVER_DIRECTORY');
     clearIsInSourceDirCachedValue();
+  });
+
+  describe(`getAppRootDirectory`, () => {
+    afterEach(() => {
+      clearAppRootDirectoryCache();
+    });
+
+    it(`it should throw error when the server directory is empty`, () => {
+      setServerDirectory(``);
+      expect(() => {
+        getAppRootDirectory();
+      }).toThrow(
+        `Unable to get app project directory as the server directory is not set.`
+      );
+    });
+
+    it(`should return server directory if the server file is not in source directory`, () => {
+      setServerDirectory(`/test/dist`);
+      expect(getAppRootDirectory()).toBe(`/test/dist`);
+    });
+
+    it(`should return server directory without src when the server file is in source directory`, () => {
+      setServerDirectory(`/test/app/src`);
+      expect(getAppRootDirectory()).toBe(`/test/app`);
+    });
+
+    it(`should ignore the last path.sep if the path ends with path.sep`, () => {
+      setServerDirectory(`/test/app/src/`);
+      expect(getAppRootDirectory()).toBe(`/test/app`);
+    });
   });
 
   describe(`setServerDirectory & getServerDirectory`, () => {

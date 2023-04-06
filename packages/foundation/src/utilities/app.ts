@@ -1,3 +1,4 @@
+// TODO: move this file to foundation
 import path from 'path';
 import { getEnvVariable, setEnvVariable, srcDirectory } from '@men-mvc/config';
 
@@ -7,6 +8,39 @@ export const setServerDirectory = (dir: string) =>
 export const getServerDirectory = (): string =>
   getEnvVariable('SERVER_DIRECTORY', '') ?? ``;
 
+let cachedAppRootDirectory: string | null = null;
+export const getAppRootDirectory = (): string => {
+  if (cachedAppRootDirectory) {
+    return cachedAppRootDirectory;
+  }
+
+  let serverDirectory = getServerDirectory();
+  if (!serverDirectory) {
+    throw new Error(
+      `Unable to get app project directory as the server directory is not set.`
+    );
+  }
+  if (!isInSourceDirectory()) {
+    // for prod build, server directory is the app root directory
+    cachedAppRootDirectory = serverDirectory;
+    return cachedAppRootDirectory;
+  }
+  // path will end with src as isInSourceDirectory returns true
+  if (serverDirectory.endsWith(path.sep)) {
+    serverDirectory = serverDirectory.slice(0, -1);
+  }
+  const segments = serverDirectory.split(path.sep);
+  segments.pop(); // remove the src
+
+  cachedAppRootDirectory = segments.join(path.sep);
+  return cachedAppRootDirectory;
+};
+
+export const clearAppRootDirectoryCache = () => {
+  cachedAppRootDirectory = null;
+};
+
+// TODO - this function should be using getAppRootDirectory
 // if the server is inside the /src folder, this function returns true.
 let isInSourceDirCachedValue: boolean | null = null;
 export const isInSourceDirectory = (): boolean => {

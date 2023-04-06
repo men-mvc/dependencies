@@ -1,6 +1,9 @@
 import { baseConfig, MailDriver } from '@men-mvc/config';
 import path from 'path';
-import { getServerDirectory, isInSourceDirectory } from '../utilities';
+import {
+  getServerDirectory,
+  getAppRootDirectory
+} from '../utilities/foundation';
 
 export const getMailDriver = (): MailDriver | undefined =>
   baseConfig.mail.driver;
@@ -24,21 +27,7 @@ export const getMailLogsDir = (): string => {
   if (cachedMailLogsDir) {
     return cachedMailLogsDir;
   }
-  const dirname = `mailLogs`;
-  const serverDirectory = getServerDirectory();
-  if (!isInSourceDirectory()) {
-    cachedMailLogsDir = path.join(serverDirectory, dirname);
-    return cachedMailLogsDir;
-  }
-  // this is already in source code directory so path always should end with src
-  const serverDirSegments = serverDirectory.split(path.sep);
-  if (serverDirSegments.length <= 1) {
-    cachedMailLogsDir = dirname;
-    return cachedMailLogsDir;
-  }
-  serverDirSegments.pop();
-
-  cachedMailLogsDir = path.join(serverDirSegments.join(path.sep), dirname);
+  cachedMailLogsDir = path.join(getAppRootDirectory(), `mailLogs`);
 
   return cachedMailLogsDir;
 };

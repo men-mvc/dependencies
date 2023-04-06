@@ -1,6 +1,10 @@
 import sinon from 'sinon';
 import Sinon, { SinonStub } from 'sinon';
-import { DeepPartial, UploadedFile } from '@men-mvc/foundation';
+import {
+  DeepPartial,
+  setServerDirectory,
+  UploadedFile
+} from '@men-mvc/foundation';
 import { FileSystemDriver } from '@men-mvc/config';
 import {
   FileArray,
@@ -23,6 +27,14 @@ import { FileUploader, getAppStorageDirectory } from '../../src';
  */
 const fileUploader = new FileUploader();
 describe('FileUploader Utility', function () {
+  beforeAll(() => {
+    setServerDirectory(process.cwd());
+  });
+
+  afterAll(() => {
+    setServerDirectory('');
+  });
+
   describe(`getLocalStorage`, () => {
     it(`should always return the same instance`, () => {
       expect(fileUploader.getLocalStorage()).toBe(
@@ -41,10 +53,11 @@ describe('FileUploader Utility', function () {
     let getDriverStub: SinonStub;
     let s3WriteFileStub: SinonStub;
     const fakeUploadedFileContent = faker.lorem.sentence();
-    const testFilesDirectory = path.join(
-      getAppStorageDirectory(),
-      `testStoreFile`
-    );
+    let testFilesDirectory: string;
+
+    beforeAll(() => {
+      testFilesDirectory = path.join(getAppStorageDirectory(), `testStoreFile`);
+    });
 
     afterEach(async () => {
       await deleteStorageDirectory();

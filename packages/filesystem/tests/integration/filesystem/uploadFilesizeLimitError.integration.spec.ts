@@ -1,6 +1,6 @@
 import express from 'express';
 import sinon from 'sinon';
-import { ErrorCodes } from '@men-mvc/foundation';
+import { ErrorCodes, setServerDirectory } from '@men-mvc/foundation';
 import { configureTestRoutes } from '../testRoutes';
 import {
   generateSimpleFormDataPayload,
@@ -10,6 +10,14 @@ import * as utilities from '../../../src/utilities';
 import { registerMultipartFormParser } from '../../../src';
 
 describe('FileSystem - UploadFilesizeLimit', function () {
+  beforeAll(() => {
+    setServerDirectory(process.cwd());
+  });
+
+  afterAll(() => {
+    setServerDirectory('');
+  });
+
   // TODO: figure out why uploaded file sie is sometimes 1 and sometimes 2
   it(`should throw max upload filesize limit error when the file is too large`, async () => {
     let getMaxUploadLimitStub = fakeGetMaxUploadLimit(2);

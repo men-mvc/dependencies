@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { getServerDirectory } from '@men-mvc/essentials';
 import path from 'path';
+import { getServerDirectory } from './app';
 
 declare type RequestErrorHandlerFunc = (
   err: Error,

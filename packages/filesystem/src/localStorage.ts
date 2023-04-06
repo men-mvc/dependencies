@@ -31,7 +31,7 @@ export class LocalStorage implements Storage {
 
   // public - to unit test
   public createStorageCompatiblePath = (dirOrFilePath: string) => {
-    if (dirOrFilePath.startsWith("/")) {
+    if (dirOrFilePath.startsWith('/')) {
       dirOrFilePath = dirOrFilePath.substring(1);
     }
 

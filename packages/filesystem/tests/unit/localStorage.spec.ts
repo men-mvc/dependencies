@@ -33,11 +33,15 @@ describe(`LocalStorage Utility`, () => {
 
   describe(`createStorageCompatiblePath`, () => {
     it(`should return storage path + filepath`, () => {
-      expect(localStorage.createStorageCompatiblePath("testing.txt")).toBe(path.join(testStoragePath, "testing.txt"));
+      expect(localStorage.createStorageCompatiblePath('testing.txt')).toBe(
+        path.join(testStoragePath, 'testing.txt')
+      );
     });
 
     it(`should remove a leading fore slash`, () => {
-      expect(localStorage.createStorageCompatiblePath("/testing.txt")).toBe(path.join(testStoragePath, "testing.txt"));
+      expect(localStorage.createStorageCompatiblePath('/testing.txt')).toBe(
+        path.join(testStoragePath, 'testing.txt')
+      );
     });
   });
 
