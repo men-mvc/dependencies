@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/cache",
-  "version": "0.83.0",
+  "version": "0.84.0",
   "description": "Cache package for Men MVC framework.",
   "private": false,
   "type": "commonjs",
@@ -27,7 +27,7 @@
     "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
-    "@men-mvc/config": "^0.83.0",
+    "@men-mvc/config": "^0.84.0",
     "memory-cache": "^0.2.0",
     "redis": "^4.5.1"
   },
