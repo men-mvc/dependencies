@@ -13,5 +13,5 @@ export const replaceRouteParams = (
     newRoute = newRoute.replace(`:${key}`, params[key]);
   }
 
-  return newRoute.startsWith('/') ? newRoute : `/${newRoute}`;
+  return newRoute;
 };
