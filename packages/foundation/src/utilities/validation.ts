@@ -22,9 +22,9 @@ export const resolveValidationError = (
     return new ValidationError({});
   }
 
-  let errors: { [key: string]: string } = {};
+  let errors: Record<string, string> = {};
   valError.details.map((error) => {
-    errors[error.context?.key as string] = error.message;
+    errors[error.path.join('.')] = error.message;
   });
   return new ValidationError(errors);
 };

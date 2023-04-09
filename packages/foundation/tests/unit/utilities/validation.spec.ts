@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
 import sinon, { SinonStub, stub } from 'sinon';
-import joi, {
-  ValidationError as JoiValidationError,
-  ValidationErrorItem
-} from 'joi';
+import joi from 'joi';
 import { faker } from '@faker-js/faker';
 import { setEnvVariable } from '@men-mvc/config';
 import {
@@ -26,32 +23,104 @@ import { MockValidationController } from './mocks/mockValidationController';
 
 describe(`Validation Utility`, () => {
   describe(`resolveValidationError`, () => {
-    it(`should convert joi validation error into app-compatible format and return ValidationError`, () => {
-      const errors: ValidationErrorItem[] = [
-        createFakeValidationErrorItem(`name`, `Name is required.`),
-        createFakeValidationErrorItem(`email`, `Email is required.`)
-      ];
-      const result = resolveValidationError(
-        new JoiValidationError(`ValidationError`, errors, null)
-      );
-      expect(result instanceof ValidationError).toBeTruthy();
-      expect(Object.keys(result.errors).length).toBe(2);
-      Object.keys(result.errors).map((key, index) => {
-        expect(result.errors[key]).toBe(errors[index].message);
-        expect(key).toBe(errors[index].context?.key);
+    it(`should resolve schema errors`, () => {
+      const contactSchema = joi.object().keys({
+        email: joi.string().required(),
+        phone: joi.string().required()
       });
+
+      const userSchema = joi.object().keys({
+        name: joi.string().required(),
+        contacts: joi.array().items(contactSchema).required()
+      });
+      const joiResult = userSchema.validate(
+        {
+          name: ``,
+          contacts: [
+            {
+              email: ``,
+              phone: ``
+            }
+          ]
+        },
+        {
+          abortEarly: false
+        }
+      );
+      const error = resolveValidationError(joiResult.error);
+      expect(error instanceof ValidationError).toBeTruthy();
+      expect(Object.keys(error.errors).length).toBe(3);
+      expect(error.errors['name']).toBe('"name" is not allowed to be empty');
+      expect(error.errors['contacts.0.email']).toBe(
+        '"contacts[0].email" is not allowed to be empty'
+      );
+      expect(error.errors['contacts.0.phone']).toBe(
+        '"contacts[0].phone" is not allowed to be empty'
+      );
     });
 
-    const createFakeValidationErrorItem = (
-      key: string,
-      message: string
-    ): ValidationErrorItem => ({
-      message,
-      path: [],
-      type: `any`,
-      context: {
-        key
-      }
+    it(`should separate error of a nested field has the same name as one of the parent fields`, async () => {
+      const contactSchema = joi.object().keys({
+        name: joi.string().required(),
+        phone: joi.string().required()
+      });
+
+      const userSchema = joi.object().keys({
+        name: joi.string().required(),
+        phone: joi.string().required(),
+        emergencyContacts: joi.array().items(contactSchema).required(),
+        spouse: contactSchema
+      });
+
+      const joiValidationResult = userSchema.validate(
+        {
+          name: ``,
+          phone: ``,
+          emergencyContacts: [
+            {
+              name: ``,
+              phone: ``
+            },
+            {
+              name: ``,
+              phone: ``
+            }
+          ],
+          spouse: {
+            name: ``,
+            phone: ``
+          }
+        },
+        { abortEarly: false }
+      );
+
+      const resolvedError = resolveValidationError(joiValidationResult.error);
+      expect(resolvedError instanceof ValidationError).toBeTruthy();
+      expect(Object.keys(resolvedError.errors).length).toBe(8);
+      expect(resolvedError.errors['name']).toBe(
+        '"name" is not allowed to be empty'
+      );
+      expect(resolvedError.errors['phone']).toBe(
+        '"phone" is not allowed to be empty'
+      );
+      expect(resolvedError.errors['emergencyContacts.0.name']).toBe(
+        '"emergencyContacts[0].name" is not allowed to be empty'
+      );
+      expect(resolvedError.errors['emergencyContacts.0.phone']).toBe(
+        '"emergencyContacts[0].phone" is not allowed to be empty'
+      );
+      expect(resolvedError.errors['emergencyContacts.1.name']).toBe(
+        '"emergencyContacts[1].name" is not allowed to be empty'
+      );
+      expect(resolvedError.errors['emergencyContacts.1.phone']).toBe(
+        '"emergencyContacts[1].phone" is not allowed to be empty'
+      );
+      expect(resolvedError.errors['spouse.name']).toBe(
+        '"spouse.name" is not allowed to be empty'
+      );
+      expect(resolvedError.errors['spouse.phone']).toBe(
+        '"spouse.phone" is not allowed to be empty'
+      );
     });
   });
 
