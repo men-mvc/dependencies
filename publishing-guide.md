@@ -8,8 +8,8 @@ To build and publish packages, follow these steps:
 
 1. Ensure that you are on the `main` branch.
 2. If you are setting up the project for the first time or have added a new npm package, run `npm i`.
-3. Run `lerna run test`.
-4. If all the tests pass, run `lerna run build`.
+3. If all the tests pass, run `lerna run build`.
+4. Run `lerna run test`.
 5. Commit and push all changes to your git repository.
 6. To publish the packages, run `lerna publish --registry=https://registry.npmjs.org` or `npm run publish`. Use `--force-publish` if you need to force publishing.
 
