@@ -124,5 +124,5 @@ export declare class MenS3Adapter {
 }
 
 export interface MultipartRequest<T> extends Request {
-  parsedFormData: T;
+  parsedFormData?: T;
 }
