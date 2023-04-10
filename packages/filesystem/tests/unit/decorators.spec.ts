@@ -173,7 +173,7 @@ describe(`Decorators`, () => {
         {} as Response
       );
 
-      assertFormParsed(result, {
+      assertFormParsed(result as MultiForm, {
         photoFile: mockRequestObject.files.photoFile,
         name: mockRequestObject.body.name
       });
@@ -196,7 +196,7 @@ describe(`Decorators`, () => {
           {} as Response
         );
 
-      assertFormParsed(result, {
+      assertFormParsed(result as MultiForm, {
         photoFile: mockRequestObject.files.photoFile,
         name: mockRequestObject.body.name
       });
@@ -405,10 +405,10 @@ describe(`Decorators`, () => {
         }
       };
 
-      const result = await controller.validateFormRequestAsync(
+      const result = (await controller.validateFormRequestAsync(
         mockRequestObject as unknown as MultipartRequest<MultiForm>,
         {} as Response
-      );
+      )) as MultiForm;
 
       expect(result.photoFile?.originalFilename).toBe(
         mockRequestObject.files.photoFile.name
@@ -433,10 +433,10 @@ describe(`Decorators`, () => {
       };
 
       const result =
-        await controller.validateFormRequestAsyncUsingValidatorClass(
+        (await controller.validateFormRequestAsyncUsingValidatorClass(
           mockRequestObject as unknown as MultipartRequest<MultiForm>,
           {} as Response
-        );
+        )) as MultiForm;
 
       expect(result.photoFile?.originalFilename).toBe(
         mockRequestObject.files.photoFile.name
