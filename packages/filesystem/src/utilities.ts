@@ -51,6 +51,19 @@ export const invokeAppRequestErrorHandler = (
   res: Response
 ) => invokeRequestErrorHandler(error, req, res);
 
+export const parseMultiFormBooleanInput = (
+    input: string | number | boolean
+) => {
+  if (typeof input === 'string') {
+    return input.toLowerCase() === 'true';
+  } else if (typeof input === 'number') {
+    return input > 0;
+  } else {
+    // boolean
+    return input;
+  }
+};
+
 export const readdirAsync = util.promisify(fs.readdir);
 export const rmdirAsync = util.promisify(fs.rmdir);
 export const unlinkAsync = util.promisify(fs.unlink);

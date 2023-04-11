@@ -5,7 +5,8 @@ import { faker } from '@faker-js/faker';
 import {
   clearAppStorageDirectoryCache,
   getAppStorageDirectory,
-  getDefaultAppStorageDirectory
+  getDefaultAppStorageDirectory,
+  parseMultiFormBooleanInput
 } from '../../src';
 import * as foundationUtilities from '../../src/foundation';
 import * as utilities from '../../src/utilities';
@@ -14,6 +15,29 @@ describe(`App Utility`, () => {
   afterEach(() => {
     unsetEnvVariable('SERVER_DIRECTORY');
     clearAppStorageDirectoryCache();
+  });
+
+  describe(`parseMultiFormBooleanInput`, () => {
+    it(`should return true when the input string is "true"`, () => {
+      expect(parseMultiFormBooleanInput("TrUe")).toBeTruthy();
+    });
+
+    it(`should return false when the input string is "false"`, () => {
+      expect(parseMultiFormBooleanInput("False")).toBeFalsy();
+    });
+
+    it(`should return true when the input number is 1`, () => {
+      expect(parseMultiFormBooleanInput(1)).toBeTruthy();
+    });
+
+    it(`should return false when the input number is 0`, () => {
+      expect(parseMultiFormBooleanInput(0)).toBeFalsy();
+    });
+
+    it(`should return input as is when the input type is boolean`, () => {
+      const input = faker.datatype.boolean();
+      expect(parseMultiFormBooleanInput(input)).toBe(input);
+    });
   });
 
   describe(`getDefaultAppStorageDirectory`, () => {
