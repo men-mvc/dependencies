@@ -27,7 +27,7 @@ import {
   renameAsync,
   rmdirAsync,
   unlinkAsync
-} from './utilities';
+} from './utilities/utilities';
 import { S3Storage } from './s3/s3Storage';
 
 const tempDirname = 'temp';

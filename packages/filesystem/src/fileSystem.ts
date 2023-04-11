@@ -12,7 +12,7 @@ import {
   WriteFileResult
 } from './types';
 import { FileUploader } from './fileUploader';
-import { getFileSystemDriver } from './utilities';
+import { getFileSystemDriver } from './utilities/utilities';
 import { LocalStorage } from './localStorage';
 import { S3Storage } from './s3/s3Storage';
 

@@ -11,7 +11,7 @@ import {
 } from '@men-mvc/foundation';
 import { MultipartRequest } from './types';
 import { FileSystem } from './fileSystem';
-import { invokeAppRequestErrorHandler } from './utilities';
+import { invokeAppRequestErrorHandler } from './utilities/utilities';
 
 // ! to make the logic mockable
 export const buildValidationErrorResponse = (

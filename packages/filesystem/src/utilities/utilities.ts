@@ -7,7 +7,7 @@ import {
 import path from 'path';
 import util from 'util';
 import fs from 'fs';
-import { getAppRootDirectory } from './foundation';
+import { getAppRootDirectory } from '../foundation';
 
 export const getDefaultAppStorageDirectory = (): string =>
   path.join(getAppRootDirectory(), `storage`);
@@ -52,7 +52,7 @@ export const invokeAppRequestErrorHandler = (
 ) => invokeRequestErrorHandler(error, req, res);
 
 export const parseMultiFormBooleanInput = (
-    input: string | number | boolean
+  input: string | number | boolean
 ) => {
   if (typeof input === 'string') {
     return input.toLowerCase() === 'true';

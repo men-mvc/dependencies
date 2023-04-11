@@ -22,7 +22,7 @@ import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
 } from './utilities';
-import * as utilities from '../../../src/utilities';
+import * as utilities from '../../../src/utilities/utilities';
 import { fileSystem, FileSystem } from '../../../src';
 
 type StoreFilePayload = {

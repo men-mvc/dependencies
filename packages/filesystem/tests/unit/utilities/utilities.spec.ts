@@ -7,9 +7,9 @@ import {
   getAppStorageDirectory,
   getDefaultAppStorageDirectory,
   parseMultiFormBooleanInput
-} from '../../src';
-import * as foundationUtilities from '../../src/foundation';
-import * as utilities from '../../src/utilities';
+} from '../../../src';
+import * as foundationUtilities from '../../../src/foundation';
+import * as utilities from '../../../src/utilities/utilities';
 
 describe(`App Utility`, () => {
   afterEach(() => {
@@ -19,11 +19,11 @@ describe(`App Utility`, () => {
 
   describe(`parseMultiFormBooleanInput`, () => {
     it(`should return true when the input string is "true"`, () => {
-      expect(parseMultiFormBooleanInput("TrUe")).toBeTruthy();
+      expect(parseMultiFormBooleanInput('TrUe')).toBeTruthy();
     });
 
     it(`should return false when the input string is "false"`, () => {
-      expect(parseMultiFormBooleanInput("False")).toBeFalsy();
+      expect(parseMultiFormBooleanInput('False')).toBeFalsy();
     });
 
     it(`should return true when the input number is 1`, () => {

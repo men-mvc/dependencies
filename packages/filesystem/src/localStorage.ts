@@ -11,7 +11,7 @@ import {
   rmdirAsync,
   unlinkAsync,
   writeFileAsync
-} from './utilities';
+} from './utilities/utilities';
 
 /**
  * TODO: improvement
