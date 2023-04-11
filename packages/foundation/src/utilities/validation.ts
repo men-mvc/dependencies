@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { ExternalHelpers } from 'joi';
 import path from 'path';
 import joi, {
   ObjectSchema,
@@ -14,6 +15,16 @@ import {
 } from '../types';
 import { validationErrorResponse } from './response';
 import { invokeRequestErrorHandler } from './error';
+
+export const getValidatedFieldName = (options: ExternalHelpers): string => {
+  if (Array.isArray(options.state.path)) {
+    return options.state.path.join('.');
+  } else if (typeof options.state.path === 'string') {
+    return options.state.path;
+  } else {
+    return ``;
+  }
+};
 
 export const resolveValidationError = (
   valError: JoiValidationError | undefined

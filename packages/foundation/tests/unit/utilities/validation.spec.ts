@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { ExternalHelpers } from 'joi';
 import sinon, { SinonStub, stub } from 'sinon';
 import joi from 'joi';
 import { faker } from '@faker-js/faker';
@@ -14,7 +15,8 @@ import {
   validateFileExtension,
   ValidateRequest,
   ValidateRequestAsync,
-  validationErrorResponse
+  validationErrorResponse,
+  getValidatedFieldName
 } from '../../../src';
 import * as responseUtilities from '../../../src/utilities/response';
 import * as errorUtilities from '../../../src/utilities/error';
@@ -22,6 +24,38 @@ import { delay, generateUploadedFile } from '../../../testUtilities';
 import { MockValidationController } from './mocks/mockValidationController';
 
 describe(`Validation Utility`, () => {
+  describe(`getValidatedFieldName`, () => {
+    it(`should return empty string when options.state.path is undefined`, () => {
+      expect(
+        getValidatedFieldName({
+          state: {
+            path: undefined
+          }
+        } as ExternalHelpers)
+      ).toBe(``);
+    });
+
+    it(`should return options.state.path string`, () => {
+      expect(
+        getValidatedFieldName({
+          state: {
+            path: `test_field`
+          }
+        } as ExternalHelpers)
+      ).toBe(`test_field`);
+    });
+
+    it(`should return string joining segments of options.state.path array with dot`, () => {
+      expect(
+        getValidatedFieldName({
+          state: {
+            path: [`seg1`, `seg2`, `seg3`]
+          }
+        } as unknown as ExternalHelpers)
+      ).toBe(`seg1.seg2.seg3`);
+    });
+  });
+
   describe(`resolveValidationError`, () => {
     it(`should resolve schema errors`, () => {
       const contactSchema = joi.object().keys({
