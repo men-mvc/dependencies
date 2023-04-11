@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import stream from 'stream';
 import { LocalStorage, ReadStreamOptions } from '../../src';
-import * as utilities from '../../src/utilities';
+import * as utilities from '../../src/utilities/utilities';
 
 const localStorage = new LocalStorage();
 const fakeFileContent: string = faker.lorem.paragraph();

@@ -6,7 +6,7 @@ import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
 } from './utilities';
-import * as utilities from '../../../src/utilities';
+import * as utilities from '../../../src/utilities/utilities';
 import { registerMultipartFormParser } from '../../../src';
 
 describe('FileSystem - UploadFilesizeLimit', function () {

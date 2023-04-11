@@ -5,7 +5,6 @@ import { UploadedFile as ExpressUploadedFile } from 'express-fileupload';
 import {
   RequestValidator,
   UploadedFile,
-  validateImage
 } from '@men-mvc/foundation';
 import { faker } from '@faker-js/faker';
 import {
@@ -14,7 +13,8 @@ import {
   MultipartRequest
 } from '../../src';
 import * as decorators from '../../src/decorators';
-import * as utilities from '../../src/utilities';
+import * as utilities from '../../src/utilities/utilities';
+import {validateImage} from "../../src";
 
 type MultiForm = {
   name: string;

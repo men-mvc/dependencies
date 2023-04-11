@@ -14,7 +14,7 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import path from 'path';
 import fs from 'fs';
-import * as fileSystemUtilities from '../../src/utilities';
+import * as fileSystemUtilities from '../../src/utilities/utilities';
 import {
   delay,
   deleteStorageDirectory,
