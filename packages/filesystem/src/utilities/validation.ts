@@ -5,7 +5,6 @@ import {
   UploadedFile
 } from '@men-mvc/foundation';
 
-// TODO: unit tests.
 const isUploadedFile = (value: unknown): value is UploadedFile =>
   value instanceof UploadedFile;
 
