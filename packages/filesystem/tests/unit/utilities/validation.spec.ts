@@ -3,7 +3,7 @@ import {
   setEnvVariable,
   ValidationError
 } from '@men-mvc/foundation';
-import { generateUploadedFile } from '../../testUtilities';
+import { generateUploadedFile } from '../../../src/test';
 import {validateFile, validateImage, validateFileExtension} from "../../../src";
 
 describe(`Validation Utilities`, () => {

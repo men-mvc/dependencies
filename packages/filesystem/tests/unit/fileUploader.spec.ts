@@ -18,8 +18,8 @@ import * as fileSystemUtilities from '../../src/utilities/utilities';
 import {
   delay,
   deleteStorageDirectory,
-  generateUploadedFile
 } from '../testUtilities';
+import { generateUploadedFile } from '../../src/test';
 import { FileUploader, getAppStorageDirectory } from '../../src';
 
 /**
