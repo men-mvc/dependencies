@@ -3,18 +3,29 @@ import sinon from 'sinon';
 import path from 'path';
 import { faker } from '@faker-js/faker';
 import {
-  clearAppStorageDirectoryCache,
-  getAppStorageDirectory,
+  clearPrivateStorageDirectoryCache,
+  getPrivateStorageDirectory,
   getDefaultAppStorageDirectory,
-  parseMultiFormBooleanInput
+  parseMultiFormBooleanInput,
+  getPublicStorageDirectory
 } from '../../../src';
 import * as foundationUtilities from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
 
-describe(`App Utility`, () => {
+describe(`Filesystem - Utilities`, () => {
   afterEach(() => {
     unsetEnvVariable('SERVER_DIRECTORY');
-    clearAppStorageDirectoryCache();
+    clearPrivateStorageDirectoryCache();
+  });
+
+  describe(`getPublicStorageDirectory`, () => {
+    it(`should return private storage + men + public`, () => {
+      const fakeStorageDir = faker.system.directoryPath();
+      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
+      expect(getPublicStorageDirectory()).toBe(
+        path.join(fakeStorageDir, 'men-public')
+      );
+    });
   });
 
   describe(`parseMultiFormBooleanInput`, () => {
@@ -54,7 +65,7 @@ describe(`App Utility`, () => {
     });
   });
 
-  describe(`getAppStorageDirectory`, () => {
+  describe(`getPrivateStorageDirectory`, () => {
     afterAll(() => {
       setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
     });
@@ -62,7 +73,7 @@ describe(`App Utility`, () => {
     it(`should return value of FILESYSTEM_STORAGE_DIRECTORY env variable when var is set`, () => {
       const fakeStorageDir = `~/home/custom_storage`;
       setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
-      const storageDir = getAppStorageDirectory();
+      const storageDir = getPrivateStorageDirectory();
       expect(storageDir).toBe(fakeStorageDir);
     });
 
@@ -72,7 +83,7 @@ describe(`App Utility`, () => {
       const getDefaultAppStorageDirectoryStub = sinon
         .stub(utilities, `getDefaultAppStorageDirectory`)
         .returns(fakeDefaultStorageDirectory);
-      expect(getAppStorageDirectory()).toBe(fakeDefaultStorageDirectory);
+      expect(getPrivateStorageDirectory()).toBe(fakeDefaultStorageDirectory);
       getDefaultAppStorageDirectoryStub.restore();
     });
   });

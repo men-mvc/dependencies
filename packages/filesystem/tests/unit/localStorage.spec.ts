@@ -4,8 +4,13 @@ import { readStreamAsBuffer } from '@men-mvc/foundation';
 import fs from 'fs';
 import path from 'path';
 import stream from 'stream';
-import { LocalStorage, ReadStreamOptions } from '../../src';
+import {
+  getPublicStorageIdentifier,
+  LocalStorage,
+  ReadStreamOptions
+} from '../../src';
 import * as utilities from '../../src/utilities/utilities';
+import { getPrivateStorageDirectory } from '../../src';
 
 const localStorage = new LocalStorage();
 const fakeFileContent: string = faker.lorem.paragraph();
@@ -17,36 +22,68 @@ class FakeFileError extends Error {
 }
 const testStoragePath = path.join(__dirname, 'testStorage');
 describe(`LocalStorage Utility`, () => {
-  let getAppStorageDirectoryStub: SinonStub;
+  let getPrivateStorageDirectoryStub: SinonStub;
   beforeEach(() => {
-    getAppStorageDirectoryStub = sinon
-      .stub(utilities, `getAppStorageDirectory`)
+    getPrivateStorageDirectoryStub = sinon
+      .stub(utilities, `getPrivateStorageDirectory`)
       .returns(testStoragePath);
     createDirectoryIfNotExist(testStoragePath);
   });
   afterEach(() => {
     deleteDirectoryIfExists(testStoragePath);
-    if (getAppStorageDirectoryStub) {
-      getAppStorageDirectoryStub.restore();
+    if (getPrivateStorageDirectoryStub) {
+      getPrivateStorageDirectoryStub.restore();
     }
   });
 
-  describe(`createStorageCompatiblePath`, () => {
+  describe(`isPublicFilepath`, () => {
+    it(`should return true when path starts with public storage identifier`, () => {
+      expect(
+        localStorage.isPublicFilepath(
+          path.join(getPublicStorageIdentifier(), faker.system.filePath())
+        )
+      ).toBeTruthy();
+    });
+
+    it(`should return false when path does not stat with public storage identifier`, () => {
+      expect(
+        localStorage.isPublicFilepath(faker.system.filePath())
+      ).toBeFalsy();
+    });
+
+    it(`should ignore leading path separator`, () => {
+      const filepath = `${path.sep}${path.join(
+        getPublicStorageIdentifier(),
+        faker.system.filePath()
+      )}`;
+      expect(localStorage.isPublicFilepath(filepath)).toBeTruthy();
+    });
+  });
+
+  describe(`makeClientPathCompatibleWithStorage`, () => {
     it(`should return storage path + filepath`, () => {
-      expect(localStorage.createStorageCompatiblePath('testing.txt')).toBe(
-        path.join(testStoragePath, 'testing.txt')
-      );
+      expect(
+        localStorage.makeClientPathCompatibleWithStorage('testing.txt')
+      ).toBe(path.join(testStoragePath, 'testing.txt'));
     });
 
     it(`should remove a leading fore slash`, () => {
-      expect(localStorage.createStorageCompatiblePath('/testing.txt')).toBe(
-        path.join(testStoragePath, 'testing.txt')
+      expect(
+        localStorage.makeClientPathCompatibleWithStorage('/testing.txt')
+      ).toBe(path.join(testStoragePath, 'testing.txt'));
+    });
+
+    it(`should return storage path + public storage identifier + filepath when isPublic is true`, () => {
+      expect(
+        localStorage.makeClientPathCompatibleWithStorage('/testing.txt', true)
+      ).toBe(
+        path.join(testStoragePath, getPublicStorageIdentifier(), 'testing.txt')
       );
     });
   });
 
   describe(`getAbsolutePath`, () => {
-    it(`should return prepend storage path`, () => {
+    it(`should return prepend private storage path`, () => {
       const filename = `${faker.datatype.uuid()}.txt`;
       expect(localStorage.getAbsolutePath(filename)).toBe(
         path.join(testStoragePath, filename)
@@ -197,12 +234,92 @@ describe(`LocalStorage Utility`, () => {
       const filename = `test.txt`;
       const result = await localStorage.writeFile(filename, expectedContent);
 
-      expect(result.filepath).toBe(path.join(testStoragePath, filename));
+      expect(result.storageFilepath).toBe(filename);
+      expect(result.absoluteFilepath).toBe(
+        path.join(testStoragePath, filename)
+      );
       expect(result.ServerSideEncryption).toBeUndefined();
       expect(result.ETag).toBeUndefined();
       expect(result.$metadata).toBeUndefined();
       expect(result.ServerSideEncryption).toBeUndefined();
       expect(result.VersionId).toBeUndefined();
+    });
+
+    it(`should throw error when the filepath starts with ${getPublicStorageIdentifier()}`, async () => {
+      const expectedContent = faker.lorem.paragraph(2);
+      const filename = `${getPublicStorageIdentifier()}test.txt`;
+      await expect(
+        localStorage.writeFile(filename, expectedContent)
+      ).rejects.toThrow(
+        `Filename/ filepath cannot start with ${getPublicStorageIdentifier()}`
+      );
+    });
+  });
+
+  describe(`writeFilePublicly`, () => {
+    let testPublicStorageDir: string;
+    beforeEach(() => {
+      testPublicStorageDir = path.join(
+        testStoragePath,
+        getPublicStorageIdentifier()
+      );
+      if (!fs.existsSync(testPublicStorageDir)) {
+        fs.mkdirSync(testPublicStorageDir, {
+          recursive: true
+        });
+      }
+    });
+
+    afterEach(() => {
+      if (fs.existsSync(testPublicStorageDir)) {
+        fs.rmdirSync(testPublicStorageDir, {
+          recursive: true
+        });
+      }
+    });
+
+    it(`should create file in the public storage`, async () => {
+      const expectedContent = faker.lorem.paragraph(2);
+      const filename = `test.txt`;
+      await localStorage.writeFilePublicly(filename, expectedContent);
+      const absolutePublicFilepath = path.join(testPublicStorageDir, filename);
+
+      expect(fs.existsSync(absolutePublicFilepath)).toBeTruthy();
+      const actualContent = fs.readFileSync(absolutePublicFilepath, {
+        encoding: 'utf-8'
+      });
+      expect(actualContent).toBe(expectedContent);
+    });
+
+    it(`should return the created file locations`, async () => {
+      const expectedContent = faker.lorem.paragraph(2);
+      const filename = `test.txt`;
+      const result = await localStorage.writeFilePublicly(
+        filename,
+        expectedContent
+      );
+
+      expect(result.storageFilepath).toBe(
+        path.join(getPublicStorageIdentifier(), filename)
+      );
+      expect(result.absoluteFilepath).toBe(
+        path.join(testPublicStorageDir, filename)
+      );
+    });
+
+    it(`should invoke writeFileAsync with the right options`, async () => {
+      const writeFileAsyncStub = sinon.stub(utilities, 'writeFileAsync');
+      const filename = `testing.txt`;
+      const content = faker.lorem.words(4);
+      const options = 'base64';
+      await localStorage.writeFilePublicly(filename, content, options);
+      sinon.assert.calledOnceWithExactly(
+        writeFileAsyncStub,
+        path.join(testStoragePath, getPublicStorageIdentifier(), filename),
+        content,
+        options
+      );
+      writeFileAsyncStub.restore();
     });
   });
 

@@ -17,7 +17,7 @@ import fs from 'fs';
 import * as fileSystemUtilities from '../../src/utilities/utilities';
 import { delay, deleteStorageDirectory } from '../testUtilities';
 import { generateUploadedFile } from '../../src/test';
-import { FileUploader, getAppStorageDirectory } from '../../src';
+import { FileUploader, getPrivateStorageDirectory } from '../../src';
 
 /**
  * Note: the remaining functions are tested as integration tests
@@ -53,7 +53,10 @@ describe('FileUploader Utility', function () {
     let testFilesDirectory: string;
 
     beforeAll(() => {
-      testFilesDirectory = path.join(getAppStorageDirectory(), `testStoreFile`);
+      testFilesDirectory = path.join(
+        getPrivateStorageDirectory(),
+        `testStoreFile`
+      );
     });
 
     afterEach(async () => {
@@ -84,7 +87,7 @@ describe('FileUploader Utility', function () {
       expect(
         fs.existsSync(
           `${path.join(
-            getAppStorageDirectory(),
+            getPrivateStorageDirectory(),
             storeFileParams.directory.toLowerCase(),
             storeFileParams.filename.toLowerCase()
           )}.txt`
@@ -108,7 +111,7 @@ describe('FileUploader Utility', function () {
 
       expect(result.length).toBe(40);
       expect(
-        fs.existsSync(path.join(getAppStorageDirectory(), result))
+        fs.existsSync(path.join(getPrivateStorageDirectory(), result))
       ).toBeTruthy();
     });
 
@@ -146,7 +149,7 @@ describe('FileUploader Utility', function () {
       expect(
         fs.existsSync(
           path.join(
-            getAppStorageDirectory(),
+            getPrivateStorageDirectory(),
             storeFileParams.directory,
             `${storeFileParams.filename}.txt`
           )
@@ -264,8 +267,8 @@ describe('FileUploader Utility', function () {
     });
 
     const createTestUploadedFile = (filename: string): string => {
-      if (!fs.existsSync(getAppStorageDirectory())) {
-        fs.mkdirSync(getAppStorageDirectory());
+      if (!fs.existsSync(getPrivateStorageDirectory())) {
+        fs.mkdirSync(getPrivateStorageDirectory());
       }
 
       if (!fs.existsSync(testFilesDirectory)) {
@@ -396,7 +399,7 @@ describe('FileUploader Utility', function () {
       const getTempDirIdStub = sinon.stub(fileUploader, `_getTempDirId`);
       getTempDirIdStub.returns(fakeUuid);
       const expectedDirPath = path.join(
-        path.join(getAppStorageDirectory(), 'temp'),
+        path.join(getPrivateStorageDirectory(), 'temp'),
         fakeUuid
       );
       const actualDirPath = fileUploader.getAbsoluteTempUploadDirPath();
@@ -465,8 +468,8 @@ describe('FileUploader Utility', function () {
 
     const createTempDirsForOtherSessions = async (): Promise<string[]> => {
       const tempDirs: string[] = [
-        path.join(getAppStorageDirectory(), 'temp', faker.datatype.uuid()),
-        path.join(getAppStorageDirectory(), 'temp', faker.datatype.uuid())
+        path.join(getPrivateStorageDirectory(), 'temp', faker.datatype.uuid()),
+        path.join(getPrivateStorageDirectory(), 'temp', faker.datatype.uuid())
       ];
       await Promise.all(
         tempDirs.map((dir) =>

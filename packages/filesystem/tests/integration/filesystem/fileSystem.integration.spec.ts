@@ -16,7 +16,7 @@ import {
   resetTestExpressApp
 } from '../utilities';
 import { ComplexFormData, SimpleFormData } from './support/types';
-import { getAppStorageDirectory } from '../../../src';
+import { getPrivateStorageDirectory } from '../../../src';
 import { delay, deleteStorageDirectory } from '../../testUtilities';
 import {
   generateSimpleFormDataPayload,
@@ -45,7 +45,10 @@ describe('FileSystem', () => {
 
   beforeAll(async () => {
     setServerDirectory(process.cwd());
-    primaryTempStorageDir = path.join(getAppStorageDirectory(), tempDirname);
+    primaryTempStorageDir = path.join(
+      getPrivateStorageDirectory(),
+      tempDirname
+    );
     await initTestApplication();
   });
 
@@ -176,7 +179,7 @@ describe('FileSystem', () => {
     });
 
     it(`should create temp storage for request`, async () => {
-      if (fs.existsSync(getAppStorageDirectory())) {
+      if (fs.existsSync(getPrivateStorageDirectory())) {
         deleteStorageDirectory();
       }
       const formData = generateSimpleFormDataPayload();
@@ -311,7 +314,7 @@ describe('FileSystem', () => {
 
     it(`should upload file into the default storage directory generating random filename`, async () => {
       const expectedFilepath = path.join(
-        getAppStorageDirectory(),
+        getPrivateStorageDirectory(),
         `${fakeFilenameUuid}.png`
       );
       const { body } = await makeStoreFileRequest(generateStoreFilePayload());
@@ -330,7 +333,7 @@ describe('FileSystem', () => {
       expect(
         fs.existsSync(
           path.join(
-            getAppStorageDirectory(),
+            getPrivateStorageDirectory(),
             payload.directory as string,
             `${fakeFilenameUuid}.png`
           )
@@ -347,7 +350,7 @@ describe('FileSystem', () => {
       expect(body.error).toBeFalsy();
       expect(
         fs.existsSync(
-          path.join(getAppStorageDirectory(), `${payload.filename}.png`)
+          path.join(getPrivateStorageDirectory(), `${payload.filename}.png`)
         )
       ).toBeTruthy();
     });
@@ -363,7 +366,7 @@ describe('FileSystem', () => {
       expect(
         fs.existsSync(
           path.join(
-            getAppStorageDirectory(),
+            getPrivateStorageDirectory(),
             payload.directory as string,
             `${payload.filename}.png`
           )
@@ -421,12 +424,18 @@ describe('FileSystem', () => {
       expect(body.error).toBeFalsy();
       expect(
         fs.existsSync(
-          path.join(getAppStorageDirectory(), `${generatedFilenames[0]}.png`)
+          path.join(
+            getPrivateStorageDirectory(),
+            `${generatedFilenames[0]}.png`
+          )
         )
       ).toBeTruthy();
       expect(
         fs.existsSync(
-          path.join(getAppStorageDirectory(), `${generatedFilenames[1]}.png`)
+          path.join(
+            getPrivateStorageDirectory(),
+            `${generatedFilenames[1]}.png`
+          )
         )
       ).toBeTruthy();
     });
@@ -441,7 +450,7 @@ describe('FileSystem', () => {
       expect(
         fs.existsSync(
           path.join(
-            getAppStorageDirectory(),
+            getPrivateStorageDirectory(),
             payload.directory as string,
             `${generatedFilenames[0]}.png`
           )
@@ -450,7 +459,7 @@ describe('FileSystem', () => {
       expect(
         fs.existsSync(
           path.join(
-            getAppStorageDirectory(),
+            getPrivateStorageDirectory(),
             payload.directory as string,
             `${generatedFilenames[1]}.png`
           )

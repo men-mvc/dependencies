@@ -12,10 +12,10 @@ import { getAppRootDirectory } from '../foundation';
 export const getDefaultAppStorageDirectory = (): string =>
   path.join(getAppRootDirectory(), `storage`);
 
-let appStorageDirectoryCache: string | null = null;
-export const getAppStorageDirectory = (): string => {
-  if (appStorageDirectoryCache) {
-    return appStorageDirectoryCache;
+let privateStorageDirectoryCache: string | null = null;
+export const getPrivateStorageDirectory = (): string => {
+  if (privateStorageDirectoryCache) {
+    return privateStorageDirectoryCache;
   }
   let storageDirectory: string;
   const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
@@ -25,13 +25,21 @@ export const getAppStorageDirectory = (): string => {
     storageDirectory = getDefaultAppStorageDirectory();
   }
 
-  appStorageDirectoryCache = storageDirectory;
+  privateStorageDirectoryCache = storageDirectory;
 
-  return appStorageDirectoryCache;
+  return privateStorageDirectoryCache;
 };
 
-export const clearAppStorageDirectoryCache = () => {
-  appStorageDirectoryCache = null;
+// ! if we are to add more logic in the future, unit test
+export const getPublicStorageIdentifier = () => {
+  return `men-public`;
+};
+
+export const getPublicStorageDirectory = (): string =>
+  path.join(getPrivateStorageDirectory(), getPublicStorageIdentifier());
+
+export const clearPrivateStorageDirectoryCache = () => {
+  privateStorageDirectoryCache = null;
 };
 
 export const getUploadFilesizeLimit = (): number =>

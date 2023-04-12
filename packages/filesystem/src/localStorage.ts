@@ -3,7 +3,9 @@ import path from 'path';
 import { Storage, ReadStreamOptions, WriteFileResult } from './types';
 import {
   copyFileAsync,
-  getAppStorageDirectory,
+  getPrivateStorageDirectory,
+  getPublicStorageDirectory,
+  getPublicStorageIdentifier,
   mkdirAsync,
   readdirAsync,
   readFileAsync,
@@ -29,21 +31,36 @@ export class LocalStorage implements Storage {
     return LocalStorage.instance;
   };
 
+  public isPublicFilepath = (storageFilepath: string) => {
+    if (storageFilepath.startsWith(path.sep)) {
+      storageFilepath = storageFilepath.substring(1);
+    }
+
+    return storageFilepath.startsWith(getPublicStorageIdentifier());
+  };
+
   // public - to unit test
-  public createStorageCompatiblePath = (dirOrFilePath: string) => {
+  public makeClientPathCompatibleWithStorage = (
+    dirOrFilePath: string,
+    isPublic = false
+  ) => {
     if (dirOrFilePath.startsWith('/')) {
       dirOrFilePath = dirOrFilePath.substring(1);
     }
 
-    return path.join(getAppStorageDirectory(), dirOrFilePath);
+    const storagePath = isPublic
+      ? getPublicStorageDirectory()
+      : getPrivateStorageDirectory();
+
+    return path.join(storagePath, dirOrFilePath);
   };
 
   public getAbsolutePath = (dirOrFilePath: string): string => {
-    return path.join(getAppStorageDirectory(), dirOrFilePath);
+    return path.join(getPrivateStorageDirectory(), dirOrFilePath);
   };
 
   public readDir = (dir: string): Promise<string[]> =>
-    readdirAsync(this.createStorageCompatiblePath(dir));
+    readdirAsync(this.getAbsolutePath(dir));
 
   public readFile = async (
     filepath: string,
@@ -52,7 +69,7 @@ export class LocalStorage implements Storage {
       flag?: string | undefined;
     }
   ): Promise<Buffer> => {
-    const absolutePath = this.createStorageCompatiblePath(filepath);
+    const absolutePath = this.getAbsolutePath(filepath);
     const encoding: BufferEncoding =
       options && options.encoding ? options.encoding : `utf-8`;
     const content = await readFileAsync(absolutePath, options ?? {});
@@ -65,13 +82,10 @@ export class LocalStorage implements Storage {
     filepath: string,
     options?: ReadStreamOptions
   ): Promise<fs.ReadStream> => {
-    const stream = fs.createReadStream(
-      this.createStorageCompatiblePath(filepath),
-      {
-        highWaterMark: options?.highWaterMark,
-        encoding: options?.encoding ?? `utf-8`
-      }
-    );
+    const stream = fs.createReadStream(this.getAbsolutePath(filepath), {
+      highWaterMark: options?.highWaterMark,
+      encoding: options?.encoding ?? `utf-8`
+    });
 
     return stream;
   };
@@ -81,20 +95,40 @@ export class LocalStorage implements Storage {
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
   ): Promise<WriteFileResult> => {
-    const absoluteFilepath = this.createStorageCompatiblePath(filepath);
-    await writeFileAsync(
-      this.createStorageCompatiblePath(filepath),
-      data,
-      options ?? {}
-    );
+    if (this.isPublicFilepath(filepath)) {
+      throw new Error(
+        `Filename/ filepath cannot start with ${getPublicStorageIdentifier()}`
+      );
+    }
+
+    const absoluteFilepath = this.makeClientPathCompatibleWithStorage(filepath);
+    await writeFileAsync(absoluteFilepath, data, options ?? {});
 
     return {
-      filepath: absoluteFilepath
+      storageFilepath: filepath,
+      absoluteFilepath: absoluteFilepath
+    };
+  };
+
+  public writeFilePublicly = async (
+    filepath: string,
+    data: string | NodeJS.ArrayBufferView,
+    options?: WriteFileOptions
+  ): Promise<WriteFileResult> => {
+    const absoluteFilepath = this.makeClientPathCompatibleWithStorage(
+      filepath,
+      true
+    );
+    await writeFileAsync(absoluteFilepath, data, options ?? {});
+
+    return {
+      storageFilepath: this.getPublicStorageFilepathFor(filepath),
+      absoluteFilepath: absoluteFilepath
     };
   };
 
   public deleteFile = async (filepath: string): Promise<void> =>
-    unlinkAsync(this.createStorageCompatiblePath(filepath));
+    unlinkAsync(this.getAbsolutePath(filepath));
 
   public deleteFiles = async (filepaths: string[]): Promise<void> => {
     if (filepaths.length < 1) {
@@ -102,32 +136,24 @@ export class LocalStorage implements Storage {
     }
 
     await Promise.all(
-      filepaths.map((path) =>
-        unlinkAsync(this.createStorageCompatiblePath(path))
-      )
+      filepaths.map((path) => unlinkAsync(this.getAbsolutePath(path)))
     );
   };
 
   public rename = async (from: string, to: string): Promise<void> =>
-    renameAsync(
-      this.createStorageCompatiblePath(from),
-      this.createStorageCompatiblePath(to)
-    );
+    renameAsync(this.getAbsolutePath(from), this.getAbsolutePath(to));
 
   public copy = async (from: string, to: string): Promise<void> => {
     if (from === to) {
       return;
     }
 
-    await copyFileAsync(
-      this.createStorageCompatiblePath(from),
-      this.createStorageCompatiblePath(to)
-    );
+    await copyFileAsync(this.getAbsolutePath(from), this.getAbsolutePath(to));
   };
 
   public exists = async (filepath: string): Promise<boolean> => {
     return new Promise((resolve) => {
-      fs.stat(this.createStorageCompatiblePath(filepath), (error) => {
+      fs.stat(this.getAbsolutePath(filepath), (error) => {
         if (!error) {
           return resolve(true);
         }
@@ -141,7 +167,7 @@ export class LocalStorage implements Storage {
   };
 
   public mkdir = async (dirPath: string): Promise<void> => {
-    await mkdirAsync(this.createStorageCompatiblePath(dirPath), {
+    await mkdirAsync(this.getAbsolutePath(dirPath), {
       recursive: true
     });
   };
@@ -150,16 +176,14 @@ export class LocalStorage implements Storage {
     dirPath: string,
     forceDelete?: boolean
   ): Promise<void> => {
-    await rmdirAsync(this.createStorageCompatiblePath(dirPath), {
+    await rmdirAsync(this.getAbsolutePath(dirPath), {
       recursive: !!forceDelete
     });
   };
 
   public isDir = async (dirOrFilepath: string): Promise<boolean> => {
     try {
-      return await this.isDirPromise(
-        this.createStorageCompatiblePath(dirOrFilepath)
-      );
+      return await this.isDirPromise(this.getAbsolutePath(dirOrFilepath));
     } catch (e) {
       throw e;
     }
@@ -182,4 +206,7 @@ export class LocalStorage implements Storage {
       });
     });
   };
+
+  private getPublicStorageFilepathFor = (filePathOrName: string) =>
+    path.join(getPublicStorageIdentifier(), filePathOrName);
 }

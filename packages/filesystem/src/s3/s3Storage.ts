@@ -61,7 +61,8 @@ export class S3Storage implements Storage {
 
     return {
       ...result,
-      filepath: key
+      storageFilepath: key,
+      absoluteFilepath: key
     };
   };
 

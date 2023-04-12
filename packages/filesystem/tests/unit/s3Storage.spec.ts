@@ -90,7 +90,8 @@ describe(`S3Storage`, () => {
         );
       const result = await storage.writeFile(key, data);
 
-      expect(result.filepath).toBe(key);
+      expect(result.storageFilepath).toBe(key);
+      expect(result.absoluteFilepath).toBe(key);
       expect(result.VersionId).toBe(writeOutput.VersionId);
       expect(result.ServerSideEncryption).toBe(
         writeOutput.ServerSideEncryption
