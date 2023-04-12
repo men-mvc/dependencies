@@ -1,10 +1,11 @@
 import { faker } from '@faker-js/faker';
-import {
-  setEnvVariable,
-  ValidationError
-} from '@men-mvc/foundation';
+import { setEnvVariable, ValidationError } from '@men-mvc/foundation';
 import { generateUploadedFile } from '../../../src/test';
-import {validateFile, validateImage, validateFileExtension} from "../../../src";
+import {
+  validateFile,
+  validateImage,
+  validateFileExtension
+} from '../../../src';
 
 describe(`Validation Utilities`, () => {
   describe(`validateFile`, () => {

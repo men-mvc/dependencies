@@ -15,10 +15,7 @@ import _ from 'lodash';
 import path from 'path';
 import fs from 'fs';
 import * as fileSystemUtilities from '../../src/utilities/utilities';
-import {
-  delay,
-  deleteStorageDirectory,
-} from '../testUtilities';
+import { delay, deleteStorageDirectory } from '../testUtilities';
 import { generateUploadedFile } from '../../src/test';
 import { FileUploader, getAppStorageDirectory } from '../../src';
 
@@ -175,9 +172,7 @@ describe('FileUploader Utility', function () {
       };
       const createdObjectKey = await fileUploader.storeFile(storeFileParams);
 
-      expect(createdObjectKey).toBe(
-        `${directory}/${fileKey}.txt`.toLowerCase()
-      );
+      expect(createdObjectKey).toBe(`${directory}/${fileKey}.txt`);
       sinon.assert.calledOnceWithExactly(
         s3WriteFileStub,
         createdObjectKey,
