@@ -134,9 +134,7 @@ export class FileUploader implements BaseFileUploader {
     directory
   }: StoreFileParams): Promise<string> => {
     let targetKey = this.getTargetFilename(uploadedFile, filename);
-    targetKey = directory
-      ? `${directory.toLowerCase()}/${targetKey}`
-      : targetKey;
+    targetKey = directory ? `${directory}/${targetKey}` : targetKey;
 
     const newTempFilepath = `${uploadedFile.filepath}${path.extname(
       uploadedFile.originalFilename
@@ -222,11 +220,9 @@ export class FileUploader implements BaseFileUploader {
     filename?: string
   ): string => {
     const fileExtension = this.getFileExtension(uploadedFile.originalFilename);
-    const finalName = filename
+    return filename
       ? `${filename}${fileExtension}`
       : `${generateUuid()}${fileExtension}`;
-
-    return finalName.toLowerCase();
   };
 
   private getLocalTargetFilepath = (

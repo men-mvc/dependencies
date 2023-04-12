@@ -2,10 +2,7 @@ import joi from 'joi';
 import sinon, { SinonStub } from 'sinon';
 import { Request, Response } from 'express';
 import { UploadedFile as ExpressUploadedFile } from 'express-fileupload';
-import {
-  RequestValidator,
-  UploadedFile,
-} from '@men-mvc/foundation';
+import { RequestValidator, UploadedFile } from '@men-mvc/foundation';
 import { faker } from '@faker-js/faker';
 import {
   ValidateMultipartRequest,
@@ -14,7 +11,7 @@ import {
 } from '../../src';
 import * as decorators from '../../src/decorators';
 import * as utilities from '../../src/utilities/utilities';
-import {validateImage} from "../../src";
+import { validateImage } from '../../src';
 
 type MultiForm = {
   name: string;
