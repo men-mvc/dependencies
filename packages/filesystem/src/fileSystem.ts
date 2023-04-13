@@ -94,6 +94,13 @@ export class FileSystem implements BaseFileSystem {
     return this.getStorageInstance().writeFile(filepath, data, options);
   };
 
+  public writeFilePublicly = async (
+    filepath: string,
+    data: string | NodeJS.ArrayBufferView,
+    options?: WriteFileOptions
+  ): Promise<WriteFileResult> =>
+    this.getStorageInstance().writeFilePublicly(filepath, data, options);
+
   public deleteFile = async (path: string): Promise<void> =>
     this.getStorageInstance().deleteFile(path);
 

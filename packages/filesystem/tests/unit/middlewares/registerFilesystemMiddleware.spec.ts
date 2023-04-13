@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
-import sinon, { SinonStub } from 'sinon';
-import path from 'path';
+import sinon from 'sinon';
+import fs from 'fs';
 import { getServerDirectory, setServerDirectory } from '@men-mvc/foundation';
 import { createStorageDirectoryIfNeeded, FileSystem } from '../../../src';
 import * as utilities from '../../../src/utilities/utilities';
-import fs from 'fs';
 import {
   getPrivateStorageDirectory,
   getPublicStorageDirectory

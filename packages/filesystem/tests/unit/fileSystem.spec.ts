@@ -36,6 +36,27 @@ describe(`FileSystem`, () => {
       const content = faker.datatype.uuid();
       await FileSystem.getInstance().writeFile(filepath, content, {});
       sinon.assert.calledOnceWithExactly(writeFileStub, filepath, content, {});
+      writeFileStub.restore();
+    });
+  });
+
+  describe(`writeFilePublicly`, () => {
+    it(`should invoke writeFilePublicly function of underlying storage path`, async () => {
+      const instance = FileSystem.getInstance() as FileSystem;
+      const writeFilePubliclyStub = sinon.stub(
+        instance.getStorageInstance(),
+        'writeFilePublicly'
+      );
+      const filepath = faker.system.filePath();
+      const content = faker.datatype.uuid();
+      await FileSystem.getInstance().writeFilePublicly(filepath, content, {});
+      sinon.assert.calledOnceWithExactly(
+        writeFilePubliclyStub,
+        filepath,
+        content,
+        {}
+      );
+      writeFilePubliclyStub.restore();
     });
   });
 

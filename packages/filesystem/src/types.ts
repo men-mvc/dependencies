@@ -26,6 +26,12 @@ export interface Storage {
     options?: WriteFileOptions
   ) => Promise<WriteFileResult>;
 
+  writeFilePublicly: (
+    pathOrKey: string,
+    data: string | NodeJS.ArrayBufferView,
+    options?: WriteFileOptions
+  ) => Promise<WriteFileResult>;
+
   deleteFile: (pathOrKey: string) => Promise<void>;
 
   deleteFiles: (pathsOrKeys: string[]) => Promise<void>;
