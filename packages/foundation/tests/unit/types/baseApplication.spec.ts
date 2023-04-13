@@ -1,7 +1,6 @@
-import express, { Express } from 'express';
-import { BaseApplication } from '../../../src';
+import express from 'express';
 import sinon, { SinonSandbox } from 'sinon';
-import { ApplicationEvents } from '../../../lib';
+import { BaseApplication, ApplicationEvents } from '../../../src';
 
 class TestApplication extends BaseApplication {
   initialise = () => {};
@@ -34,6 +33,27 @@ describe(`BaseApplication`, () => {
   afterEach(() => {
     sandbox.restore();
     TestApplication.clearEventEmitter();
+    TestApplication.clearInstance();
+  });
+
+  describe(`getInstance`, () => {
+    it(`should throw ApplicationNotInitialisedError`, () => {
+      expect(() => {
+        TestApplication.getInstance();
+      }).toThrow(`Application not initialise yet.`);
+    });
+
+    it(`should return application class instance`, () => {
+      const app = BaseApplication.init(new TestApplication(expressApp));
+      expect(TestApplication.getInstance()).toBe(app);
+    });
+
+    // test singleton
+    it(`should always return the same instance`, () => {
+      const app = BaseApplication.init(new TestApplication(expressApp));
+      expect(TestApplication.getInstance()).toBe(app);
+      expect(TestApplication.getInstance()).toBe(app);
+    });
   });
 
   describe(`setUp`, () => {
