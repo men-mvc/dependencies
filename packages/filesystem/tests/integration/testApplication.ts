@@ -1,10 +1,10 @@
 import express, { Express } from 'express';
 import { baseConfig } from '@men-mvc/config';
-import { AbstractApplication } from '@men-mvc/foundation';
+import { BaseApplication } from '@men-mvc/foundation';
 import { configureTestRoutes } from './testRoutes';
 import { registerFilesystem } from '../../src';
 
-export class TestApplication extends AbstractApplication {
+export class TestApplication extends BaseApplication {
   constructor(public app: Express) {
     super(app);
   }

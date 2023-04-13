@@ -38,7 +38,6 @@ describe(`registerFilesystem middleware`, () => {
         () => {}
       );
       expect(fs.existsSync(getPrivateStorageDirectory())).toBeTruthy();
-      console.log(getPublicStorageDirectory());
       expect(fs.existsSync(getPublicStorageDirectory())).toBeTruthy();
     });
 
