@@ -80,6 +80,7 @@ export const isPublicFilepath = (storageFilepath: string) => {
   return storageFilepath.startsWith(getPublicStorageIdentifier());
 };
 
+export const existsAsync = util.promisify(fs.exists);
 export const readdirAsync = util.promisify(fs.readdir);
 export const rmdirAsync = util.promisify(fs.rmdir);
 export const unlinkAsync = util.promisify(fs.unlink);

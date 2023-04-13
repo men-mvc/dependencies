@@ -22,6 +22,7 @@ import { S3Storage } from './s3/s3Storage';
 
 // TODO: add writeFiles
 export class FileSystem implements BaseFileSystem {
+  public static storageDirCreated: boolean = false;
   private static instance: FileSystem | null;
   private storageInstance: Storage | undefined;
   private uploaderInstance: BaseFileUploader | undefined;

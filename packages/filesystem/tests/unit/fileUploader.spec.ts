@@ -30,6 +30,11 @@ describe('FileUploader Utility', function () {
 
   afterAll(() => {
     setServerDirectory('');
+    if (fs.existsSync(getPrivateStorageDirectory())) {
+      fs.rmdirSync(getPrivateStorageDirectory(), {
+        recursive: true
+      });
+    }
   });
 
   describe(`getLocalStorage`, () => {

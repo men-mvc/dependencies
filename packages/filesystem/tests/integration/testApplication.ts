@@ -2,7 +2,7 @@ import express, { Express } from 'express';
 import { baseConfig } from '@men-mvc/config';
 import { AbstractApplication } from '@men-mvc/foundation';
 import { configureTestRoutes } from './testRoutes';
-import { registerMultipartFormParser } from '../../src';
+import { registerFilesystem } from '../../src';
 
 export class TestApplication extends AbstractApplication {
   constructor(public app: Express) {
@@ -14,7 +14,7 @@ export class TestApplication extends AbstractApplication {
   public initialisePreMiddlewares = () => {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(express.json());
-    registerMultipartFormParser(this.app);
+    registerFilesystem(this.app);
   };
 
   public registerRoutes = () => {

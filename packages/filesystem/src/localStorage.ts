@@ -19,7 +19,6 @@ import {
 /**
  * TODO: improvement
  * - readDir recursive
- * TODO: writeFilePublicly or pass additional argument?
  */
 export class LocalStorage implements Storage {
   public static instance: LocalStorage;
@@ -32,7 +31,6 @@ export class LocalStorage implements Storage {
     return LocalStorage.instance;
   };
 
-  // public - to unit test
   public makeClientPathCompatibleWithStorage = (
     dirOrFilePath: string,
     isPublic = false
@@ -138,6 +136,7 @@ export class LocalStorage implements Storage {
     await copyFileAsync(this.getAbsolutePath(from), this.getAbsolutePath(to));
   };
 
+  // TODO: can we not use existsAsync?
   public exists = async (filepath: string): Promise<boolean> => {
     return new Promise((resolve) => {
       fs.stat(this.getAbsolutePath(filepath), (error) => {

@@ -7,7 +7,7 @@ import {
   makeFormDataRequest
 } from './utilities';
 import * as utilities from '../../../src/utilities/utilities';
-import { registerMultipartFormParser } from '../../../src';
+import { registerFilesystem } from '../../../src';
 
 describe('FileSystem - UploadFilesizeLimit', function () {
   beforeAll(() => {
@@ -34,7 +34,7 @@ describe('FileSystem - UploadFilesizeLimit', function () {
     let application = new testApplication.TestApplication(exApp);
     exApp.use(express.urlencoded({ extended: true }));
     exApp.use(express.json());
-    registerMultipartFormParser(exApp);
+    registerFilesystem(exApp);
     configureTestRoutes(application);
   };
 
