@@ -73,7 +73,7 @@ export const parseMultiFormBooleanInput = (
 };
 
 export const isPublicFilepath = (storageFilepath: string) => {
-  if (storageFilepath.startsWith(path.sep)) {
+  if (storageFilepath.startsWith(path.sep) || storageFilepath.startsWith('/')) {
     storageFilepath = storageFilepath.substring(1);
   }
 

@@ -56,6 +56,8 @@ export interface BaseFileUploader {
 
   storeFile: (params: StoreFileParams) => Promise<string>;
 
+  storeFilePublicly: (params: StoreFileParams) => Promise<string>;
+
   storeFiles: (params: StoreFilesParams) => Promise<string[]>;
 
   getAbsoluteTempUploadDirPath: () => string;

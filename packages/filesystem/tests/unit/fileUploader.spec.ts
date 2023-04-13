@@ -2,10 +2,10 @@ import sinon from 'sinon';
 import Sinon, { SinonStub } from 'sinon';
 import {
   DeepPartial,
+  FileSystemDriver,
   setServerDirectory,
   UploadedFile
 } from '@men-mvc/foundation';
-import { FileSystemDriver } from '@men-mvc/config';
 import {
   FileArray,
   UploadedFile as ExpressUploadedFile
@@ -18,6 +18,7 @@ import * as fileSystemUtilities from '../../src/utilities/utilities';
 import { delay, deleteStorageDirectory } from '../testUtilities';
 import { generateUploadedFile } from '../../src/test';
 import { FileUploader, getPrivateStorageDirectory } from '../../src';
+import { getPublicStorageIdentifier } from '../../src';
 
 /**
  * Note: the remaining functions are tested as integration tests
@@ -99,6 +100,19 @@ describe('FileUploader Utility', function () {
         )
       ).toBeTruthy();
       expect(fs.existsSync(uploadedFilepath)).toBeFalsy();
+    });
+
+    it(`should throw error when filename starts with ${getPublicStorageIdentifier()}`, async () => {
+      getDriverStub = mockGetDriver(FileSystemDriver.local);
+      const uploadedFile = generateUploadedFile();
+      const storeFileParams = {
+        uploadedFile,
+        filename: `${getPublicStorageIdentifier()}${faker.datatype.uuid()}`
+      };
+
+      await expect(fileUploader.storeFile(storeFileParams)).rejects.toThrow(
+        `Filename passed to storeFile cannot start with ${getPublicStorageIdentifier()}`
+      );
     });
 
     it(`should allow both filename and directory to be undefined - local`, async () => {
@@ -287,6 +301,126 @@ describe('FileUploader Utility', function () {
 
     const mockGetDriver = (driver: FileSystemDriver) =>
       Sinon.stub(fileSystemUtilities, `getDriver`).returns(driver);
+  });
+
+  // TODO:
+  describe(`storeFilePublicly`, () => {
+    const storeFileResult: string = faker.system.filePath();
+    let getDriverStub: SinonStub;
+    let storeFileStub: SinonStub;
+
+    beforeEach(() => {
+      storeFileStub = sinon
+        .stub(fileUploader, `storeFile`)
+        .returns(Promise.resolve(storeFileResult));
+    });
+
+    afterEach(() => {
+      getDriverStub.restore();
+      storeFileStub.restore();
+    });
+
+    describe(`s3`, () => {
+      beforeEach(() => {
+        getDriverStub = sinon
+          .stub(fileSystemUtilities, `getDriver`)
+          .returns(FileSystemDriver.s3);
+      });
+
+      it(`should invoke storeFile with the right parameters`, async () => {
+        const filename = faker.system.fileName();
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        await fileUploader.storeFilePublicly({
+          uploadedFile,
+          filename,
+          directory
+        });
+
+        sinon.assert.calledOnceWithExactly(storeFileStub, {
+          uploadedFile,
+          filename: `${getPublicStorageIdentifier()}/${filename}`,
+          directory
+        });
+      });
+
+      it(`should generate random file name when filename is empty`, async () => {
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        await fileUploader.storeFilePublicly({
+          uploadedFile,
+          directory
+        });
+
+        sinon.assert.calledOnce(storeFileStub);
+        const callArgs = storeFileStub.getCalls()[0].args;
+        expect(
+          callArgs[0].filename.startsWith(getPublicStorageIdentifier())
+        ).toBeTruthy();
+        expect(callArgs[0].filename.length).toBe(47);
+      });
+
+      it(`should return the result of storeFile`, async () => {
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        const actualResult = await fileUploader.storeFilePublicly({
+          uploadedFile,
+          directory
+        });
+        expect(actualResult).toBe(storeFileResult);
+      });
+    });
+
+    describe(`local`, () => {
+      beforeEach(() => {
+        getDriverStub = sinon
+          .stub(fileSystemUtilities, `getDriver`)
+          .returns(FileSystemDriver.local);
+      });
+
+      it(`should invoke storeFile with the right parameters`, async () => {
+        const filename = faker.system.fileName();
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        await fileUploader.storeFilePublicly({
+          uploadedFile,
+          filename,
+          directory
+        });
+
+        sinon.assert.calledOnceWithExactly(storeFileStub, {
+          uploadedFile,
+          filename: path.join(getPublicStorageIdentifier(), filename),
+          directory
+        });
+      });
+
+      it(`should generate the random filename when filename is empty`, async () => {
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        await fileUploader.storeFilePublicly({
+          uploadedFile,
+          directory
+        });
+
+        sinon.assert.calledOnce(storeFileStub);
+        const callArgs = storeFileStub.getCalls()[0].args;
+        expect(
+          callArgs[0].filename.startsWith(getPublicStorageIdentifier())
+        ).toBeTruthy();
+        expect(callArgs[0].filename.length).toBe(47);
+      });
+
+      it(`should return the result of storeFile`, async () => {
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        const actualResult = await fileUploader.storeFilePublicly({
+          uploadedFile,
+          directory
+        });
+        expect(actualResult).toBe(storeFileResult);
+      });
+    });
   });
 
   describe(`_makeUploadedFileCompatible`, () => {

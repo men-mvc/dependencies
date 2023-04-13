@@ -2,6 +2,7 @@ import path from 'path';
 import { faker } from '@faker-js/faker';
 import sinon from 'sinon';
 import { FileSystem, getPublicStorageIdentifier } from '../../src';
+import { generateUploadedFile } from '../../src/test';
 
 describe(`FileSystem`, () => {
   beforeEach(() => {
@@ -41,7 +42,7 @@ describe(`FileSystem`, () => {
   });
 
   describe(`writeFilePublicly`, () => {
-    it(`should invoke writeFilePublicly function of underlying storage path`, async () => {
+    it(`should invoke writeFilePublicly function of underlying storage instance`, async () => {
       const instance = FileSystem.getInstance() as FileSystem;
       const writeFilePubliclyStub = sinon.stub(
         instance.getStorageInstance(),
@@ -57,6 +58,30 @@ describe(`FileSystem`, () => {
         {}
       );
       writeFilePubliclyStub.restore();
+    });
+  });
+
+  describe(`storeFilePublicly`, () => {
+    it(`should invoke storeFilePublicly function of underlying fileUploader instance`, async () => {
+      const instance = FileSystem.getInstance() as FileSystem;
+      const storeFilePubliclyStub = sinon.stub(
+        instance.getUploaderInstance(),
+        'storeFilePublicly'
+      );
+      const filename = faker.datatype.uuid();
+      const directory = faker.datatype.uuid();
+      const uploadedFile = generateUploadedFile();
+      await FileSystem.getInstance().storeFilePublicly({
+        uploadedFile,
+        filename,
+        directory
+      });
+      sinon.assert.calledOnceWithExactly(storeFilePubliclyStub, {
+        uploadedFile,
+        filename,
+        directory
+      });
+      storeFilePubliclyStub.restore();
     });
   });
 

@@ -7,11 +7,11 @@ import {
 } from 'express-fileupload';
 import {
   DeepPartial,
+  FileSystemDriver,
   isNumber,
   UploadedFile,
   UploadMaxFileSizeError
 } from '@men-mvc/foundation';
-import { FileSystemDriver } from '@men-mvc/config';
 import {
   BaseFileUploader,
   InvalidPayloadFormatException,
@@ -22,7 +22,9 @@ import { LocalStorage } from './localStorage';
 import {
   generateUuid,
   getDriver,
+  getPublicStorageIdentifier,
   getUploadFilesizeLimit,
+  isPublicFilepath,
   readFileAsync,
   renameAsync,
   rmdirAsync,
@@ -174,11 +176,30 @@ export class FileUploader implements BaseFileUploader {
   };
 
   public storeFile = async (params: StoreFileParams): Promise<string> => {
+    if (params.filename && isPublicFilepath(params.filename)) {
+      throw new Error(
+        `Filename passed to storeFile cannot start with ${getPublicStorageIdentifier()}`
+      );
+    }
+
     if (getDriver() === FileSystemDriver.s3) {
       return this.storeFileInS3Bucket(params);
-    } else {
-      return this.storeFileLocally(params);
     }
+
+    return this.storeFileLocally(params);
+  };
+
+  public storeFilePublicly = async (
+    params: StoreFileParams
+  ): Promise<string> => {
+    const filename = `${params.filename ?? this.generateRandomFilename()}`;
+    if (getDriver() === FileSystemDriver.s3) {
+      params.filename = `${getPublicStorageIdentifier()}/${filename}`;
+      return this.storeFile(params);
+    }
+
+    params.filename = path.join(getPublicStorageIdentifier(), filename);
+    return this.storeFile(params);
   };
 
   public storeFiles = ({
@@ -215,6 +236,8 @@ export class FileUploader implements BaseFileUploader {
     return path.extname(filepath).toLowerCase();
   };
 
+  private generateRandomFilename = () => generateUuid();
+
   private getTargetFilename = (
     uploadedFile: UploadedFile,
     filename?: string
@@ -222,7 +245,7 @@ export class FileUploader implements BaseFileUploader {
     const fileExtension = this.getFileExtension(uploadedFile.originalFilename);
     return filename
       ? `${filename}${fileExtension}`
-      : `${generateUuid()}${fileExtension}`;
+      : `${this.generateRandomFilename()}${fileExtension}`;
   };
 
   private getLocalTargetFilepath = (

@@ -71,6 +71,9 @@ export class FileSystem implements BaseFileSystem {
   public storeFile = async (params: StoreFileParams): Promise<string> =>
     this.getUploaderInstance().storeFile(params);
 
+  public storeFilePublicly = async (params: StoreFileParams): Promise<string> =>
+    this.getUploaderInstance().storeFilePublicly(params);
+
   public storeFiles = async (params: StoreFilesParams): Promise<string[]> =>
     this.getUploaderInstance().storeFiles(params);
 
