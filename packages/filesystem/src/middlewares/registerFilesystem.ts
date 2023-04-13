@@ -29,12 +29,12 @@ export const createStorageDirectoryIfNeeded = async (
     return next();
   }
   if (!(await existsAsync(getPrivateStorageDirectory()))) {
-    mkdirAsync(getPrivateStorageDirectory(), {
+    await mkdirAsync(getPrivateStorageDirectory(), {
       recursive: true
     });
   }
   if (!(await existsAsync(getPublicStorageDirectory()))) {
-    mkdirAsync(getPublicStorageDirectory(), {
+    await mkdirAsync(getPublicStorageDirectory(), {
       recursive: true
     });
   }
