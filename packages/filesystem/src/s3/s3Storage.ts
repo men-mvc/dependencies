@@ -5,6 +5,7 @@ import {
   Storage,
   WriteFileResult
 } from '../types';
+import { getPublicStorageIdentifier } from '../utilities/utilities';
 
 export class S3Storage implements Storage {
   private adapter: MenS3Adapter | undefined;
@@ -64,6 +65,19 @@ export class S3Storage implements Storage {
       storageFilepath: key,
       absoluteFilepath: key
     };
+  };
+
+  public writeFilePublicly = async (
+    key: string,
+    data: string | NodeJS.ArrayBufferView,
+    options?: WriteFileOptions
+  ): Promise<WriteFileResult> => {
+    if (key.startsWith('/')) {
+      key = key.substring(1);
+    }
+    key = `${getPublicStorageIdentifier()}/${key}`;
+
+    return this.writeFile(key, data, options);
   };
 
   public deleteFile = async (key: string): Promise<void> =>

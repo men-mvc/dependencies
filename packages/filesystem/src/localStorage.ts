@@ -6,6 +6,7 @@ import {
   getPrivateStorageDirectory,
   getPublicStorageDirectory,
   getPublicStorageIdentifier,
+  isPublicFilepath,
   mkdirAsync,
   readdirAsync,
   readFileAsync,
@@ -29,14 +30,6 @@ export class LocalStorage implements Storage {
     }
 
     return LocalStorage.instance;
-  };
-
-  public isPublicFilepath = (storageFilepath: string) => {
-    if (storageFilepath.startsWith(path.sep)) {
-      storageFilepath = storageFilepath.substring(1);
-    }
-
-    return storageFilepath.startsWith(getPublicStorageIdentifier());
   };
 
   // public - to unit test
@@ -95,12 +88,6 @@ export class LocalStorage implements Storage {
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
   ): Promise<WriteFileResult> => {
-    if (this.isPublicFilepath(filepath)) {
-      throw new Error(
-        `Filename/ filepath cannot start with ${getPublicStorageIdentifier()}`
-      );
-    }
-
     const absoluteFilepath = this.makeClientPathCompatibleWithStorage(filepath);
     await writeFileAsync(absoluteFilepath, data, options ?? {});
 

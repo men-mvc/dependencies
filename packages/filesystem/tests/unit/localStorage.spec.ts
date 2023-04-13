@@ -36,30 +36,6 @@ describe(`LocalStorage Utility`, () => {
     }
   });
 
-  describe(`isPublicFilepath`, () => {
-    it(`should return true when path starts with public storage identifier`, () => {
-      expect(
-        localStorage.isPublicFilepath(
-          path.join(getPublicStorageIdentifier(), faker.system.filePath())
-        )
-      ).toBeTruthy();
-    });
-
-    it(`should return false when path does not stat with public storage identifier`, () => {
-      expect(
-        localStorage.isPublicFilepath(faker.system.filePath())
-      ).toBeFalsy();
-    });
-
-    it(`should ignore leading path separator`, () => {
-      const filepath = `${path.sep}${path.join(
-        getPublicStorageIdentifier(),
-        faker.system.filePath()
-      )}`;
-      expect(localStorage.isPublicFilepath(filepath)).toBeTruthy();
-    });
-  });
-
   describe(`makeClientPathCompatibleWithStorage`, () => {
     it(`should return storage path + filepath`, () => {
       expect(
@@ -243,16 +219,6 @@ describe(`LocalStorage Utility`, () => {
       expect(result.$metadata).toBeUndefined();
       expect(result.ServerSideEncryption).toBeUndefined();
       expect(result.VersionId).toBeUndefined();
-    });
-
-    it(`should throw error when the filepath starts with ${getPublicStorageIdentifier()}`, async () => {
-      const expectedContent = faker.lorem.paragraph(2);
-      const filename = `${getPublicStorageIdentifier()}test.txt`;
-      await expect(
-        localStorage.writeFile(filename, expectedContent)
-      ).rejects.toThrow(
-        `Filename/ filepath cannot start with ${getPublicStorageIdentifier()}`
-      );
     });
   });
 

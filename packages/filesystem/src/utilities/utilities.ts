@@ -72,6 +72,14 @@ export const parseMultiFormBooleanInput = (
   }
 };
 
+export const isPublicFilepath = (storageFilepath: string) => {
+  if (storageFilepath.startsWith(path.sep)) {
+    storageFilepath = storageFilepath.substring(1);
+  }
+
+  return storageFilepath.startsWith(getPublicStorageIdentifier());
+};
+
 export const readdirAsync = util.promisify(fs.readdir);
 export const rmdirAsync = util.promisify(fs.rmdir);
 export const unlinkAsync = util.promisify(fs.unlink);

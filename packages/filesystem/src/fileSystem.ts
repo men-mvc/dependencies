@@ -12,7 +12,11 @@ import {
   WriteFileResult
 } from './types';
 import { FileUploader } from './fileUploader';
-import { getFileSystemDriver } from './utilities/utilities';
+import {
+  getFileSystemDriver,
+  getPublicStorageIdentifier,
+  isPublicFilepath
+} from './utilities/utilities';
 import { LocalStorage } from './localStorage';
 import { S3Storage } from './s3/s3Storage';
 
@@ -79,8 +83,15 @@ export class FileSystem implements BaseFileSystem {
     filepath: string,
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
-  ): Promise<WriteFileResult> =>
-    this.getStorageInstance().writeFile(filepath, data, options);
+  ): Promise<WriteFileResult> => {
+    if (isPublicFilepath(filepath)) {
+      throw new Error(
+        `Filename/ filepath passed to writeFile cannot start with ${getPublicStorageIdentifier()}`
+      );
+    }
+
+    return this.getStorageInstance().writeFile(filepath, data, options);
+  };
 
   public deleteFile = async (path: string): Promise<void> =>
     this.getStorageInstance().deleteFile(path);

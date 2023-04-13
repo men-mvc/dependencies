@@ -7,7 +7,9 @@ import {
   getPrivateStorageDirectory,
   getDefaultAppStorageDirectory,
   parseMultiFormBooleanInput,
-  getPublicStorageDirectory
+  getPublicStorageDirectory,
+  getPublicStorageIdentifier,
+  isPublicFilepath
 } from '../../../src';
 import * as foundationUtilities from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
@@ -16,6 +18,28 @@ describe(`Filesystem - Utilities`, () => {
   afterEach(() => {
     unsetEnvVariable('SERVER_DIRECTORY');
     clearPrivateStorageDirectoryCache();
+  });
+
+  describe(`isPublicFilepath`, () => {
+    it(`should return true when path starts with public storage identifier`, () => {
+      expect(
+        isPublicFilepath(
+          path.join(getPublicStorageIdentifier(), faker.system.filePath())
+        )
+      ).toBeTruthy();
+    });
+
+    it(`should return false when path does not stat with public storage identifier`, () => {
+      expect(isPublicFilepath(faker.system.filePath())).toBeFalsy();
+    });
+
+    it(`should ignore leading path separator`, () => {
+      const filepath = `${path.sep}${path.join(
+        getPublicStorageIdentifier(),
+        faker.system.filePath()
+      )}`;
+      expect(isPublicFilepath(filepath)).toBeTruthy();
+    });
   });
 
   describe(`getPublicStorageDirectory`, () => {
