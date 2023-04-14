@@ -4,5 +4,5 @@ export enum ErrorCodes {
   INVALID_PAYLOAD_FORMAT = `InvalidPayloadFormat`,
   UPLOAD_MAX_FILESIZE_LIMIT = `UploadMaxFilesizeLimit`,
   APPLICATION_NOT_INITIALISED_YET = `ApplicationNotInitialisedYet`,
-  FILE_NOT_PUBLIC = `FileNotPublic`,
+  FILE_NOT_PUBLIC = `FileNotPublic`
 }

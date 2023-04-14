@@ -5,3 +5,4 @@ export * from './response';
 export * from './stream';
 export * from './error';
 export * from './app';
+export * from './route';

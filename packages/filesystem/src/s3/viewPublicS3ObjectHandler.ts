@@ -12,10 +12,8 @@ import {
 import { FileSystem } from '..';
 import { notFoundResponse } from '../foundation';
 
-export const viewPublicS3ObjectRoute = `filesystem/s3/:key`;
+export const viewPublicS3ObjectRoute = `/filesystem/s3/:key`;
 
-// TODO: create download version
-// res.setHeader('Content-disposition', 'attachment; filename=logo.png'); // this will download the file. TODO: create getDownloadUrl function too.
 export const viewPublicS3ObjectRequestHandler = async (
   req: Request,
   res: Response
