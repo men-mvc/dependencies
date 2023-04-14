@@ -1,7 +1,5 @@
-import { DeepPartial, UploadedFile } from '@men-mvc/foundation';
-import { faker } from '@faker-js/faker';
 import fs from 'fs';
-import { getAppStorageDirectory } from '../src';
+import { getPrivateStorageDirectory } from '../src';
 
 export const delay = (milliseconds: number = 500): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -12,11 +10,11 @@ export const delay = (milliseconds: number = 500): Promise<boolean> => {
 };
 
 export const deleteStorageDirectory = () => {
-  if (!fs.existsSync(getAppStorageDirectory())) {
+  if (!fs.existsSync(getPrivateStorageDirectory())) {
     return;
   }
 
-  fs.rmdirSync(getAppStorageDirectory(), {
+  fs.rmdirSync(getPrivateStorageDirectory(), {
     recursive: true
   });
 };

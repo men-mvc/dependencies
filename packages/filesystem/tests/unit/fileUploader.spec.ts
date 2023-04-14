@@ -2,10 +2,10 @@ import sinon from 'sinon';
 import Sinon, { SinonStub } from 'sinon';
 import {
   DeepPartial,
+  FileSystemDriver,
   setServerDirectory,
   UploadedFile
 } from '@men-mvc/foundation';
-import { FileSystemDriver } from '@men-mvc/config';
 import {
   FileArray,
   UploadedFile as ExpressUploadedFile
@@ -14,10 +14,11 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import path from 'path';
 import fs from 'fs';
+import { generateUploadedFile } from '@men-mvc/test';
 import * as fileSystemUtilities from '../../src/utilities/utilities';
 import { delay, deleteStorageDirectory } from '../testUtilities';
-import { generateUploadedFile } from '../../src/test';
-import { FileUploader, getAppStorageDirectory } from '../../src';
+import { FileUploader, getPrivateStorageDirectory } from '../../src';
+import { getPublicStorageIdentifier } from '../../src';
 
 /**
  * Note: the remaining functions are tested as integration tests
@@ -30,6 +31,11 @@ describe('FileUploader Utility', function () {
 
   afterAll(() => {
     setServerDirectory('');
+    if (fs.existsSync(getPrivateStorageDirectory())) {
+      fs.rmdirSync(getPrivateStorageDirectory(), {
+        recursive: true
+      });
+    }
   });
 
   describe(`getLocalStorage`, () => {
@@ -53,7 +59,10 @@ describe('FileUploader Utility', function () {
     let testFilesDirectory: string;
 
     beforeAll(() => {
-      testFilesDirectory = path.join(getAppStorageDirectory(), `testStoreFile`);
+      testFilesDirectory = path.join(
+        getPrivateStorageDirectory(),
+        `testStoreFile`
+      );
     });
 
     afterEach(async () => {
@@ -84,13 +93,26 @@ describe('FileUploader Utility', function () {
       expect(
         fs.existsSync(
           `${path.join(
-            getAppStorageDirectory(),
+            getPrivateStorageDirectory(),
             storeFileParams.directory.toLowerCase(),
             storeFileParams.filename.toLowerCase()
           )}.txt`
         )
       ).toBeTruthy();
       expect(fs.existsSync(uploadedFilepath)).toBeFalsy();
+    });
+
+    it(`should throw error when filename starts with ${getPublicStorageIdentifier()}`, async () => {
+      getDriverStub = mockGetDriver(FileSystemDriver.local);
+      const uploadedFile = generateUploadedFile();
+      const storeFileParams = {
+        uploadedFile,
+        filename: `${getPublicStorageIdentifier()}${faker.datatype.uuid()}`
+      };
+
+      await expect(fileUploader.storeFile(storeFileParams)).rejects.toThrow(
+        `Filename passed to the storeFile function cannot start with ${getPublicStorageIdentifier()}`
+      );
     });
 
     it(`should allow both filename and directory to be undefined - local`, async () => {
@@ -108,7 +130,7 @@ describe('FileUploader Utility', function () {
 
       expect(result.length).toBe(40);
       expect(
-        fs.existsSync(path.join(getAppStorageDirectory(), result))
+        fs.existsSync(path.join(getPrivateStorageDirectory(), result))
       ).toBeTruthy();
     });
 
@@ -146,7 +168,7 @@ describe('FileUploader Utility', function () {
       expect(
         fs.existsSync(
           path.join(
-            getAppStorageDirectory(),
+            getPrivateStorageDirectory(),
             storeFileParams.directory,
             `${storeFileParams.filename}.txt`
           )
@@ -264,8 +286,8 @@ describe('FileUploader Utility', function () {
     });
 
     const createTestUploadedFile = (filename: string): string => {
-      if (!fs.existsSync(getAppStorageDirectory())) {
-        fs.mkdirSync(getAppStorageDirectory());
+      if (!fs.existsSync(getPrivateStorageDirectory())) {
+        fs.mkdirSync(getPrivateStorageDirectory());
       }
 
       if (!fs.existsSync(testFilesDirectory)) {
@@ -279,6 +301,125 @@ describe('FileUploader Utility', function () {
 
     const mockGetDriver = (driver: FileSystemDriver) =>
       Sinon.stub(fileSystemUtilities, `getDriver`).returns(driver);
+  });
+
+  describe(`storeFilePublicly`, () => {
+    const storeFileResult: string = faker.system.filePath();
+    let getDriverStub: SinonStub;
+    let storeFileStub: SinonStub;
+
+    beforeEach(() => {
+      storeFileStub = sinon
+        .stub(fileUploader, `storeFile`)
+        .returns(Promise.resolve(storeFileResult));
+    });
+
+    afterEach(() => {
+      getDriverStub.restore();
+      storeFileStub.restore();
+    });
+
+    describe(`s3`, () => {
+      beforeEach(() => {
+        getDriverStub = sinon
+          .stub(fileSystemUtilities, `getDriver`)
+          .returns(FileSystemDriver.s3);
+      });
+
+      it(`should invoke storeFile with the right parameters`, async () => {
+        const filename = faker.system.fileName();
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        await fileUploader.storeFilePublicly({
+          uploadedFile,
+          filename,
+          directory
+        });
+
+        sinon.assert.calledOnceWithExactly(storeFileStub, {
+          uploadedFile,
+          filename: `${getPublicStorageIdentifier()}/${filename}`,
+          directory
+        });
+      });
+
+      it(`should generate random file name when filename is empty`, async () => {
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        await fileUploader.storeFilePublicly({
+          uploadedFile,
+          directory
+        });
+
+        sinon.assert.calledOnce(storeFileStub);
+        const callArgs = storeFileStub.getCalls()[0].args;
+        expect(
+          callArgs[0].filename.startsWith(getPublicStorageIdentifier())
+        ).toBeTruthy();
+        expect(callArgs[0].filename.length).toBe(47);
+      });
+
+      it(`should return the result of storeFile`, async () => {
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        const actualResult = await fileUploader.storeFilePublicly({
+          uploadedFile,
+          directory
+        });
+        expect(actualResult).toBe(storeFileResult);
+      });
+    });
+
+    describe(`local`, () => {
+      beforeEach(() => {
+        getDriverStub = sinon
+          .stub(fileSystemUtilities, `getDriver`)
+          .returns(FileSystemDriver.local);
+      });
+
+      it(`should invoke storeFile with the right parameters`, async () => {
+        const filename = faker.system.fileName();
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        await fileUploader.storeFilePublicly({
+          uploadedFile,
+          filename,
+          directory
+        });
+
+        sinon.assert.calledOnceWithExactly(storeFileStub, {
+          uploadedFile,
+          filename: path.join(getPublicStorageIdentifier(), filename),
+          directory
+        });
+      });
+
+      it(`should generate the random filename when filename is empty`, async () => {
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        await fileUploader.storeFilePublicly({
+          uploadedFile,
+          directory
+        });
+
+        sinon.assert.calledOnce(storeFileStub);
+        const callArgs = storeFileStub.getCalls()[0].args;
+        expect(
+          callArgs[0].filename.startsWith(getPublicStorageIdentifier())
+        ).toBeTruthy();
+        expect(callArgs[0].filename.length).toBe(47);
+      });
+
+      it(`should return the result of storeFile`, async () => {
+        const uploadedFile = generateUploadedFile();
+        const directory = faker.datatype.uuid();
+        const actualResult = await fileUploader.storeFilePublicly({
+          uploadedFile,
+          directory
+        });
+        expect(actualResult).toBe(storeFileResult);
+      });
+    });
   });
 
   describe(`_makeUploadedFileCompatible`, () => {
@@ -396,7 +537,7 @@ describe('FileUploader Utility', function () {
       const getTempDirIdStub = sinon.stub(fileUploader, `_getTempDirId`);
       getTempDirIdStub.returns(fakeUuid);
       const expectedDirPath = path.join(
-        path.join(getAppStorageDirectory(), 'temp'),
+        path.join(getPrivateStorageDirectory(), 'temp'),
         fakeUuid
       );
       const actualDirPath = fileUploader.getAbsoluteTempUploadDirPath();
@@ -465,8 +606,8 @@ describe('FileUploader Utility', function () {
 
     const createTempDirsForOtherSessions = async (): Promise<string[]> => {
       const tempDirs: string[] = [
-        path.join(getAppStorageDirectory(), 'temp', faker.datatype.uuid()),
-        path.join(getAppStorageDirectory(), 'temp', faker.datatype.uuid())
+        path.join(getPrivateStorageDirectory(), 'temp', faker.datatype.uuid()),
+        path.join(getPrivateStorageDirectory(), 'temp', faker.datatype.uuid())
       ];
       await Promise.all(
         tempDirs.map((dir) =>

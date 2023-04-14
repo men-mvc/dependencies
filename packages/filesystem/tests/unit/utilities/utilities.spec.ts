@@ -3,18 +3,77 @@ import sinon from 'sinon';
 import path from 'path';
 import { faker } from '@faker-js/faker';
 import {
-  clearAppStorageDirectoryCache,
-  getAppStorageDirectory,
+  clearPrivateStorageDirectoryCache,
+  getPrivateStorageDirectory,
   getDefaultAppStorageDirectory,
-  parseMultiFormBooleanInput
+  parseMultiFormBooleanInput,
+  getPublicStorageDirectory,
+  getPublicStorageIdentifier,
+  isPublicFilepath,
+  removePublicStorageIdentifierFrom
 } from '../../../src';
-import * as foundationUtilities from '../../../src/foundation';
+import * as foundation from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
 
-describe(`App Utility`, () => {
+describe(`Filesystem - Utilities`, () => {
   afterEach(() => {
     unsetEnvVariable('SERVER_DIRECTORY');
-    clearAppStorageDirectoryCache();
+    clearPrivateStorageDirectoryCache();
+  });
+
+  describe(`removePublicStorageIdentifierFrom`, () => {
+    it(`should return argument filepath as is when the file is not public`, async () => {
+      const filepath = faker.system.filePath();
+      expect(removePublicStorageIdentifierFrom(filepath)).toBe(filepath);
+    });
+
+    it(`should replace the first occurrence of ${getPublicStorageIdentifier()}`, async () => {
+      const filepathWithoutPublicFileIdentifier = path.join(
+        faker.datatype.uuid(),
+        getPublicStorageIdentifier(),
+        `${faker.datatype.uuid()}.png`
+      );
+      const filepath = path.join(
+        getPublicStorageIdentifier(),
+        filepathWithoutPublicFileIdentifier
+      );
+
+      expect(removePublicStorageIdentifierFrom(filepath)).toBe(
+        filepathWithoutPublicFileIdentifier
+      );
+    });
+  });
+
+  describe(`isPublicFilepath`, () => {
+    it(`should return true when path starts with public storage identifier`, () => {
+      expect(
+        isPublicFilepath(
+          path.join(getPublicStorageIdentifier(), faker.system.filePath())
+        )
+      ).toBeTruthy();
+    });
+
+    it(`should return false when path does not stat with public storage identifier`, () => {
+      expect(isPublicFilepath(faker.system.filePath())).toBeFalsy();
+    });
+
+    it(`should ignore leading path separator`, () => {
+      const filepath = `${path.sep}${path.join(
+        getPublicStorageIdentifier(),
+        faker.system.filePath()
+      )}`;
+      expect(isPublicFilepath(filepath)).toBeTruthy();
+    });
+  });
+
+  describe(`getPublicStorageDirectory`, () => {
+    it(`should return private storage + men + public`, () => {
+      const fakeStorageDir = faker.system.directoryPath();
+      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
+      expect(getPublicStorageDirectory()).toBe(
+        path.join(fakeStorageDir, 'men-public')
+      );
+    });
   });
 
   describe(`parseMultiFormBooleanInput`, () => {
@@ -44,7 +103,7 @@ describe(`App Utility`, () => {
     it(`should return app root directory + dirname`, () => {
       const appRootDir = faker.system.filePath();
       const getAppRootDirectoryStub = sinon
-        .stub(foundationUtilities, `getAppRootDirectory`)
+        .stub(foundation, `getAppRootDirectory`)
         .returns(appRootDir);
 
       expect(getDefaultAppStorageDirectory()).toBe(
@@ -54,7 +113,7 @@ describe(`App Utility`, () => {
     });
   });
 
-  describe(`getAppStorageDirectory`, () => {
+  describe(`getPrivateStorageDirectory`, () => {
     afterAll(() => {
       setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
     });
@@ -62,7 +121,7 @@ describe(`App Utility`, () => {
     it(`should return value of FILESYSTEM_STORAGE_DIRECTORY env variable when var is set`, () => {
       const fakeStorageDir = `~/home/custom_storage`;
       setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
-      const storageDir = getAppStorageDirectory();
+      const storageDir = getPrivateStorageDirectory();
       expect(storageDir).toBe(fakeStorageDir);
     });
 
@@ -72,7 +131,7 @@ describe(`App Utility`, () => {
       const getDefaultAppStorageDirectoryStub = sinon
         .stub(utilities, `getDefaultAppStorageDirectory`)
         .returns(fakeDefaultStorageDirectory);
-      expect(getAppStorageDirectory()).toBe(fakeDefaultStorageDirectory);
+      expect(getPrivateStorageDirectory()).toBe(fakeDefaultStorageDirectory);
       getDefaultAppStorageDirectoryStub.restore();
     });
   });

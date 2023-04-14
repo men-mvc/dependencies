@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { baseConfig, FileSystemDriver, getEnvVariable } from '@men-mvc/config';
+import mimeTypes from 'mime-types';
 import {
   generateUuid as globalGenerateUuid,
   invokeRequestErrorHandler
@@ -12,10 +13,10 @@ import { getAppRootDirectory } from '../foundation';
 export const getDefaultAppStorageDirectory = (): string =>
   path.join(getAppRootDirectory(), `storage`);
 
-let appStorageDirectoryCache: string | null = null;
-export const getAppStorageDirectory = (): string => {
-  if (appStorageDirectoryCache) {
-    return appStorageDirectoryCache;
+let privateStorageDirectoryCache: string | null = null;
+export const getPrivateStorageDirectory = (): string => {
+  if (privateStorageDirectoryCache) {
+    return privateStorageDirectoryCache;
   }
   let storageDirectory: string;
   const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
@@ -25,13 +26,21 @@ export const getAppStorageDirectory = (): string => {
     storageDirectory = getDefaultAppStorageDirectory();
   }
 
-  appStorageDirectoryCache = storageDirectory;
+  privateStorageDirectoryCache = storageDirectory;
 
-  return appStorageDirectoryCache;
+  return privateStorageDirectoryCache;
 };
 
-export const clearAppStorageDirectoryCache = () => {
-  appStorageDirectoryCache = null;
+// ! if we are to add more logic in the future, unit test
+export const getPublicStorageIdentifier = () => {
+  return `men-public`;
+};
+
+export const getPublicStorageDirectory = (): string =>
+  path.join(getPrivateStorageDirectory(), getPublicStorageIdentifier());
+
+export const clearPrivateStorageDirectoryCache = () => {
+  privateStorageDirectoryCache = null;
 };
 
 export const getUploadFilesizeLimit = (): number =>
@@ -64,6 +73,36 @@ export const parseMultiFormBooleanInput = (
   }
 };
 
+export const isPublicFilepath = (storageFilepath: string) => {
+  if (storageFilepath.startsWith(path.sep) || storageFilepath.startsWith('/')) {
+    storageFilepath = storageFilepath.substring(1);
+  }
+
+  return storageFilepath.startsWith(getPublicStorageIdentifier());
+};
+
+export const getMimeType = (filePathOrName: string): string | null => {
+  const mimeType = mimeTypes.lookup(filePathOrName);
+  return mimeType ? mimeType : null;
+};
+
+export const removePublicStorageIdentifierFrom = (
+  filePathOrKey: string
+): string => {
+  if (!isPublicFilepath(filePathOrKey)) {
+    return filePathOrKey;
+  }
+
+  // replace the first occurrence
+  let finalPath = filePathOrKey.replace(getPublicStorageIdentifier(), '');
+  if (finalPath.startsWith(path.sep)) {
+    finalPath = finalPath.substring(1);
+  }
+
+  return finalPath;
+};
+
+export const existsAsync = util.promisify(fs.exists);
 export const readdirAsync = util.promisify(fs.readdir);
 export const rmdirAsync = util.promisify(fs.rmdir);
 export const unlinkAsync = util.promisify(fs.unlink);

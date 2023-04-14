@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { setEnvVariable, ValidationError } from '@men-mvc/foundation';
-import { generateUploadedFile } from '../../../src/test';
+import { generateUploadedFile } from '@men-mvc/test';
 import {
   validateFile,
   validateImage,

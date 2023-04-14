@@ -5,9 +5,18 @@ import {
   Storage,
   WriteFileResult
 } from '../types';
+import { getPublicStorageIdentifier } from '../utilities/utilities';
+import { getAppBaseUrl, replaceRouteParams } from '../foundation';
+import { viewPublicS3ObjectRoute } from './viewPublicS3ObjectHandler';
 
 export class S3Storage implements Storage {
   private adapter: MenS3Adapter | undefined;
+
+  public getPublicUrl = (filepath: string): string => {
+    return `${getAppBaseUrl()}${replaceRouteParams(viewPublicS3ObjectRoute, {
+      key: encodeURIComponent(filepath)
+    })}`;
+  };
 
   public getAbsolutePath = (path: string): string => {
     return path;
@@ -61,8 +70,22 @@ export class S3Storage implements Storage {
 
     return {
       ...result,
-      filepath: key
+      storageFilepath: key,
+      absoluteFilepath: key
     };
+  };
+
+  public writeFilePublicly = async (
+    key: string,
+    data: string | NodeJS.ArrayBufferView,
+    options?: WriteFileOptions
+  ): Promise<WriteFileResult> => {
+    if (key.startsWith('/')) {
+      key = key.substring(1);
+    }
+    key = `${getPublicStorageIdentifier()}/${key}`;
+
+    return this.writeFile(key, data, options);
   };
 
   public deleteFile = async (key: string): Promise<void> =>

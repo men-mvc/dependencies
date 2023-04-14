@@ -12,12 +12,17 @@ import {
   WriteFileResult
 } from './types';
 import { FileUploader } from './fileUploader';
-import { getFileSystemDriver } from './utilities/utilities';
+import {
+  getFileSystemDriver,
+  getPublicStorageIdentifier,
+  isPublicFilepath
+} from './utilities/utilities';
 import { LocalStorage } from './localStorage';
 import { S3Storage } from './s3/s3Storage';
 
 // TODO: add writeFiles
 export class FileSystem implements BaseFileSystem {
+  public static storageDirCreated: boolean = false;
   private static instance: FileSystem | null;
   private storageInstance: Storage | undefined;
   private uploaderInstance: BaseFileUploader | undefined;
@@ -43,11 +48,11 @@ export class FileSystem implements BaseFileSystem {
   };
 
   public static getInstance = (): BaseFileSystem => {
-    if (!this.instance) {
-      this.instance = new FileSystem();
+    if (!FileSystem.instance) {
+      FileSystem.instance = new FileSystem();
     }
 
-    return this.instance;
+    return FileSystem.instance;
   };
 
   public static resetInstance = () => {
@@ -66,6 +71,9 @@ export class FileSystem implements BaseFileSystem {
   public storeFile = async (params: StoreFileParams): Promise<string> =>
     this.getUploaderInstance().storeFile(params);
 
+  public storeFilePublicly = async (params: StoreFileParams): Promise<string> =>
+    this.getUploaderInstance().storeFilePublicly(params);
+
   public storeFiles = async (params: StoreFilesParams): Promise<string[]> =>
     this.getUploaderInstance().storeFiles(params);
 
@@ -79,8 +87,22 @@ export class FileSystem implements BaseFileSystem {
     filepath: string,
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
+  ): Promise<WriteFileResult> => {
+    if (isPublicFilepath(filepath)) {
+      throw new Error(
+        `Filename/ filepath passed to the writeFile function cannot start with ${getPublicStorageIdentifier()}`
+      );
+    }
+
+    return this.getStorageInstance().writeFile(filepath, data, options);
+  };
+
+  public writeFilePublicly = async (
+    filepath: string,
+    data: string | NodeJS.ArrayBufferView,
+    options?: WriteFileOptions
   ): Promise<WriteFileResult> =>
-    this.getStorageInstance().writeFile(filepath, data, options);
+    this.getStorageInstance().writeFilePublicly(filepath, data, options);
 
   public deleteFile = async (path: string): Promise<void> =>
     this.getStorageInstance().deleteFile(path);
@@ -108,9 +130,9 @@ export class FileSystem implements BaseFileSystem {
   public isDir = async (path: string): Promise<boolean> =>
     this.getStorageInstance().isDir(path);
 
-  createReadStream = (
+  public createReadStream = (
     filepath: string,
-    options: ReadStreamOptions
+    options?: ReadStreamOptions
   ): Promise<ReadStream> =>
     this.getStorageInstance().createReadStream(filepath, options);
 

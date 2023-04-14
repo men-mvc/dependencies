@@ -1,5 +1,6 @@
 import path from 'path';
 import { getEnvVariable, setEnvVariable, srcDirectory } from '@men-mvc/config';
+import { BaseApplication } from '../types';
 
 export const setServerDirectory = (dir: string) =>
   setEnvVariable('SERVER_DIRECTORY', dir);
@@ -68,4 +69,14 @@ export const isInSourceDirectory = (): boolean => {
 
 export const clearIsInSourceDirCachedValue = () => {
   isInSourceDirCachedValue = null;
+};
+
+export const getAppBaseUrl = (): string => {
+  if (getEnvVariable(`APP_BASE_URL`)) {
+    return getEnvVariable(`APP_BASE_URL`) as string;
+  }
+
+  const req = BaseApplication.getInstance().app.request;
+
+  return req.protocol + '://' + req.get('host');
 };

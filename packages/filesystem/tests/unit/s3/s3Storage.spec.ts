@@ -1,14 +1,38 @@
-import sinon from 'sinon';
+import sinon, { SinonStub } from 'sinon';
 import { faker } from '@faker-js/faker';
-import { S3Storage } from '../../src/s3/s3Storage';
-import { MenS3PutObjectCommandOutput } from '../../src';
+import { readReadableAsString, replaceRouteParams } from '@men-mvc/foundation';
 import { Buffer } from 'buffer';
 import { ReadStream } from 'fs';
 import { Readable } from 'stream';
-import { readReadableAsString } from '@men-mvc/foundation';
+import { S3Storage } from '../../../src/s3/s3Storage';
+import {
+  getPublicStorageIdentifier,
+  MenS3PutObjectCommandOutput
+} from '../../../src';
+import * as foundation from '../../../src/foundation';
+import { viewPublicS3ObjectRoute } from '../../../lib/s3/viewPublicS3ObjectHandler';
 
 const storage = new S3Storage();
 describe(`S3Storage`, () => {
+  describe(`getPublicUrl`, () => {
+    /**
+     * ! this test also ensures that the key is URL encoded.
+     */
+    it(`should return app base url + view public s3 object route providing key parameter with value`, async () => {
+      const appBaseUrl = 'http://localhost';
+      const getAppBaseUrlStub = sinon
+        .stub(foundation, `getAppBaseUrl`)
+        .returns(appBaseUrl);
+      const key = `${getPublicStorageIdentifier()}/${faker.datatype.uuid()}[+].png`;
+      expect(storage.getPublicUrl(key)).toBe(
+        `${appBaseUrl}${replaceRouteParams(viewPublicS3ObjectRoute, {
+          key: encodeURIComponent(key)
+        })}`
+      );
+      getAppBaseUrlStub.restore();
+    });
+  });
+
   describe(`getAbsolutePath`, () => {
     it(`should return filename as is`, async () => {
       const filename = faker.datatype.uuid();
@@ -65,23 +89,28 @@ describe(`S3Storage`, () => {
   });
 
   describe(`writeFile`, () => {
+    let writeFileStub: SinonStub;
+
+    afterEach(() => {
+      writeFileStub.restore();
+    });
+
     it(`should invoke adapter's writeFile function with the right parameters`, async () => {
-      const writeFileStub = sinon.stub(storage.getS3Adapter(), `writeFile`);
+      writeFileStub = sinon.stub(storage.getS3Adapter(), `writeFile`);
       const data = faker.lorem.sentence();
       const key = faker.datatype.uuid();
       await storage.writeFile(key, data);
       sinon.assert.calledOnceWithExactly(writeFileStub, key, data);
-      writeFileStub.restore();
     });
 
-    it(`should return the created object info`, async () => {
+    it(`should return the created object locations`, async () => {
       const data = faker.lorem.sentence();
       const key = faker.datatype.uuid();
       const writeOutput = {
         VersionId: faker.datatype.uuid(),
         ServerSideEncryption: `AES256`
       };
-      sinon
+      writeFileStub = sinon
         .stub(storage.getS3Adapter(), `writeFile`)
         .returns(
           new Promise((resolve) =>
@@ -90,11 +119,54 @@ describe(`S3Storage`, () => {
         );
       const result = await storage.writeFile(key, data);
 
-      expect(result.filepath).toBe(key);
+      expect(result.storageFilepath).toBe(key);
+      expect(result.absoluteFilepath).toBe(key);
       expect(result.VersionId).toBe(writeOutput.VersionId);
       expect(result.ServerSideEncryption).toBe(
         writeOutput.ServerSideEncryption
       );
+    });
+  });
+
+  describe(`writeFilePublicly`, () => {
+    let writeFileStub: SinonStub;
+    beforeEach(() => {
+      writeFileStub = sinon.stub(storage.getS3Adapter(), `writeFile`);
+    });
+
+    afterEach(() => {
+      writeFileStub.restore();
+    });
+
+    it(`should invoke adapter's writeFile function with the right parameters appending ${getPublicStorageIdentifier()} to the key`, async () => {
+      const data = faker.lorem.sentence();
+      const key = faker.datatype.uuid();
+      await storage.writeFilePublicly(key, data);
+      sinon.assert.calledOnceWithExactly(
+        writeFileStub,
+        `${getPublicStorageIdentifier()}/${key}`,
+        data
+      );
+    });
+
+    it(`should remove leading slash in the key`, async () => {
+      const data = faker.lorem.sentence();
+      const key = faker.datatype.uuid();
+      await storage.writeFilePublicly(`/${key}`, data);
+      sinon.assert.calledOnceWithExactly(
+        writeFileStub,
+        `${getPublicStorageIdentifier()}/${key}`,
+        data
+      );
+    });
+
+    it(`should return the created object locations`, async () => {
+      const data = faker.lorem.sentence();
+      const key = faker.datatype.uuid();
+      const expectedKey = `${getPublicStorageIdentifier()}/${key}`;
+      const result = await storage.writeFilePublicly(key, data);
+      expect(result.absoluteFilepath).toBe(expectedKey);
+      expect(result.storageFilepath).toBe(expectedKey);
     });
   });
 

@@ -17,10 +17,16 @@ export interface Storage {
 
   createReadStream: (
     filepath: string,
-    options: ReadStreamOptions
+    options?: ReadStreamOptions
   ) => Promise<ReadStream>;
 
   writeFile: (
+    pathOrKey: string,
+    data: string | NodeJS.ArrayBufferView,
+    options?: WriteFileOptions
+  ) => Promise<WriteFileResult>;
+
+  writeFilePublicly: (
     pathOrKey: string,
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
@@ -49,6 +55,8 @@ export interface BaseFileUploader {
   parseFormData: <T>(request: Request) => Promise<DeepPartial<T>>;
 
   storeFile: (params: StoreFileParams) => Promise<string>;
+
+  storeFilePublicly: (params: StoreFileParams) => Promise<string>;
 
   storeFiles: (params: StoreFilesParams) => Promise<string[]>;
 
@@ -88,7 +96,8 @@ export type ReadStreamOptions = {
 };
 
 export type WriteFileResult = {
-  filepath: string;
+  storageFilepath: string;
+  absoluteFilepath: string;
 } & Partial<MenS3PutObjectCommandOutput>;
 
 export type MenS3PutObjectCommandOutput = {

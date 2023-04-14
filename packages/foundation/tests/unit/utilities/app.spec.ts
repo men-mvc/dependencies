@@ -1,18 +1,52 @@
-import { srcDirectory, unsetEnvVariable } from '@men-mvc/config';
+import {
+  setEnvVariable,
+  srcDirectory,
+  unsetEnvVariable
+} from '@men-mvc/config';
 import { faker } from '@faker-js/faker';
 import {
   clearAppRootDirectoryCache,
   clearIsInSourceDirCachedValue,
+  getAppBaseUrl,
   getAppRootDirectory,
   getServerDirectory,
   isInSourceDirectory,
   setServerDirectory
 } from '../../../src';
+import { BaseApplication } from '../../../src';
 
 describe(`App Utility`, () => {
   afterEach(() => {
     unsetEnvVariable('SERVER_DIRECTORY');
     clearIsInSourceDirCachedValue();
+  });
+
+  describe(`getAppBaseUrl`, () => {
+    afterEach(() => {
+      setEnvVariable(`APP_BASE_URL`, ``);
+      BaseApplication.clearInstance();
+    });
+
+    it(`should return value of APP_BASE_URL env variable`, () => {
+      const url = faker.internet.url();
+      setEnvVariable(`APP_BASE_URL`, url);
+      expect(getAppBaseUrl()).toBe(url);
+    });
+
+    it(`should return protocol + host`, () => {
+      const protocol = 'https';
+      const host = 'localhost:8000';
+      const mockApplication = {
+        app: {
+          request: {
+            protocol,
+            get: (name: string) => host
+          }
+        }
+      } as unknown as BaseApplication;
+      BaseApplication.init(mockApplication);
+      expect(getAppBaseUrl()).toBe(`${protocol}://${host}`);
+    });
   });
 
   describe(`getAppRootDirectory`, () => {

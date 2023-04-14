@@ -1,4 +1,4 @@
-import { replaceRouteParams } from '../../../src/utilities/route';
+import { replaceRouteParams } from '../../../src';
 
 describe(`Route Utilities`, () => {
   describe(`replaceRouteParams`, () => {
