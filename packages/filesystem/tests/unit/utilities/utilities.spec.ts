@@ -9,15 +9,39 @@ import {
   parseMultiFormBooleanInput,
   getPublicStorageDirectory,
   getPublicStorageIdentifier,
-  isPublicFilepath
+  isPublicFilepath,
+  removePublicStorageIdentifierFrom
 } from '../../../src';
-import * as foundationUtilities from '../../../src/foundation';
+import * as foundation from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
 
 describe(`Filesystem - Utilities`, () => {
   afterEach(() => {
     unsetEnvVariable('SERVER_DIRECTORY');
     clearPrivateStorageDirectoryCache();
+  });
+
+  describe(`removePublicStorageIdentifierFrom`, () => {
+    it(`should return argument filepath as is when the file is not public`, async () => {
+      const filepath = faker.system.filePath();
+      expect(removePublicStorageIdentifierFrom(filepath)).toBe(filepath);
+    });
+
+    it(`should replace the first occurrence of ${getPublicStorageIdentifier()}`, async () => {
+      const filepathWithoutPublicFileIdentifier = path.join(
+        faker.datatype.uuid(),
+        getPublicStorageIdentifier(),
+        `${faker.datatype.uuid()}.png`
+      );
+      const filepath = path.join(
+        getPublicStorageIdentifier(),
+        filepathWithoutPublicFileIdentifier
+      );
+
+      expect(removePublicStorageIdentifierFrom(filepath)).toBe(
+        filepathWithoutPublicFileIdentifier
+      );
+    });
   });
 
   describe(`isPublicFilepath`, () => {
@@ -79,7 +103,7 @@ describe(`Filesystem - Utilities`, () => {
     it(`should return app root directory + dirname`, () => {
       const appRootDir = faker.system.filePath();
       const getAppRootDirectoryStub = sinon
-        .stub(foundationUtilities, `getAppRootDirectory`)
+        .stub(foundation, `getAppRootDirectory`)
         .returns(appRootDir);
 
       expect(getDefaultAppStorageDirectory()).toBe(

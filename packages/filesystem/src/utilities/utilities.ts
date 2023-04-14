@@ -86,6 +86,22 @@ export const getMimeType = (filePathOrName: string): string | null => {
   return mimeType ? mimeType : null;
 };
 
+export const removePublicStorageIdentifierFrom = (
+  filePathOrKey: string
+): string => {
+  if (!isPublicFilepath(filePathOrKey)) {
+    return filePathOrKey;
+  }
+
+  // replace the first occurrence
+  let finalPath = filePathOrKey.replace(getPublicStorageIdentifier(), '');
+  if (finalPath.startsWith(path.sep)) {
+    finalPath = finalPath.substring(1);
+  }
+
+  return finalPath;
+};
+
 export const existsAsync = util.promisify(fs.exists);
 export const readdirAsync = util.promisify(fs.readdir);
 export const rmdirAsync = util.promisify(fs.rmdir);

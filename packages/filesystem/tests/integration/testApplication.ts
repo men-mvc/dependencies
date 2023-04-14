@@ -1,6 +1,6 @@
-import express, {Express} from 'express';
+import express, { Express } from 'express';
 import { baseConfig } from '@men-mvc/config';
-import {BaseApplication} from '@men-mvc/foundation';
+import { BaseApplication } from '@men-mvc/foundation';
 import { configureTestRoutes } from './testRoutes';
 import { registerFilesystem } from '../../src';
 

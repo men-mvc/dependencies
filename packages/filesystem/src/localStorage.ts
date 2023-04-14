@@ -6,15 +6,16 @@ import {
   getPrivateStorageDirectory,
   getPublicStorageDirectory,
   getPublicStorageIdentifier,
-  isPublicFilepath,
   mkdirAsync,
   readdirAsync,
   readFileAsync,
+  removePublicStorageIdentifierFrom,
   renameAsync,
   rmdirAsync,
   unlinkAsync,
   writeFileAsync
 } from './utilities/utilities';
+import { getAppBaseUrl } from './foundation';
 
 /**
  * TODO: improvement
@@ -44,6 +45,10 @@ export class LocalStorage implements Storage {
       : getPrivateStorageDirectory();
 
     return path.join(storagePath, dirOrFilePath);
+  };
+
+  public getPublicUrl = (filepath: string): string => {
+    return `${getAppBaseUrl()}/${removePublicStorageIdentifierFrom(filepath)}`;
   };
 
   public getAbsolutePath = (dirOrFilePath: string): string => {

@@ -1,17 +1,38 @@
 import sinon, { SinonStub } from 'sinon';
 import { faker } from '@faker-js/faker';
+import { readReadableAsString, replaceRouteParams } from '@men-mvc/foundation';
+import { Buffer } from 'buffer';
+import { ReadStream } from 'fs';
+import { Readable } from 'stream';
 import { S3Storage } from '../../../src/s3/s3Storage';
 import {
   getPublicStorageIdentifier,
   MenS3PutObjectCommandOutput
 } from '../../../src';
-import { Buffer } from 'buffer';
-import { ReadStream } from 'fs';
-import { Readable } from 'stream';
-import { readReadableAsString } from '@men-mvc/foundation';
+import * as foundation from '../../../src/foundation';
+import { viewPublicS3ObjectRoute } from '../../../lib/s3/viewPublicS3ObjectHandler';
 
 const storage = new S3Storage();
 describe(`S3Storage`, () => {
+  describe(`getPublicUrl`, () => {
+    /**
+     * ! this test also ensures that the key is URL encoded.
+     */
+    it(`should return app base url + view public s3 object route providing key parameter with value`, async () => {
+      const appBaseUrl = 'http://localhost';
+      const getAppBaseUrlStub = sinon
+        .stub(foundation, `getAppBaseUrl`)
+        .returns(appBaseUrl);
+      const key = `${getPublicStorageIdentifier()}/${faker.datatype.uuid()}[+].png`;
+      expect(storage.getPublicUrl(key)).toBe(
+        `${appBaseUrl}${replaceRouteParams(viewPublicS3ObjectRoute, {
+          key: encodeURIComponent(key)
+        })}`
+      );
+      getAppBaseUrlStub.restore();
+    });
+  });
+
   describe(`getAbsolutePath`, () => {
     it(`should return filename as is`, async () => {
       const filename = faker.datatype.uuid();

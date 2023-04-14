@@ -10,6 +10,7 @@ import {
   ReadStreamOptions
 } from '../../src';
 import * as utilities from '../../src/utilities/utilities';
+import * as foundation from '../../src/foundation';
 import { getPrivateStorageDirectory } from '../../src';
 
 const localStorage = new LocalStorage();
@@ -34,6 +35,25 @@ describe(`LocalStorage Utility`, () => {
     if (getPrivateStorageDirectoryStub) {
       getPrivateStorageDirectoryStub.restore();
     }
+  });
+
+  describe(`getPublicUrl`, () => {
+    it(`should return app base url + filename without ${getPublicStorageIdentifier()}`, () => {
+      const baseUrl = `http://localhost`;
+      const filenameWithoutPublicIdentifier = `${faker.datatype.uuid()}.png`;
+      const filename = path.join(
+        getPublicStorageIdentifier(),
+        filenameWithoutPublicIdentifier
+      );
+      const getAppBaseUrlStub = sinon
+        .stub(foundation, `getAppBaseUrl`)
+        .returns(baseUrl);
+      expect(localStorage.getPublicUrl(filename)).toBe(
+        `${baseUrl}/${filenameWithoutPublicIdentifier}`
+      );
+
+      getAppBaseUrlStub.restore();
+    });
   });
 
   describe(`makeClientPathCompatibleWithStorage`, () => {
