@@ -23,7 +23,7 @@ describe(`FileSystem`, () => {
           faker.datatype.uuid()
         )
       ).rejects.toThrow(
-        `Filename/ filepath passed to writeFile cannot start with ${getPublicStorageIdentifier()}`
+        `Filename/ filepath passed to the writeFile function cannot start with ${getPublicStorageIdentifier()}`
       );
     });
 

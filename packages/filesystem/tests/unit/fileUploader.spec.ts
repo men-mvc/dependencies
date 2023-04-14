@@ -111,7 +111,7 @@ describe('FileUploader Utility', function () {
       };
 
       await expect(fileUploader.storeFile(storeFileParams)).rejects.toThrow(
-        `Filename passed to storeFile cannot start with ${getPublicStorageIdentifier()}`
+        `Filename passed to the storeFile function cannot start with ${getPublicStorageIdentifier()}`
       );
     });
 

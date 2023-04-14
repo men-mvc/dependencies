@@ -90,7 +90,7 @@ export class FileSystem implements BaseFileSystem {
   ): Promise<WriteFileResult> => {
     if (isPublicFilepath(filepath)) {
       throw new Error(
-        `Filename/ filepath passed to writeFile cannot start with ${getPublicStorageIdentifier()}`
+        `Filename/ filepath passed to the writeFile function cannot start with ${getPublicStorageIdentifier()}`
       );
     }
 

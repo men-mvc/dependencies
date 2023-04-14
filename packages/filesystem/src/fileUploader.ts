@@ -178,7 +178,7 @@ export class FileUploader implements BaseFileUploader {
   public storeFile = async (params: StoreFileParams): Promise<string> => {
     if (params.filename && isPublicFilepath(params.filename)) {
       throw new Error(
-        `Filename passed to storeFile cannot start with ${getPublicStorageIdentifier()}`
+        `Filename passed to the storeFile function cannot start with ${getPublicStorageIdentifier()}`
       );
     }
 
