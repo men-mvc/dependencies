@@ -1,5 +1,9 @@
 import { faker } from '@faker-js/faker';
-import { hashPassword, validatePassword } from '../../../src';
+import {
+  generateVerificationToken,
+  hashPassword,
+  validatePassword
+} from '../../../src';
 
 describe(`Auth Utility`, () => {
   describe(`hashPassword`, () => {
@@ -26,6 +30,12 @@ describe(`Auth Utility`, () => {
       expect(
         await validatePassword(hashedPassword, faker.internet.password())
       ).toBeFalsy();
+    });
+  });
+
+  describe(`generateVerificationToken`, () => {
+    it(`should generate a verification token in the correct length`, async () => {
+      expect(generateVerificationToken().length).toBe(101);
     });
   });
 });
