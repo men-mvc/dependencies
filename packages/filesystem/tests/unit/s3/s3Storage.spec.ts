@@ -1,10 +1,10 @@
 import sinon, { SinonStub } from 'sinon';
 import { faker } from '@faker-js/faker';
-import { S3Storage } from '../../src/s3/s3Storage';
+import { S3Storage } from '../../../src/s3/s3Storage';
 import {
   getPublicStorageIdentifier,
   MenS3PutObjectCommandOutput
-} from '../../src';
+} from '../../../src';
 import { Buffer } from 'buffer';
 import { ReadStream } from 'fs';
 import { Readable } from 'stream';

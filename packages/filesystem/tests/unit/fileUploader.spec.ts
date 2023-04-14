@@ -303,7 +303,6 @@ describe('FileUploader Utility', function () {
       Sinon.stub(fileSystemUtilities, `getDriver`).returns(driver);
   });
 
-  // TODO:
   describe(`storeFilePublicly`, () => {
     const storeFileResult: string = faker.system.filePath();
     let getDriverStub: SinonStub;

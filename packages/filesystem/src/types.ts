@@ -17,7 +17,7 @@ export interface Storage {
 
   createReadStream: (
     filepath: string,
-    options: ReadStreamOptions
+    options?: ReadStreamOptions
   ) => Promise<ReadStream>;
 
   writeFile: (

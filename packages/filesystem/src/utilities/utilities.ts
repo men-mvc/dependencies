@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { baseConfig, FileSystemDriver, getEnvVariable } from '@men-mvc/config';
+import mimeTypes from 'mime-types';
 import {
   generateUuid as globalGenerateUuid,
   invokeRequestErrorHandler
@@ -78,6 +79,11 @@ export const isPublicFilepath = (storageFilepath: string) => {
   }
 
   return storageFilepath.startsWith(getPublicStorageIdentifier());
+};
+
+export const getMimeType = (filePathOrName: string): string | null => {
+  const mimeType = mimeTypes.lookup(filePathOrName);
+  return mimeType ? mimeType : null;
 };
 
 export const existsAsync = util.promisify(fs.exists);

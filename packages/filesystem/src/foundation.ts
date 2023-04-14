@@ -1,3 +1,8 @@
-import { getAppRootDirectory as _getAppRootDirectory } from '@men-mvc/foundation';
+import {
+  getAppRootDirectory as _getAppRootDirectory,
+  notFoundResponse as _notFoundResponse
+} from '@men-mvc/foundation';
 
-export const getAppRootDirectory = () => _getAppRootDirectory();
+export const getAppRootDirectory = _getAppRootDirectory;
+
+export const notFoundResponse = _notFoundResponse;

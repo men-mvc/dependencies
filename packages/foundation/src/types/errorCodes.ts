@@ -3,5 +3,6 @@ export enum ErrorCodes {
   INSUFFICIENT_PERMISSIONS = `InsufficientPermissions`,
   INVALID_PAYLOAD_FORMAT = `InvalidPayloadFormat`,
   UPLOAD_MAX_FILESIZE_LIMIT = `UploadMaxFilesizeLimit`,
-  APPLICATION_NOT_INITIALISED_YET = `ApplicationNotInitialisedYet`
+  APPLICATION_NOT_INITIALISED_YET = `ApplicationNotInitialisedYet`,
+  FILE_NOT_PUBLIC = `FileNotPublic`,
 }

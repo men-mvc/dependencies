@@ -48,11 +48,11 @@ export class FileSystem implements BaseFileSystem {
   };
 
   public static getInstance = (): BaseFileSystem => {
-    if (!this.instance) {
-      this.instance = new FileSystem();
+    if (!FileSystem.instance) {
+      FileSystem.instance = new FileSystem();
     }
 
-    return this.instance;
+    return FileSystem.instance;
   };
 
   public static resetInstance = () => {
@@ -130,9 +130,9 @@ export class FileSystem implements BaseFileSystem {
   public isDir = async (path: string): Promise<boolean> =>
     this.getStorageInstance().isDir(path);
 
-  createReadStream = (
+  public createReadStream = (
     filepath: string,
-    options: ReadStreamOptions
+    options?: ReadStreamOptions
   ): Promise<ReadStream> =>
     this.getStorageInstance().createReadStream(filepath, options);
 
