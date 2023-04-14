@@ -15,12 +15,6 @@ import { getPrivateStorageDirectory } from '../../src';
 
 const localStorage = new LocalStorage();
 const fakeFileContent: string = faker.lorem.paragraph();
-class FakeFileError extends Error {
-  public code: string | null = null;
-  constructor(message: string) {
-    super(message);
-  }
-}
 const testStoragePath = path.join(__dirname, 'testStorage');
 describe(`LocalStorage Utility`, () => {
   let getPrivateStorageDirectoryStub: SinonStub;
@@ -345,20 +339,6 @@ describe(`LocalStorage Utility`, () => {
 
     it(`should return false if the directory does not exist`, async () => {
       expect(await localStorage.exists(`doesnotexist`)).toBeFalsy();
-    });
-
-    it(`should throw error when the error code is not ENOENT`, async () => {
-      const fakeError = new FakeFileError(`Storage is full.`);
-      fakeError.code = `STORAGE_FULL`;
-      const statStub = sinon.stub(fs, `stat`);
-      const fakeStatFunc = jest.fn((filepath, cb) => {
-        cb(fakeError);
-      });
-      statStub.callsFake(fakeStatFunc);
-      await expect(
-        localStorage.exists(`${faker.datatype.uuid()}.txt`)
-      ).rejects.toThrow(fakeError.message);
-      statStub.restore();
     });
   });
 

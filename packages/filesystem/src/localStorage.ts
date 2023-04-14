@@ -2,7 +2,7 @@ import fs, { WriteFileOptions } from 'fs';
 import path from 'path';
 import { Storage, ReadStreamOptions, WriteFileResult } from './types';
 import {
-  copyFileAsync,
+  copyFileAsync, existsAsync,
   getPrivateStorageDirectory,
   getPublicStorageDirectory,
   getPublicStorageIdentifier,
@@ -141,21 +141,8 @@ export class LocalStorage implements Storage {
     await copyFileAsync(this.getAbsolutePath(from), this.getAbsolutePath(to));
   };
 
-  // TODO: can we not use existsAsync?
-  public exists = async (filepath: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      fs.stat(this.getAbsolutePath(filepath), (error) => {
-        if (!error) {
-          return resolve(true);
-        }
-        if (error.code === 'ENOENT') {
-          return resolve(false);
-        }
-
-        throw error;
-      });
-    });
-  };
+  public exists = async (filepath: string): Promise<boolean> =>
+      existsAsync(this.getAbsolutePath(filepath))
 
   public mkdir = async (dirPath: string): Promise<void> => {
     await mkdirAsync(this.getAbsolutePath(dirPath), {
