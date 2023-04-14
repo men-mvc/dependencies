@@ -1,8 +1,8 @@
 import path from 'path';
 import { faker } from '@faker-js/faker';
 import sinon from 'sinon';
+import { generateUploadedFile } from '@men-mvc/test';
 import { FileSystem, getPublicStorageIdentifier } from '../../src';
-import { generateUploadedFile } from '../../src/test';
 
 describe(`FileSystem`, () => {
   beforeEach(() => {

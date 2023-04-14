@@ -14,9 +14,9 @@ import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import path from 'path';
 import fs from 'fs';
+import { generateUploadedFile } from '@men-mvc/test';
 import * as fileSystemUtilities from '../../src/utilities/utilities';
 import { delay, deleteStorageDirectory } from '../testUtilities';
-import { generateUploadedFile } from '../../src/test';
 import { FileUploader, getPrivateStorageDirectory } from '../../src';
 import { getPublicStorageIdentifier } from '../../src';
 
