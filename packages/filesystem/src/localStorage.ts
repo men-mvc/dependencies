@@ -2,10 +2,10 @@ import fs, { WriteFileOptions } from 'fs';
 import path from 'path';
 import { Storage, ReadStreamOptions, WriteFileResult } from './types';
 import {
-  copyFileAsync, existsAsync,
-  getPrivateStorageDirectory,
-  getPublicStorageDirectory,
-  getPublicStorageIdentifier,
+  getPathInStorage,
+  copyFileAsync,
+  existsAsync,
+  getStorageDirectory,
   mkdirAsync,
   readdirAsync,
   readFileAsync,
@@ -13,7 +13,8 @@ import {
   renameAsync,
   rmdirAsync,
   unlinkAsync,
-  writeFileAsync
+  writeFileAsync,
+  removeLeadingPathSep
 } from './utilities/utilities';
 import { getAppBaseUrl } from './foundation';
 
@@ -32,27 +33,12 @@ export class LocalStorage implements Storage {
     return LocalStorage.instance;
   };
 
-  public makeClientPathCompatibleWithStorage = (
-    dirOrFilePath: string,
-    isPublic = false
-  ) => {
-    if (dirOrFilePath.startsWith('/')) {
-      dirOrFilePath = dirOrFilePath.substring(1);
-    }
-
-    const storagePath = isPublic
-      ? getPublicStorageDirectory()
-      : getPrivateStorageDirectory();
-
-    return path.join(storagePath, dirOrFilePath);
-  };
-
   public getPublicUrl = (filepath: string): string => {
     return `${getAppBaseUrl()}/${removePublicStorageIdentifierFrom(filepath)}`;
   };
 
   public getAbsolutePath = (dirOrFilePath: string): string => {
-    return path.join(getPrivateStorageDirectory(), dirOrFilePath);
+    return path.join(getStorageDirectory(), dirOrFilePath);
   };
 
   public readDir = (dir: string): Promise<string[]> =>
@@ -91,11 +77,12 @@ export class LocalStorage implements Storage {
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
   ): Promise<WriteFileResult> => {
-    const absoluteFilepath = this.makeClientPathCompatibleWithStorage(filepath);
+    const pathInStorage = getPathInStorage(filepath);
+    const absoluteFilepath = this.getAbsolutePath(pathInStorage);
     await writeFileAsync(absoluteFilepath, data, options ?? {});
 
     return {
-      storageFilepath: filepath,
+      pathInStorage,
       absoluteFilepath: absoluteFilepath
     };
   };
@@ -105,14 +92,12 @@ export class LocalStorage implements Storage {
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
   ): Promise<WriteFileResult> => {
-    const absoluteFilepath = this.makeClientPathCompatibleWithStorage(
-      filepath,
-      true
-    );
+    const pathInStorage = getPathInStorage(filepath, true);
+    const absoluteFilepath = this.getAbsolutePath(pathInStorage);
     await writeFileAsync(absoluteFilepath, data, options ?? {});
 
     return {
-      storageFilepath: this.getPublicStorageFilepathFor(filepath),
+      pathInStorage,
       absoluteFilepath: absoluteFilepath
     };
   };
@@ -142,12 +127,33 @@ export class LocalStorage implements Storage {
   };
 
   public exists = async (filepath: string): Promise<boolean> =>
-      existsAsync(this.getAbsolutePath(filepath))
+    existsAsync(this.getAbsolutePath(filepath));
 
-  public mkdir = async (dirPath: string): Promise<void> => {
+  public mkdir = async (dirPath: string): Promise<string> => {
+    dirPath = removeLeadingPathSep(dirPath);
     await mkdirAsync(this.getAbsolutePath(dirPath), {
       recursive: true
     });
+
+    return dirPath;
+  };
+
+  public mkdirPublic = async (dir: string): Promise<string> => {
+    const pathInStorage = getPathInStorage(dir, true);
+    await mkdirAsync(this.getAbsolutePath(pathInStorage), {
+      recursive: true
+    });
+
+    return pathInStorage;
+  };
+
+  public mkdirPrivate = async (dir: string): Promise<string> => {
+    const pathInStorage = getPathInStorage(dir);
+    await mkdirAsync(this.getAbsolutePath(pathInStorage), {
+      recursive: true
+    });
+
+    return pathInStorage;
   };
 
   public rmdir = async (
@@ -184,7 +190,4 @@ export class LocalStorage implements Storage {
       });
     });
   };
-
-  private getPublicStorageFilepathFor = (filePathOrName: string) =>
-    path.join(getPublicStorageIdentifier(), filePathOrName);
 }

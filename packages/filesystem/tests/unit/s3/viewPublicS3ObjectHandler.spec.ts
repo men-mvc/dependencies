@@ -6,7 +6,7 @@ import { ReadStream } from 'fs';
 import { viewPublicS3ObjectRequestHandler } from '../../../src/s3/viewPublicS3ObjectHandler';
 import * as utilities from '../../../src/utilities/utilities';
 import * as foundation from '../../../src/foundation';
-import { FileSystem, getPublicStorageIdentifier } from '../../../src';
+import { FileSystem, getPublicStorageDirname } from '../../../src';
 
 describe(`viewPublicS3ObjectHandler`, () => {
   const fileContent = faker.datatype.uuid();
@@ -57,7 +57,7 @@ describe(`viewPublicS3ObjectHandler`, () => {
    */
   it(`should return file stream content`, async () => {
     sandbox.stub(utilities, `getDriver`).returns(FileSystemDriver.s3);
-    const key = `${getPublicStorageIdentifier()}/${faker.datatype.uuid()}.png`;
+    const key = `${getPublicStorageDirname()}/${faker.datatype.uuid()}.png`;
     const createReadStreamStub = stubCreateReadStream();
 
     const result = await viewPublicS3ObjectRequestHandler(
@@ -71,7 +71,7 @@ describe(`viewPublicS3ObjectHandler`, () => {
 
   it(`should decode the key param`, async () => {
     sandbox.stub(utilities, `getDriver`).returns(FileSystemDriver.s3);
-    const key = `${getPublicStorageIdentifier()}/${faker.datatype.uuid()}.png`;
+    const key = `${getPublicStorageDirname()}/${faker.datatype.uuid()}.png`;
     const encodedKey = encodeURIComponent(key);
     const createReadStreamStub = stubCreateReadStream();
 
@@ -88,7 +88,7 @@ describe(`viewPublicS3ObjectHandler`, () => {
 
   it(`should set mime type when there's mime type for filepath`, async () => {
     sandbox.stub(utilities, `getDriver`).returns(FileSystemDriver.s3);
-    const key = `${getPublicStorageIdentifier()}/${faker.datatype.uuid()}.png`;
+    const key = `${getPublicStorageDirname()}/${faker.datatype.uuid()}.png`;
     stubCreateReadStream();
     let contentSet = false;
 
@@ -106,7 +106,7 @@ describe(`viewPublicS3ObjectHandler`, () => {
 
   it(`should not set content type when there's no mime type for the file`, async () => {
     sandbox.stub(utilities, `getDriver`).returns(FileSystemDriver.s3);
-    const key = `${getPublicStorageIdentifier()}/${faker.datatype.uuid()}`;
+    const key = `${getPublicStorageDirname()}/${faker.datatype.uuid()}`;
     stubCreateReadStream();
     let contentSet = false;
 

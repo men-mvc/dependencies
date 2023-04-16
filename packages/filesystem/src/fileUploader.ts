@@ -15,16 +15,19 @@ import {
 import {
   BaseFileUploader,
   InvalidPayloadFormatException,
+  MenS3PutObjectCommandOutput,
   StoreFileParams,
   StoreFilesParams
 } from './types';
 import { LocalStorage } from './localStorage';
 import {
+  existsAsync,
   generateUuid,
   getDriver,
-  getPublicStorageIdentifier,
+  getPathInStorage,
+  getPublicStorageDirname,
   getUploadFilesizeLimit,
-  isPublicFilepath,
+  mkdirAsync,
   readFileAsync,
   renameAsync,
   rmdirAsync,
@@ -130,11 +133,10 @@ export class FileUploader implements BaseFileUploader {
     return fields as T;
   };
 
-  private storeFileInS3Bucket = async ({
-    uploadedFile,
-    filename,
-    directory
-  }: StoreFileParams): Promise<string> => {
+  private storeFileInS3Bucket = async (
+    { uploadedFile, filename, directory }: StoreFileParams,
+    isPublic = false
+  ): Promise<string> => {
     let targetKey = this.getTargetFilename(uploadedFile, filename);
     targetKey = directory ? `${directory}/${targetKey}` : targetKey;
 
@@ -145,43 +147,38 @@ export class FileUploader implements BaseFileUploader {
     await renameAsync(uploadedFile.filepath, newTempFilepath);
     // move the temp file on the local filesystem to the S3
     const content = await readFileAsync(newTempFilepath);
-    await this.getS3Storage().writeFile(targetKey, content);
+    const writeFileResult = isPublic
+      ? await this.getS3Storage().writeFilePublicly(targetKey, content)
+      : await this.getS3Storage().writeFile(targetKey, content);
     await unlinkAsync(newTempFilepath);
 
-    return targetKey;
+    return writeFileResult.pathInStorage;
   };
 
-  private storeFileLocally = async ({
-    uploadedFile,
-    filename,
-    directory
-  }: StoreFileParams): Promise<string> => {
-    if (directory) {
-      if (!(await this.getLocalStorage().exists(directory))) {
-        await this.getLocalStorage().mkdir(directory);
-      }
+  private storeFileLocally = async (
+    { uploadedFile, filename, directory }: StoreFileParams,
+    isPublic = false
+  ): Promise<string> => {
+    const targetFilepath = getPathInStorage(
+      this.getLocalTargetFilepath(uploadedFile, directory ?? '', filename),
+      isPublic
+    );
+
+    const absoluteFilepath =
+      this.getLocalStorage().getAbsolutePath(targetFilepath);
+    const dir = path.dirname(absoluteFilepath);
+    if (dir && !(await existsAsync(dir))) {
+      await mkdirAsync(dir, {
+        recursive: true
+      });
     }
 
-    const targetFilepath = this.getLocalTargetFilepath(
-      uploadedFile,
-      directory ?? '',
-      filename
-    );
-    await renameAsync(
-      uploadedFile.filepath,
-      this.getLocalStorage().getAbsolutePath(targetFilepath)
-    );
+    await renameAsync(uploadedFile.filepath, absoluteFilepath);
 
     return targetFilepath;
   };
 
   public storeFile = async (params: StoreFileParams): Promise<string> => {
-    if (params.filename && isPublicFilepath(params.filename)) {
-      throw new Error(
-        `Filename passed to the storeFile function cannot start with ${getPublicStorageIdentifier()}`
-      );
-    }
-
     if (getDriver() === FileSystemDriver.s3) {
       return this.storeFileInS3Bucket(params);
     }
@@ -192,14 +189,11 @@ export class FileUploader implements BaseFileUploader {
   public storeFilePublicly = async (
     params: StoreFileParams
   ): Promise<string> => {
-    const filename = `${params.filename ?? this.generateRandomFilename()}`;
     if (getDriver() === FileSystemDriver.s3) {
-      params.filename = `${getPublicStorageIdentifier()}/${filename}`;
-      return this.storeFile(params);
+      return this.storeFileInS3Bucket(params, true);
     }
 
-    params.filename = path.join(getPublicStorageIdentifier(), filename);
-    return this.storeFile(params);
+    return this.storeFileLocally(params, true);
   };
 
   public storeFiles = ({

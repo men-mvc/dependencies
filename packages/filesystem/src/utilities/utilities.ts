@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { baseConfig, FileSystemDriver, getEnvVariable } from '@men-mvc/config';
 import mimeTypes from 'mime-types';
 import {
-  generateUuid as globalGenerateUuid,
+  generateUuid as _generateUuid,
   invokeRequestErrorHandler
 } from '@men-mvc/foundation';
 import path from 'path';
@@ -13,10 +13,10 @@ import { getAppRootDirectory } from '../foundation';
 export const getDefaultAppStorageDirectory = (): string =>
   path.join(getAppRootDirectory(), `storage`);
 
-let privateStorageDirectoryCache: string | null = null;
-export const getPrivateStorageDirectory = (): string => {
-  if (privateStorageDirectoryCache) {
-    return privateStorageDirectoryCache;
+let storageDirectoryCache: string | null = null;
+export const getStorageDirectory = (): string => {
+  if (storageDirectoryCache) {
+    return storageDirectoryCache;
   }
   let storageDirectory: string;
   const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
@@ -26,21 +26,51 @@ export const getPrivateStorageDirectory = (): string => {
     storageDirectory = getDefaultAppStorageDirectory();
   }
 
-  privateStorageDirectoryCache = storageDirectory;
+  storageDirectoryCache = storageDirectory;
 
-  return privateStorageDirectoryCache;
+  return storageDirectoryCache;
 };
 
 // ! if we are to add more logic in the future, unit test
-export const getPublicStorageIdentifier = () => {
+export const getPublicStorageDirname = () => {
   return `men-public`;
 };
 
-export const getPublicStorageDirectory = (): string =>
-  path.join(getPrivateStorageDirectory(), getPublicStorageIdentifier());
+// ! if we are to add more logic in the future, unit test
+export const getPrivateStorageDirname = () => {
+  return `men-private`;
+};
 
-export const clearPrivateStorageDirectoryCache = () => {
-  privateStorageDirectoryCache = null;
+export const getPublicStorageDirectory = (): string =>
+  path.join(getStorageDirectory(), getPublicStorageDirname());
+
+export const getPrivateStorageDirectory = (): string =>
+  path.join(getStorageDirectory(), getPrivateStorageDirname());
+
+export const clearStorageDirectoryCache = () => {
+  storageDirectoryCache = null;
+};
+
+export const getPathInStorage = (clientFilepath: string, isPublic = false) => {
+  clientFilepath = removeLeadingPathSep(clientFilepath);
+
+  return path.join(
+    isPublic ? getPublicStorageDirname() : getPrivateStorageDirname(),
+    clientFilepath
+  );
+};
+
+export const removeLeadingPathSep = (filepath: string) => {
+  if (filepath.startsWith(path.sep) || filepath.startsWith('/')) {
+    if (filepath.startsWith(path.sep)) {
+      filepath = filepath.substring(1);
+    }
+    if (filepath.startsWith('/')) {
+      filepath = filepath.substring(1);
+    }
+  }
+
+  return filepath;
 };
 
 export const getUploadFilesizeLimit = (): number =>
@@ -49,7 +79,7 @@ export const getUploadFilesizeLimit = (): number =>
 export const getFileSystemDriver = (): FileSystemDriver =>
   baseConfig.fileSystem.storageDriver;
 
-export const generateUuid = (): string => globalGenerateUuid();
+export const generateUuid = _generateUuid;
 
 export const getDriver = (): FileSystemDriver =>
   baseConfig.fileSystem?.storageDriver ?? FileSystemDriver.local;
@@ -74,11 +104,9 @@ export const parseMultiFormBooleanInput = (
 };
 
 export const isPublicFilepath = (storageFilepath: string) => {
-  if (storageFilepath.startsWith(path.sep) || storageFilepath.startsWith('/')) {
-    storageFilepath = storageFilepath.substring(1);
-  }
+  storageFilepath = removeLeadingPathSep(storageFilepath);
 
-  return storageFilepath.startsWith(getPublicStorageIdentifier());
+  return storageFilepath.startsWith(getPublicStorageDirname());
 };
 
 export const getMimeType = (filePathOrName: string): string | null => {
@@ -94,7 +122,7 @@ export const removePublicStorageIdentifierFrom = (
   }
 
   // replace the first occurrence
-  let finalPath = filePathOrKey.replace(getPublicStorageIdentifier(), '');
+  let finalPath = filePathOrKey.replace(getPublicStorageDirname(), '');
   if (finalPath.startsWith(path.sep)) {
     finalPath = finalPath.substring(1);
   }

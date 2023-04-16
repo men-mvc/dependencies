@@ -2,7 +2,7 @@ import path from 'path';
 import { faker } from '@faker-js/faker';
 import sinon from 'sinon';
 import { generateUploadedFile } from '@men-mvc/test';
-import { FileSystem, getPublicStorageIdentifier } from '../../src';
+import { FileSystem, getPublicStorageDirname } from '../../src';
 
 describe(`FileSystem`, () => {
   beforeEach(() => {
@@ -16,17 +16,6 @@ describe(`FileSystem`, () => {
   });
 
   describe(`writeFile`, () => {
-    it(`should throws error when filepath starts with ${getPublicStorageIdentifier()}`, () => {
-      expect(
-        FileSystem.getInstance().writeFile(
-          path.join(getPublicStorageIdentifier(), faker.system.fileName()),
-          faker.datatype.uuid()
-        )
-      ).rejects.toThrow(
-        `Filename/ filepath passed to the writeFile function cannot start with ${getPublicStorageIdentifier()}`
-      );
-    });
-
     it(`should invoke writeFile function of underlying storage path`, async () => {
       const instance = FileSystem.getInstance() as FileSystem;
       const writeFileStub = sinon.stub(
@@ -82,6 +71,45 @@ describe(`FileSystem`, () => {
         directory
       });
       storeFilePubliclyStub.restore();
+    });
+  });
+
+  describe(`mkdir`, () => {
+    it(`should invoke mkdir function of the underlying storage instance`, async () => {
+      const instance = FileSystem.getInstance() as FileSystem;
+      const mkdirStub = sinon.stub(instance.getStorageInstance(), `mkdir`);
+      const dir = faker.datatype.uuid();
+      await instance.mkdir(dir);
+      sinon.assert.calledOnceWithExactly(mkdirStub, dir);
+      mkdirStub.restore();
+    });
+  });
+
+  describe(`mkdirPrivate`, () => {
+    it(`should invoke mkdirPrivate function of the underlying storage instance`, async () => {
+      const instance = FileSystem.getInstance() as FileSystem;
+      const mkdirPrivateStub = sinon.stub(
+        instance.getStorageInstance(),
+        `mkdirPrivate`
+      );
+      const dir = faker.datatype.uuid();
+      await instance.mkdirPrivate(dir);
+      sinon.assert.calledOnceWithExactly(mkdirPrivateStub, dir);
+      mkdirPrivateStub.restore();
+    });
+  });
+
+  describe(`mkdirPublic`, () => {
+    it(`should invoke mkdirPublic function of the underlying storage instance`, async () => {
+      const instance = FileSystem.getInstance() as FileSystem;
+      const mkdirPublicStub = sinon.stub(
+        instance.getStorageInstance(),
+        `mkdirPublic`
+      );
+      const dir = faker.datatype.uuid();
+      await instance.mkdirPublic(dir);
+      sinon.assert.calledOnceWithExactly(mkdirPublicStub, dir);
+      mkdirPublicStub.restore();
     });
   });
 

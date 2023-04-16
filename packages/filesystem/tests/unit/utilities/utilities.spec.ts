@@ -1,24 +1,80 @@
 import { setEnvVariable, unsetEnvVariable } from '@men-mvc/config';
-import sinon from 'sinon';
+import sinon, { createSandbox, SinonSandbox } from 'sinon';
 import path from 'path';
 import { faker } from '@faker-js/faker';
 import {
-  clearPrivateStorageDirectoryCache,
-  getPrivateStorageDirectory,
+  clearStorageDirectoryCache,
+  getStorageDirectory,
   getDefaultAppStorageDirectory,
   parseMultiFormBooleanInput,
   getPublicStorageDirectory,
-  getPublicStorageIdentifier,
   isPublicFilepath,
-  removePublicStorageIdentifierFrom
+  removePublicStorageIdentifierFrom,
+  getPrivateStorageDirectory,
+  removeLeadingPathSep,
+  getPathInStorage,
+  getPrivateStorageDirname,
+  getPublicStorageDirname
 } from '../../../src';
 import * as foundation from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
 
 describe(`Filesystem - Utilities`, () => {
+  let sandbox: SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = createSandbox();
+  });
+
   afterEach(() => {
     unsetEnvVariable('SERVER_DIRECTORY');
-    clearPrivateStorageDirectoryCache();
+    unsetEnvVariable('FILESYSTEM_STORAGE_DIRECTORY');
+    clearStorageDirectoryCache();
+    sandbox.restore();
+  });
+
+  describe(`removeLeadingPathSeparator`, () => {
+    it(`should remove leading path.sep`, () => {
+      expect(removeLeadingPathSep(`${path.sep}testing.txt`)).toBe(
+        `testing.txt`
+      );
+    });
+
+    it(`should remove leading fore slash`, () => {
+      expect(removeLeadingPathSep(`/testing.txt`)).toBe(`testing.txt`);
+    });
+
+    it(`should return the filepath as is`, () => {
+      expect(removeLeadingPathSep(`testing.txt`)).toBe(`testing.txt`);
+    });
+  });
+
+  describe(`getPathInStorage`, () => {
+    it(`should remove leading separator`, () => {
+      const filepath = faker.system.filePath();
+      const removeLeadingPathSepStub = sandbox
+        .stub(utilities, `removeLeadingPathSep`)
+        .returns(filepath);
+      getPathInStorage(filepath);
+
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSepStub, filepath);
+    });
+
+    it(`should append public storage dir path when isPublic is true`, () => {
+      const filepath = faker.system.filePath();
+
+      expect(getPathInStorage(filepath, true)).toBe(
+        path.join(getPublicStorageDirname(), filepath)
+      );
+    });
+
+    it(`should append private storage dir path when isPublic is false`, () => {
+      const filepath = faker.system.filePath();
+
+      expect(getPathInStorage(filepath)).toBe(
+        path.join(getPrivateStorageDirname(), filepath)
+      );
+    });
   });
 
   describe(`removePublicStorageIdentifierFrom`, () => {
@@ -27,14 +83,14 @@ describe(`Filesystem - Utilities`, () => {
       expect(removePublicStorageIdentifierFrom(filepath)).toBe(filepath);
     });
 
-    it(`should replace the first occurrence of ${getPublicStorageIdentifier()}`, async () => {
+    it(`should replace the first occurrence of ${getPublicStorageDirname()}`, async () => {
       const filepathWithoutPublicFileIdentifier = path.join(
         faker.datatype.uuid(),
-        getPublicStorageIdentifier(),
+        getPublicStorageDirname(),
         `${faker.datatype.uuid()}.png`
       );
       const filepath = path.join(
-        getPublicStorageIdentifier(),
+        getPublicStorageDirname(),
         filepathWithoutPublicFileIdentifier
       );
 
@@ -48,7 +104,7 @@ describe(`Filesystem - Utilities`, () => {
     it(`should return true when path starts with public storage identifier`, () => {
       expect(
         isPublicFilepath(
-          path.join(getPublicStorageIdentifier(), faker.system.filePath())
+          path.join(getPublicStorageDirname(), faker.system.filePath())
         )
       ).toBeTruthy();
     });
@@ -59,7 +115,7 @@ describe(`Filesystem - Utilities`, () => {
 
     it(`should ignore leading path separator`, () => {
       const filepath = `${path.sep}${path.join(
-        getPublicStorageIdentifier(),
+        getPublicStorageDirname(),
         faker.system.filePath()
       )}`;
       expect(isPublicFilepath(filepath)).toBeTruthy();
@@ -67,11 +123,21 @@ describe(`Filesystem - Utilities`, () => {
   });
 
   describe(`getPublicStorageDirectory`, () => {
-    it(`should return private storage + men + public`, () => {
+    it(`should return storage + men-public`, () => {
       const fakeStorageDir = faker.system.directoryPath();
       setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
       expect(getPublicStorageDirectory()).toBe(
         path.join(fakeStorageDir, 'men-public')
+      );
+    });
+  });
+
+  describe(`getPrivateStorageDirectory`, () => {
+    it(`should return storage + men-private`, () => {
+      const fakeStorageDir = faker.system.directoryPath();
+      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
+      expect(getPrivateStorageDirectory()).toBe(
+        path.join(fakeStorageDir, 'men-private')
       );
     });
   });
@@ -113,7 +179,7 @@ describe(`Filesystem - Utilities`, () => {
     });
   });
 
-  describe(`getPrivateStorageDirectory`, () => {
+  describe(`getStorageDirectory`, () => {
     afterAll(() => {
       setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
     });
@@ -121,7 +187,7 @@ describe(`Filesystem - Utilities`, () => {
     it(`should return value of FILESYSTEM_STORAGE_DIRECTORY env variable when var is set`, () => {
       const fakeStorageDir = `~/home/custom_storage`;
       setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
-      const storageDir = getPrivateStorageDirectory();
+      const storageDir = getStorageDirectory();
       expect(storageDir).toBe(fakeStorageDir);
     });
 
@@ -131,7 +197,7 @@ describe(`Filesystem - Utilities`, () => {
       const getDefaultAppStorageDirectoryStub = sinon
         .stub(utilities, `getDefaultAppStorageDirectory`)
         .returns(fakeDefaultStorageDirectory);
-      expect(getPrivateStorageDirectory()).toBe(fakeDefaultStorageDirectory);
+      expect(getStorageDirectory()).toBe(fakeDefaultStorageDirectory);
       getDefaultAppStorageDirectoryStub.restore();
     });
   });

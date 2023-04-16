@@ -14,7 +14,7 @@ import {
 import { FileUploader } from './fileUploader';
 import {
   getFileSystemDriver,
-  getPublicStorageIdentifier,
+  getPublicStorageDirname,
   isPublicFilepath
 } from './utilities/utilities';
 import { LocalStorage } from './localStorage';
@@ -87,15 +87,8 @@ export class FileSystem implements BaseFileSystem {
     filepath: string,
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
-  ): Promise<WriteFileResult> => {
-    if (isPublicFilepath(filepath)) {
-      throw new Error(
-        `Filename/ filepath passed to the writeFile function cannot start with ${getPublicStorageIdentifier()}`
-      );
-    }
-
-    return this.getStorageInstance().writeFile(filepath, data, options);
-  };
+  ): Promise<WriteFileResult> =>
+    this.getStorageInstance().writeFile(filepath, data, options);
 
   public writeFilePublicly = async (
     filepath: string,
@@ -119,8 +112,14 @@ export class FileSystem implements BaseFileSystem {
   public exists = async (path: string): Promise<boolean> =>
     this.getStorageInstance().exists(path);
 
-  public mkdir = async (dirPath: string): Promise<void> =>
+  public mkdir = async (dirPath: string): Promise<string> =>
     this.getStorageInstance().mkdir(dirPath);
+
+  public mkdirPrivate = async (dirPath: string): Promise<string> =>
+    this.getStorageInstance().mkdirPrivate(dirPath);
+
+  public mkdirPublic = async (dirPath: string): Promise<string> =>
+    this.getStorageInstance().mkdirPublic(dirPath);
 
   public rmdir = async (
     dirPath: string,
