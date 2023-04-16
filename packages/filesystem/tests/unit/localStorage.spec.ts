@@ -18,6 +18,10 @@ import {
 } from '../../src';
 import * as utilities from '../../src/utilities/utilities';
 import * as foundation from '../../src/foundation';
+import {
+  getPrivateStorageDirectory,
+  getPublicStorageDirectory
+} from '../../lib';
 
 const localStorage = new LocalStorage();
 const fakeFileContent: string = faker.lorem.paragraph();
@@ -431,6 +435,75 @@ describe(`LocalStorage Utility`, () => {
       const dirname = path.join(faker.datatype.uuid(), faker.datatype.uuid());
       await localStorage.mkdir(dirname);
       expect(fs.existsSync(path.join(testStorageDir, dirname))).toBeTruthy();
+    });
+
+    it(`should remove leading path sep`, async () => {
+      const removeLeadingPathSpy = sinon.spy(utilities, `removeLeadingPathSep`);
+      const dirname = faker.datatype.uuid();
+      await localStorage.mkdir(dirname);
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSpy, dirname);
+      removeLeadingPathSpy.restore();
+    });
+
+    it(`should return the path without leading path sep`, async () => {
+      const dirname = faker.datatype.uuid();
+      const dirWithLeadingPathSep = `${path.sep}${dirname}`;
+      const result = await localStorage.mkdir(dirWithLeadingPathSep);
+      expect(result).toBe(dirname);
+    });
+  });
+
+  describe(`mkdirPublic`, () => {
+    it(`should recursively create the directory in public storage folder`, async () => {
+      const dir = path.join(faker.datatype.uuid(), faker.datatype.uuid());
+      await localStorage.mkdirPublic(dir);
+      expect(
+        fs.existsSync(path.join(getPublicStorageDirectory(), dir))
+      ).toBeTruthy();
+    });
+
+    it(`should remove leading file sep`, async () => {
+      const removeLeadingPathSepSpy = sinon.spy(
+        utilities,
+        `removeLeadingPathSep`
+      );
+      const dir = path.join(faker.datatype.uuid(), faker.datatype.uuid());
+      await localStorage.mkdirPublic(dir);
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSepSpy, dir);
+      removeLeadingPathSepSpy.restore();
+    });
+
+    it(`should return path in storage`, async () => {
+      const dir = path.join(faker.datatype.uuid(), faker.datatype.uuid());
+      const result = await localStorage.mkdirPublic(dir);
+      expect(result).toBe(path.join(getPublicStorageDirname(), dir));
+    });
+  });
+
+  describe(`mkdirPrivate`, () => {
+    it(`should recursively create the directory in private storage folder`, async () => {
+      const dir = path.join(faker.datatype.uuid(), faker.datatype.uuid());
+      await localStorage.mkdirPrivate(dir);
+      expect(
+        fs.existsSync(path.join(getPrivateStorageDirectory(), dir))
+      ).toBeTruthy();
+    });
+
+    it(`should remove leading file sep`, async () => {
+      const removeLeadingPathSepSpy = sinon.spy(
+        utilities,
+        `removeLeadingPathSep`
+      );
+      const dir = path.join(faker.datatype.uuid(), faker.datatype.uuid());
+      await localStorage.mkdirPrivate(dir);
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSepSpy, dir);
+      removeLeadingPathSepSpy.restore();
+    });
+
+    it(`should return path in storage`, async () => {
+      const dir = path.join(faker.datatype.uuid(), faker.datatype.uuid());
+      const result = await localStorage.mkdirPrivate(dir);
+      expect(result).toBe(path.join(getPrivateStorageDirname(), dir));
     });
   });
 

@@ -5,9 +5,6 @@ import {
   getPathInStorage,
   copyFileAsync,
   existsAsync,
-  getPrivateStorageDirectory,
-  getPublicStorageDirectory,
-  getPublicStorageDirname,
   getStorageDirectory,
   mkdirAsync,
   readdirAsync,
@@ -16,7 +13,8 @@ import {
   renameAsync,
   rmdirAsync,
   unlinkAsync,
-  writeFileAsync
+  writeFileAsync,
+  removeLeadingPathSep
 } from './utilities/utilities';
 import { getAppBaseUrl } from './foundation';
 
@@ -131,10 +129,31 @@ export class LocalStorage implements Storage {
   public exists = async (filepath: string): Promise<boolean> =>
     existsAsync(this.getAbsolutePath(filepath));
 
-  public mkdir = async (dirPath: string): Promise<void> => {
+  public mkdir = async (dirPath: string): Promise<string> => {
+    dirPath = removeLeadingPathSep(dirPath);
     await mkdirAsync(this.getAbsolutePath(dirPath), {
       recursive: true
     });
+
+    return dirPath;
+  };
+
+  public mkdirPublic = async (dir: string): Promise<string> => {
+    const pathInStorage = getPathInStorage(dir, true);
+    await mkdirAsync(this.getAbsolutePath(pathInStorage), {
+      recursive: true
+    });
+
+    return pathInStorage;
+  };
+
+  public mkdirPrivate = async (dir: string): Promise<string> => {
+    const pathInStorage = getPathInStorage(dir);
+    await mkdirAsync(this.getAbsolutePath(pathInStorage), {
+      recursive: true
+    });
+
+    return pathInStorage;
   };
 
   public rmdir = async (

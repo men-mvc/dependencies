@@ -6,6 +6,7 @@ import {
   WriteFileResult
 } from '../types';
 import {
+  getPathInStorage,
   getPrivateStorageDirname,
   getPublicStorageDirname,
   removeLeadingPathSep
@@ -86,7 +87,6 @@ export class S3Storage implements Storage {
     };
   };
 
-  // TODO: update tests
   public writeFilePublicly = async (
     key: string,
     data: string | NodeJS.ArrayBufferView,
@@ -119,8 +119,26 @@ export class S3Storage implements Storage {
   public readDir = async (keyPrefix: string): Promise<string[]> =>
     this.getS3Adapter().readDir(keyPrefix);
 
-  public mkdir = async (path: string): Promise<void> =>
-    this.getS3Adapter().mkdir(path);
+  public mkdir = async (path: string): Promise<string> => {
+    path = removeLeadingPathSep(path);
+    await this.getS3Adapter().mkdir(path);
+
+    return path;
+  };
+
+  public mkdirPublic = async (dir: string): Promise<string> => {
+    dir = getPathInStorage(dir, true);
+    await this.getS3Adapter().mkdir(dir);
+
+    return dir;
+  };
+
+  public mkdirPrivate = async (dir: string): Promise<string> => {
+    dir = getPathInStorage(dir);
+    await this.getS3Adapter().mkdir(dir);
+
+    return dir;
+  };
 
   public rmdir = async (path: string, forceDelete?: boolean): Promise<void> =>
     this.getS3Adapter().rmdir(path, forceDelete);

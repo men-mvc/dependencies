@@ -42,7 +42,11 @@ export interface Storage {
 
   exists: (pathOrKey: string) => Promise<boolean>;
 
-  mkdir: (path: string) => Promise<void>;
+  mkdir: (path: string) => Promise<string>;
+
+  mkdirPrivate: (path: string) => Promise<string>;
+
+  mkdirPublic: (path: string) => Promise<string>;
 
   rmdir: (path: string, forceDelete?: boolean) => Promise<void>;
 

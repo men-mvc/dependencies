@@ -112,8 +112,14 @@ export class FileSystem implements BaseFileSystem {
   public exists = async (path: string): Promise<boolean> =>
     this.getStorageInstance().exists(path);
 
-  public mkdir = async (dirPath: string): Promise<void> =>
+  public mkdir = async (dirPath: string): Promise<string> =>
     this.getStorageInstance().mkdir(dirPath);
+
+  public mkdirPrivate = async (dirPath: string): Promise<string> =>
+    this.getStorageInstance().mkdirPrivate(dirPath);
+
+  public mkdirPublic = async (dirPath: string): Promise<string> =>
+    this.getStorageInstance().mkdirPublic(dirPath);
 
   public rmdir = async (
     dirPath: string,

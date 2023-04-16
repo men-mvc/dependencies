@@ -74,6 +74,45 @@ describe(`FileSystem`, () => {
     });
   });
 
+  describe(`mkdir`, () => {
+    it(`should invoke mkdir function of the underlying storage instance`, async () => {
+      const instance = FileSystem.getInstance() as FileSystem;
+      const mkdirStub = sinon.stub(instance.getStorageInstance(), `mkdir`);
+      const dir = faker.datatype.uuid();
+      await instance.mkdir(dir);
+      sinon.assert.calledOnceWithExactly(mkdirStub, dir);
+      mkdirStub.restore();
+    });
+  });
+
+  describe(`mkdirPrivate`, () => {
+    it(`should invoke mkdirPrivate function of the underlying storage instance`, async () => {
+      const instance = FileSystem.getInstance() as FileSystem;
+      const mkdirPrivateStub = sinon.stub(
+        instance.getStorageInstance(),
+        `mkdirPrivate`
+      );
+      const dir = faker.datatype.uuid();
+      await instance.mkdirPrivate(dir);
+      sinon.assert.calledOnceWithExactly(mkdirPrivateStub, dir);
+      mkdirPrivateStub.restore();
+    });
+  });
+
+  describe(`mkdirPublic`, () => {
+    it(`should invoke mkdirPublic function of the underlying storage instance`, async () => {
+      const instance = FileSystem.getInstance() as FileSystem;
+      const mkdirPublicStub = sinon.stub(
+        instance.getStorageInstance(),
+        `mkdirPublic`
+      );
+      const dir = faker.datatype.uuid();
+      await instance.mkdirPublic(dir);
+      sinon.assert.calledOnceWithExactly(mkdirPublicStub, dir);
+      mkdirPublicStub.restore();
+    });
+  });
+
   describe(`getUploaderInstance`, () => {
     it(`should always return the same instance`, () => {
       const fileSystem = new FileSystem();

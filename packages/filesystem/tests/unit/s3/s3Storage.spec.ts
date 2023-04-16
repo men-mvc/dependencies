@@ -1,7 +1,12 @@
 import sinon, { SinonStub } from 'sinon';
 import { faker } from '@faker-js/faker';
 import path from 'path';
-import { readReadableAsString, replaceRouteParams } from '@men-mvc/foundation';
+import {
+  getServerDirectory,
+  readReadableAsString,
+  replaceRouteParams,
+  setServerDirectory
+} from '@men-mvc/foundation';
 import { Buffer } from 'buffer';
 import { ReadStream } from 'fs';
 import { Readable } from 'stream';
@@ -14,9 +19,19 @@ import {
 import { viewPublicS3ObjectRoute } from '../../../src/s3/viewPublicS3ObjectHandler';
 import * as foundation from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
+import { getPrivateStorageDirectory } from '../../../lib';
 
 const storage = new S3Storage();
+const serverDirBeforeTests = getServerDirectory();
 describe(`S3Storage`, () => {
+  beforeAll(() => {
+    setServerDirectory(process.cwd());
+  });
+
+  afterAll(() => {
+    setServerDirectory(serverDirBeforeTests);
+  });
+
   describe(`getPublicUrl`, () => {
     /**
      * ! this test also ensures that the key is URL encoded.
@@ -261,12 +276,110 @@ describe(`S3Storage`, () => {
   });
 
   describe(`mkdir`, () => {
+    let mkdirStub: SinonStub;
+
+    beforeEach(() => {
+      mkdirStub = sinon.stub(storage.getS3Adapter(), `mkdir`);
+    });
+
+    afterEach(() => {
+      mkdirStub.restore();
+    });
+
     it(`should invoke adapter's mkdir function with the right parameters`, async () => {
       const key = faker.datatype.uuid();
-      const mkdirStub = sinon.stub(storage.getS3Adapter(), `mkdir`);
       await storage.mkdir(key);
       sinon.assert.calledOnceWithExactly(mkdirStub, key);
+    });
+
+    it(`should remove leading slash`, async () => {
+      const key = faker.datatype.uuid();
+      const removeLeadingPathSepStub = sinon
+        .stub(utilities, `removeLeadingPathSep`)
+        .returns(key);
+      await storage.mkdir(key);
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSepStub, key);
+      removeLeadingPathSepStub.restore();
+    });
+
+    it(`should return key without leading slash`, async () => {
+      const key = faker.datatype.uuid();
+      const result = await storage.mkdir(`/${key}`);
+      expect(result).toBe(key);
+    });
+  });
+
+  describe(`mkdirPrivate`, () => {
+    let mkdirStub: SinonStub;
+
+    beforeEach(() => {
+      mkdirStub = sinon.stub(storage.getS3Adapter(), `mkdir`);
+    });
+
+    afterEach(() => {
       mkdirStub.restore();
+    });
+
+    it(`should invoke adapter's mkdir with the right parameters`, async () => {
+      const key = faker.datatype.uuid();
+      await storage.mkdirPrivate(key);
+      sinon.assert.calledOnceWithExactly(
+        mkdirStub,
+        `${getPrivateStorageDirname()}/${key}`
+      );
+    });
+
+    it(`should remove the leading slash`, async () => {
+      const key = faker.datatype.uuid();
+      const removeLeadingPathSepStub = sinon
+        .stub(utilities, `removeLeadingPathSep`)
+        .returns(key);
+      await storage.mkdirPrivate(key);
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSepStub, key);
+      removeLeadingPathSepStub.restore();
+    });
+
+    it(`should return the key with private dirname as prefix`, async () => {
+      const key = faker.datatype.uuid();
+      const result = await storage.mkdirPrivate(key);
+      expect(result).toBe(`${getPrivateStorageDirname()}/${key}`);
+    });
+  });
+
+  describe(`mkdirPublic`, () => {
+    let mkdirStub: SinonStub;
+
+    beforeEach(() => {
+      mkdirStub = sinon.stub(storage.getS3Adapter(), `mkdir`);
+    });
+
+    afterEach(() => {
+      mkdirStub.restore();
+    });
+
+    it(`should invoke adapter's mkdir with the right parameters`, async () => {
+      const key = faker.datatype.uuid();
+      await storage.mkdirPublic(key);
+      sinon.assert.calledOnceWithExactly(
+        mkdirStub,
+        `${getPublicStorageDirname()}/${key}`
+      );
+    });
+
+    it(`should remove the leading slash`, async () => {
+      const key = faker.datatype.uuid();
+      const removeLeadingPathSepStub = sinon
+        .stub(utilities, `removeLeadingPathSep`)
+        .returns(key);
+      await storage.mkdirPublic(key);
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSepStub, key);
+      removeLeadingPathSepStub.restore();
+    });
+
+    it(`should return the key with public dirname as prefix`, async () => {
+      const key = faker.datatype.uuid();
+      const result = await storage.mkdirPublic(key);
+      expect(result).toBe(`${getPublicStorageDirname()}/${key}`);
     });
   });
 
