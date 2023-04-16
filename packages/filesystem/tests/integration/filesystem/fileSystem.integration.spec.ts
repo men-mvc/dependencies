@@ -16,14 +16,18 @@ import {
   resetTestExpressApp
 } from '../utilities';
 import { ComplexFormData, SimpleFormData } from './support/types';
-import { getPrivateStorageDirectory } from '../../../src';
+import {
+  getPrivateStorageDirectory,
+  getStorageDirectory,
+  fileSystem,
+  FileSystem
+} from '../../../src';
 import { delay, deleteStorageDirectory } from '../../testUtilities';
 import {
   generateSimpleFormDataPayload,
   makeFormDataRequest
 } from './utilities';
 import * as utilities from '../../../src/utilities/utilities';
-import { fileSystem, FileSystem } from '../../../src';
 
 type StoreFilePayload = {
   file: FakeUploadedFile;
@@ -36,19 +40,19 @@ type StoreFilesPayload = {
 };
 
 const tempDirname = `temp`;
+/**
+ * where the files to be uploaded are stored in
+ */
 const originalFilesDir = path.join(
   __dirname,
   `support${path.sep}files${path.sep}original`
 );
 describe('FileSystem', () => {
-  let primaryTempStorageDir: string;
+  let testTempStorageDir: string;
 
   beforeAll(async () => {
     setServerDirectory(process.cwd());
-    primaryTempStorageDir = path.join(
-      getPrivateStorageDirectory(),
-      tempDirname
-    );
+    testTempStorageDir = path.join(getStorageDirectory(), tempDirname);
     await initTestApplication();
   });
 
@@ -58,6 +62,7 @@ describe('FileSystem', () => {
 
   afterEach(() => {
     fileSystem.resetTempUploadDirId();
+    deleteStorageDirectory();
   });
 
   describe(`parseFormData`, () => {
@@ -156,8 +161,7 @@ describe('FileSystem', () => {
     it(`should delete the unique temp upload dir when the request finished`, async () => {
       resetTestExpressApp();
       const fakeTempDirPath = path.join(
-        process.cwd(),
-        `storage`,
+        getStorageDirectory(),
         `temp`,
         `fake-temp-dir-id`
       );
@@ -179,12 +183,12 @@ describe('FileSystem', () => {
     });
 
     it(`should create temp storage for request`, async () => {
-      if (fs.existsSync(getPrivateStorageDirectory())) {
+      if (fs.existsSync(getStorageDirectory())) {
         deleteStorageDirectory();
       }
       const formData = generateSimpleFormDataPayload();
       await makeFormDataRequest(formData);
-      expect(fs.existsSync(primaryTempStorageDir)).toBeTruthy();
+      expect(fs.existsSync(testTempStorageDir)).toBeTruthy();
     });
 
     it(`should throw invalid payload format error when fields payload is array`, async () => {
@@ -309,7 +313,6 @@ describe('FileSystem', () => {
     });
     afterEach(async () => {
       generateUuidStub.restore();
-      await deleteStorageDirectory();
     });
 
     it(`should upload file into the default storage directory generating random filename`, async () => {
@@ -415,7 +418,6 @@ describe('FileSystem', () => {
     });
     afterEach(async () => {
       generateUuidStub.restore();
-      deleteStorageDirectory();
     });
 
     it(`should store files into the default storage directory generating random filenames for each file`, async () => {

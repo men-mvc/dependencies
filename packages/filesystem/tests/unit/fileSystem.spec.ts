@@ -2,7 +2,7 @@ import path from 'path';
 import { faker } from '@faker-js/faker';
 import sinon from 'sinon';
 import { generateUploadedFile } from '@men-mvc/test';
-import { FileSystem, getPublicStorageIdentifier } from '../../src';
+import { FileSystem, getPublicStorageDirname } from '../../src';
 
 describe(`FileSystem`, () => {
   beforeEach(() => {
@@ -16,17 +16,6 @@ describe(`FileSystem`, () => {
   });
 
   describe(`writeFile`, () => {
-    it(`should throws error when filepath starts with ${getPublicStorageIdentifier()}`, () => {
-      expect(
-        FileSystem.getInstance().writeFile(
-          path.join(getPublicStorageIdentifier(), faker.system.fileName()),
-          faker.datatype.uuid()
-        )
-      ).rejects.toThrow(
-        `Filename/ filepath passed to the writeFile function cannot start with ${getPublicStorageIdentifier()}`
-      );
-    });
-
     it(`should invoke writeFile function of underlying storage path`, async () => {
       const instance = FileSystem.getInstance() as FileSystem;
       const writeFileStub = sinon.stub(

@@ -5,9 +5,19 @@ import {
   Storage,
   WriteFileResult
 } from '../types';
-import { getPublicStorageIdentifier } from '../utilities/utilities';
+import {
+  getPrivateStorageDirname,
+  getPublicStorageDirname,
+  removeLeadingPathSep
+} from '../utilities/utilities';
 import { getAppBaseUrl, replaceRouteParams } from '../foundation';
 import { viewPublicS3ObjectRoute } from './viewPublicS3ObjectHandler';
+
+const showWarningForUsingOptions = () => {
+  console.warn(
+    'options argument of writeFile function is not supported for S3 filesystem.'
+  );
+};
 
 export class S3Storage implements Storage {
   private adapter: MenS3Adapter | undefined;
@@ -18,9 +28,10 @@ export class S3Storage implements Storage {
     })}`;
   };
 
-  public getAbsolutePath = (path: string): string => {
-    return path;
-  };
+  /**
+   * !  path will always have public storage or private storage prefix
+   */
+  public getAbsolutePath = (path: string): string => path;
 
   public getS3Adapter = (): MenS3Adapter => {
     try {
@@ -61,31 +72,39 @@ export class S3Storage implements Storage {
     options?: WriteFileOptions // What about this? - not available for S3
   ): Promise<WriteFileResult> => {
     if (options) {
-      console.warn(
-        'options argument of writeFile function is not supported for S3 filesystem.'
-      );
+      showWarningForUsingOptions();
     }
+    key = removeLeadingPathSep(key);
+    key = `${getPrivateStorageDirname()}/${key}`;
 
     const result = await this.getS3Adapter().writeFile(key, data);
 
     return {
       ...result,
-      storageFilepath: key,
+      pathInStorage: key,
       absoluteFilepath: key
     };
   };
 
+  // TODO: update tests
   public writeFilePublicly = async (
     key: string,
     data: string | NodeJS.ArrayBufferView,
     options?: WriteFileOptions
   ): Promise<WriteFileResult> => {
-    if (key.startsWith('/')) {
-      key = key.substring(1);
+    if (options) {
+      showWarningForUsingOptions();
     }
-    key = `${getPublicStorageIdentifier()}/${key}`;
+    key = removeLeadingPathSep(key);
+    key = `${getPublicStorageDirname()}/${key}`;
 
-    return this.writeFile(key, data, options);
+    const result = await this.getS3Adapter().writeFile(key, data);
+
+    return {
+      ...result,
+      pathInStorage: key,
+      absoluteFilepath: key
+    };
   };
 
   public deleteFile = async (key: string): Promise<void> =>

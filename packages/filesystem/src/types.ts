@@ -96,7 +96,7 @@ export type ReadStreamOptions = {
 };
 
 export type WriteFileResult = {
-  storageFilepath: string;
+  pathInStorage: string;
   absoluteFilepath: string;
 } & Partial<MenS3PutObjectCommandOutput>;
 

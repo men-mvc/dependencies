@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { getPrivateStorageDirectory } from '../src';
+import { getPrivateStorageDirectory, getStorageDirectory } from '../src';
 
 export const delay = (milliseconds: number = 500): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -10,11 +10,11 @@ export const delay = (milliseconds: number = 500): Promise<boolean> => {
 };
 
 export const deleteStorageDirectory = () => {
-  if (!fs.existsSync(getPrivateStorageDirectory())) {
+  if (!fs.existsSync(getStorageDirectory())) {
     return;
   }
 
-  fs.rmdirSync(getPrivateStorageDirectory(), {
+  fs.rmdirSync(getStorageDirectory(), {
     recursive: true
   });
 };

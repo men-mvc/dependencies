@@ -1,16 +1,19 @@
 import sinon, { SinonStub } from 'sinon';
 import { faker } from '@faker-js/faker';
+import path from 'path';
 import { readReadableAsString, replaceRouteParams } from '@men-mvc/foundation';
 import { Buffer } from 'buffer';
 import { ReadStream } from 'fs';
 import { Readable } from 'stream';
 import { S3Storage } from '../../../src/s3/s3Storage';
 import {
-  getPublicStorageIdentifier,
+  getPrivateStorageDirname,
+  getPublicStorageDirname,
   MenS3PutObjectCommandOutput
 } from '../../../src';
+import { viewPublicS3ObjectRoute } from '../../../src/s3/viewPublicS3ObjectHandler';
 import * as foundation from '../../../src/foundation';
-import { viewPublicS3ObjectRoute } from '../../../lib/s3/viewPublicS3ObjectHandler';
+import * as utilities from '../../../src/utilities/utilities';
 
 const storage = new S3Storage();
 describe(`S3Storage`, () => {
@@ -23,7 +26,7 @@ describe(`S3Storage`, () => {
       const getAppBaseUrlStub = sinon
         .stub(foundation, `getAppBaseUrl`)
         .returns(appBaseUrl);
-      const key = `${getPublicStorageIdentifier()}/${faker.datatype.uuid()}[+].png`;
+      const key = `${getPublicStorageDirname()}/${faker.datatype.uuid()}[+].png`;
       expect(storage.getPublicUrl(key)).toBe(
         `${appBaseUrl}${replaceRouteParams(viewPublicS3ObjectRoute, {
           key: encodeURIComponent(key)
@@ -100,7 +103,11 @@ describe(`S3Storage`, () => {
       const data = faker.lorem.sentence();
       const key = faker.datatype.uuid();
       await storage.writeFile(key, data);
-      sinon.assert.calledOnceWithExactly(writeFileStub, key, data);
+      sinon.assert.calledOnceWithExactly(
+        writeFileStub,
+        path.join(getPrivateStorageDirname(), key),
+        data
+      );
     });
 
     it(`should return the created object locations`, async () => {
@@ -119,12 +126,29 @@ describe(`S3Storage`, () => {
         );
       const result = await storage.writeFile(key, data);
 
-      expect(result.storageFilepath).toBe(key);
-      expect(result.absoluteFilepath).toBe(key);
+      expect(result.pathInStorage).toBe(
+        path.join(getPrivateStorageDirname(), key)
+      );
+      expect(result.absoluteFilepath).toBe(
+        path.join(getPrivateStorageDirname(), key)
+      );
       expect(result.VersionId).toBe(writeOutput.VersionId);
       expect(result.ServerSideEncryption).toBe(
         writeOutput.ServerSideEncryption
       );
+    });
+
+    it(`should remove the leading path separator`, async () => {
+      const removeLeadingPathSepStub = sinon.stub(
+        utilities,
+        `removeLeadingPathSep`
+      );
+      writeFileStub = sinon.stub(storage.getS3Adapter(), `writeFile`);
+      const data = faker.lorem.sentence();
+      const key = faker.datatype.uuid();
+      await storage.writeFile(key, data);
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSepStub, key);
+      removeLeadingPathSepStub.restore();
     });
   });
 
@@ -138,35 +162,36 @@ describe(`S3Storage`, () => {
       writeFileStub.restore();
     });
 
-    it(`should invoke adapter's writeFile function with the right parameters appending ${getPublicStorageIdentifier()} to the key`, async () => {
+    it(`should invoke adapter's writeFile function with the right parameters appending ${getPublicStorageDirname()} to the key`, async () => {
       const data = faker.lorem.sentence();
       const key = faker.datatype.uuid();
       await storage.writeFilePublicly(key, data);
       sinon.assert.calledOnceWithExactly(
         writeFileStub,
-        `${getPublicStorageIdentifier()}/${key}`,
+        `${getPublicStorageDirname()}/${key}`,
         data
       );
     });
 
     it(`should remove leading slash in the key`, async () => {
-      const data = faker.lorem.sentence();
-      const key = faker.datatype.uuid();
-      await storage.writeFilePublicly(`/${key}`, data);
-      sinon.assert.calledOnceWithExactly(
-        writeFileStub,
-        `${getPublicStorageIdentifier()}/${key}`,
-        data
+      const removeLeadingPathSepStub = sinon.stub(
+        utilities,
+        `removeLeadingPathSep`
       );
+      const data = faker.lorem.sentence();
+      const key = `/${faker.datatype.uuid()}`;
+      await storage.writeFilePublicly(key, data);
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSepStub, key);
+      removeLeadingPathSepStub.restore();
     });
 
     it(`should return the created object locations`, async () => {
       const data = faker.lorem.sentence();
       const key = faker.datatype.uuid();
-      const expectedKey = `${getPublicStorageIdentifier()}/${key}`;
+      const expectedKey = `${getPublicStorageDirname()}/${key}`;
       const result = await storage.writeFilePublicly(key, data);
       expect(result.absoluteFilepath).toBe(expectedKey);
-      expect(result.storageFilepath).toBe(expectedKey);
+      expect(result.pathInStorage).toBe(expectedKey);
     });
   });
 

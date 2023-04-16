@@ -6,9 +6,9 @@ import {
   requestHandler
 } from '@men-mvc/foundation';
 import { existsAsync, getUploadFilesizeLimit } from '../utilities/utilities';
-import { FileSystem, fileSystem } from '..';
+import { FileSystem, fileSystem, getPrivateStorageDirectory } from '..';
 import {
-  getPrivateStorageDirectory,
+  getStorageDirectory,
   getPublicStorageDirectory,
   mkdirAsync
 } from '../utilities/utilities';
@@ -36,13 +36,19 @@ export const createStorageDirectoryIfNeeded = async (
   if (FileSystem.storageDirCreated) {
     return next();
   }
-  if (!(await existsAsync(getPrivateStorageDirectory()))) {
-    await mkdirAsync(getPrivateStorageDirectory(), {
+
+  if (!(await existsAsync(getStorageDirectory()))) {
+    await mkdirAsync(getStorageDirectory(), {
       recursive: true
     });
   }
   if (!(await existsAsync(getPublicStorageDirectory()))) {
     await mkdirAsync(getPublicStorageDirectory(), {
+      recursive: true
+    });
+  }
+  if (!(await existsAsync(getPrivateStorageDirectory()))) {
+    await mkdirAsync(getPrivateStorageDirectory(), {
       recursive: true
     });
   }

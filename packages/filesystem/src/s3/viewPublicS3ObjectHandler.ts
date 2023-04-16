@@ -1,9 +1,5 @@
 import { Request, Response } from 'express';
-import {
-  asyncRequestHandler,
-  FileNotPublicError,
-  FileSystemDriver
-} from '@men-mvc/foundation';
+import { FileNotPublicError, FileSystemDriver } from '@men-mvc/foundation';
 import {
   getDriver,
   getMimeType,
