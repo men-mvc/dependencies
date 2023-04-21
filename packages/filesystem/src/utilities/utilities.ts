@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
-import { baseConfig, FileSystemDriver, getEnvVariable } from '@men-mvc/config';
+import {
+  BaseConfig,
+  baseConfig,
+  FileSystemDriver,
+  getEnvVariable
+} from '@men-mvc/config';
 import mimeTypes from 'mime-types';
 import {
   generateUuid as _generateUuid,
@@ -9,6 +14,13 @@ import path from 'path';
 import util from 'util';
 import fs from 'fs';
 import { getAppRootDirectory } from '../foundation';
+
+export const getBaseConfig = (): BaseConfig => baseConfig;
+
+export const getCloudFrontDomain = () =>
+  getBaseConfig().fileSystem?.s3?.cloudfront?.domainName ?? ``;
+
+export const isUsingCloudFront = () => !!getCloudFrontDomain();
 
 export const getDefaultAppStorageDirectory = (): string =>
   path.join(getAppRootDirectory(), `storage`);
@@ -129,6 +141,9 @@ export const removePublicStorageIdentifierFrom = (
 
   return finalPath;
 };
+
+export const getLocalUrlSignerSecret = () =>
+  getBaseConfig().fileSystem?.local?.urlSignerSecret ?? ``;
 
 export const existsAsync = util.promisify(fs.exists);
 export const readdirAsync = util.promisify(fs.readdir);

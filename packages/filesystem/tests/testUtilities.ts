@@ -1,5 +1,10 @@
 import fs from 'fs';
-import { getPrivateStorageDirectory, getStorageDirectory } from '../src';
+import {
+  BaseConfig,
+  DeepPartial,
+  frameworkTestConfig
+} from '@men-mvc/foundation';
+import { getStorageDirectory } from '../src';
 
 export const delay = (milliseconds: number = 500): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -17,4 +22,13 @@ export const deleteStorageDirectory = () => {
   fs.rmdirSync(getStorageDirectory(), {
     recursive: true
   });
+};
+
+export const generateBaseConfig = (
+  data: DeepPartial<BaseConfig> = {}
+): BaseConfig => {
+  return {
+    ...frameworkTestConfig,
+    ...data
+  } as BaseConfig;
 };

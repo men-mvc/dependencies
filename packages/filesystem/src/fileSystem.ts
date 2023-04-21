@@ -27,6 +27,7 @@ export class FileSystem implements BaseFileSystem {
   private storageInstance: Storage | undefined;
   private uploaderInstance: BaseFileUploader | undefined;
 
+  // TODO: unit test if this return the right instance
   public getStorageInstance = (): Storage => {
     if (!this.storageInstance) {
       if (getFileSystemDriver() === FileSystemDriver.s3) {

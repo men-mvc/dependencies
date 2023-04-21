@@ -1,4 +1,4 @@
-import { setEnvVariable, unsetEnvVariable } from '@men-mvc/config';
+import { S3Config, setEnvVariable, unsetEnvVariable } from '@men-mvc/config';
 import sinon, { createSandbox, SinonSandbox } from 'sinon';
 import path from 'path';
 import { faker } from '@faker-js/faker';
@@ -18,6 +18,7 @@ import {
 } from '../../../src';
 import * as foundation from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
+import { generateBaseConfig } from '../../testUtilities';
 
 describe(`Filesystem - Utilities`, () => {
   let sandbox: SinonSandbox;
@@ -31,6 +32,75 @@ describe(`Filesystem - Utilities`, () => {
     unsetEnvVariable('FILESYSTEM_STORAGE_DIRECTORY');
     clearStorageDirectoryCache();
     sandbox.restore();
+  });
+
+  describe(`getLocalUrlSignerSecret`, () => {
+    it(`should return value defined in the config`, () => {
+      const testSecret = faker.datatype.uuid();
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            local: {
+              urlSignerSecret: testSecret,
+              signedUrlDurationInSeconds: 200
+            }
+          }
+        })
+      );
+      expect(utilities.getLocalUrlSignerSecret()).toBe(testSecret);
+    });
+  });
+
+  describe(`getCloudFrontDomain`, () => {
+    it(`should return cloudfront domain set in the config`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              cloudfront: {
+                domainName: `https://cloudfront.example.com`
+              }
+            } as S3Config
+          }
+        })
+      );
+
+      expect(utilities.getCloudFrontDomain()).toBe(
+        `https://cloudfront.example.com`
+      );
+    });
+  });
+
+  describe(`isUsingCloudFront`, () => {
+    it(`should return true when cloudfront domain name is set`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              cloudfront: {
+                domainName: `http://cloudfront.example.com`
+              }
+            } as S3Config
+          }
+        })
+      );
+
+      expect(utilities.isUsingCloudFront()).toBeTruthy();
+    });
+
+    it(`should return false when cloudfront domain name is not set`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              cloudfront: {}
+            } as S3Config
+          }
+        })
+      );
+
+      expect(utilities.isUsingCloudFront()).toBeFalsy();
+    });
   });
 
   describe(`removeLeadingPathSeparator`, () => {

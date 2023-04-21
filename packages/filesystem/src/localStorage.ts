@@ -1,6 +1,12 @@
 import fs, { WriteFileOptions } from 'fs';
 import path from 'path';
-import { Storage, ReadStreamOptions, WriteFileResult } from './types';
+import signer from 'signed-url';
+import {
+  Storage,
+  ReadStreamOptions,
+  WriteFileResult,
+  LocalUrlSignerClient
+} from './types';
 import {
   getPathInStorage,
   copyFileAsync,
@@ -9,21 +15,39 @@ import {
   mkdirAsync,
   readdirAsync,
   readFileAsync,
-  removePublicStorageIdentifierFrom,
   renameAsync,
   rmdirAsync,
   unlinkAsync,
   writeFileAsync,
-  removeLeadingPathSep
+  removeLeadingPathSep,
+  getLocalUrlSignerSecret,
+  getBaseConfig
 } from './utilities/utilities';
-import { getAppBaseUrl } from './foundation';
+import { getAppBaseUrl, replaceRouteParams } from './foundation';
+import { viewLocalSignedUrlRoute } from './localFileSignedUrlHandler';
 
 /**
  * TODO: improvement
  * - readDir recursive
  */
 export class LocalStorage implements Storage {
-  public static instance: LocalStorage;
+  private static instance: LocalStorage;
+  private signerClient: LocalUrlSignerClient | undefined;
+
+  public getSignerClient = (): LocalUrlSignerClient => {
+    if (!this.signerClient) {
+      this.signerClient = signer({
+        secret: getLocalUrlSignerSecret(),
+        key: `hash` // the query string key to use (defaults to 'hash')
+      }) as LocalUrlSignerClient;
+    }
+
+    return this.signerClient;
+  };
+
+  public clearSignerClient = () => {
+    this.signerClient = undefined;
+  };
 
   public static getInstance = (): LocalStorage => {
     if (!LocalStorage.instance) {
@@ -34,8 +58,38 @@ export class LocalStorage implements Storage {
   };
 
   public getPublicUrl = (filepath: string): string => {
-    return `${getAppBaseUrl()}/${removePublicStorageIdentifierFrom(filepath)}`;
+    return `${getAppBaseUrl()}/${filepath}`;
   };
+
+  public verifySignedUrl = (signedUrl: string): boolean =>
+    this.getSignerClient().verify(signedUrl, {
+      method: `GET`
+    });
+
+  public buildUrlToBeSigned = (filepath: string): string =>
+    `${getAppBaseUrl()}${replaceRouteParams(viewLocalSignedUrlRoute, {
+      filepath: encodeURIComponent(filepath)
+    })}`;
+
+  private getSignedUrlDuration = (durationInSeconds?: number): number => {
+    if (durationInSeconds) {
+      return durationInSeconds;
+    }
+
+    const configDuration =
+      getBaseConfig().fileSystem?.local?.signedUrlDurationInSeconds;
+
+    return configDuration ? configDuration : 3600;
+  };
+
+  public getSignedUrl = (
+    filepath: string,
+    durationInSeconds?: number
+  ): string =>
+    this.getSignerClient().sign(this.buildUrlToBeSigned(filepath), {
+      ttl: this.getSignedUrlDuration(durationInSeconds),
+      method: `GET`
+    });
 
   public getAbsolutePath = (dirOrFilePath: string): string => {
     return path.join(getStorageDirectory(), dirOrFilePath);

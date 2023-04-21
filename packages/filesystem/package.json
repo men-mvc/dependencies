@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "@men-mvc/foundation": "^0.94.0",
-    "mime-types": "^2.1.35"
+    "mime-types": "^2.1.35",
+    "signed-url": "^1.0.3"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
