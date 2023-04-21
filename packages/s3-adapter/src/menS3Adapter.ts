@@ -11,12 +11,18 @@ import {
   DeleteObjectsCommandInput,
   DeleteObjectsCommand
 } from '@aws-sdk/client-s3';
-import { getAwsS3Bucket, getAwsS3Credentials } from './utilities';
-import { MenS3PutObjectCommandOutput } from './types';
+import {
+  getAwsS3Bucket,
+  getAwsS3Credentials,
+  getCloudFrontConfig,
+  getSignedUrlExpireTime
+} from './utilities';
+import { AwsCloudfrontSign, MenS3PutObjectCommandOutput } from './types';
 
 // referene link -> https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/javascript_s3_code_examples.html?fbclid=IwAR0gIsyNLqKN0wJd1-C4RG0izXxFy0u8fjU3FyE9exJ_Swfji6eEIWgzegg
 export class MenS3Adapter {
   private s3Client: S3Client | undefined;
+  private signClient: AwsCloudfrontSign | undefined;
 
   public getS3Client = (): S3Client => {
     if (this.s3Client) {
@@ -34,6 +40,30 @@ export class MenS3Adapter {
     });
 
     return this.s3Client;
+  };
+
+  public getCloudFrontSignClient = (): AwsCloudfrontSign => {
+    try {
+      if (this.signClient) {
+        return this.signClient;
+      }
+
+      this.signClient = require(`aws-cloudfront-sign`) as AwsCloudfrontSign;
+
+      return this.signClient;
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  public getSignedUrl = (key: string, durationInSeconds?: number): string => {
+    const config = getCloudFrontConfig();
+
+    return this.getCloudFrontSignClient().getSignedUrl(config.domainName, {
+      keypairId: config.publicKeyId,
+      privateKeyString: config.privateKeyString,
+      expireTime: getSignedUrlExpireTime(durationInSeconds)
+    });
   };
 
   public createReadStream = async (key: string): Promise<ReadStream> => {

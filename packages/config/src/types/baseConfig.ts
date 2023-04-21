@@ -30,6 +30,10 @@ export interface BaseConfig {
     storageDriver: FileSystemDriver;
     maxUploadLimit: number; // in bytes
     s3?: S3Config;
+    local?: {
+      urlSignerSecret: string;
+      signedUrlDurationInSeconds?: number;
+    }
   };
   logging?: {
     disabled?: boolean;

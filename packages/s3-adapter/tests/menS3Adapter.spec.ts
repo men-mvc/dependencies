@@ -18,9 +18,14 @@ import {
   PutObjectCommand,
   PutObjectCommandOutput
 } from '@aws-sdk/client-s3';
-import { ReadableString, readReadableAsString } from '@men-mvc/foundation';
+import {
+  ReadableString,
+  readReadableAsString,
+  S3Config
+} from '@men-mvc/foundation';
 import { MenS3Adapter } from '../src';
 import * as utilities from '../src/utilities';
+import { generateBaseConfig } from './testUtilities';
 
 const adapter = new MenS3Adapter();
 const fakeBucketName = `fake-bucket`;
@@ -44,9 +49,91 @@ describe(`MenS3Adapter Utility`, () => {
 
   describe(`getS3Client`, () => {
     it(`should always return the same instance`, () => {
-      const instance1 = adapter.getS3Client();
-      const instance2 = adapter.getS3Client();
-      expect(instance1).toBe(instance2);
+      expect(adapter.getS3Client()).toBe(adapter.getS3Client());
+    });
+  });
+
+  describe(`getCloudFrontSignClient`, () => {
+    it(`should always return the same instance`, () => {
+      expect(adapter.getCloudFrontSignClient()).toBe(
+        adapter.getCloudFrontSignClient()
+      );
+    });
+  });
+
+  describe(`getSignedUrl`, () => {
+    const fakeSignedUrl = `${faker.internet.url()}?hash=${faker.datatype.uuid()}`;
+    const fakeCloudfrontDomain = `https://cloudfront.example.com`;
+    const fakePublicKeyId = faker.datatype.uuid();
+    const fakePrivateKeyString = `${faker.datatype.uuid()}-${faker.datatype.uuid()}`;
+    const now = new Date();
+    let clientGetSignedUrlStub: SinonStub;
+    let getBaseConfigStub: SinonStub;
+    let getNowStub: SinonStub;
+
+    beforeAll(() => {
+      getBaseConfigStub = sinon.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              cloudfront: {
+                domainName: fakeCloudfrontDomain,
+                publicKeyId: fakePublicKeyId,
+                privateKeyString: fakePrivateKeyString
+              }
+            } as S3Config
+          }
+        })
+      );
+      getNowStub = sinon.stub(utilities, `getNow`).returns(now);
+    });
+
+    afterAll(() => {
+      getBaseConfigStub.restore();
+      getNowStub.restore();
+    });
+
+    beforeEach(() => {
+      clientGetSignedUrlStub = sinon
+        .stub(adapter.getCloudFrontSignClient(), `getSignedUrl`)
+        .returns(fakeSignedUrl);
+    });
+
+    afterEach(() => {
+      if (clientGetSignedUrlStub) {
+        clientGetSignedUrlStub.restore();
+      }
+    });
+
+    it(`should invoke getSignedUrl with the right parameters`, () => {
+      const key = faker.datatype.uuid();
+      adapter.getSignedUrl(key, 120);
+      sinon.assert.calledOnceWithExactly(
+        clientGetSignedUrlStub,
+        fakeCloudfrontDomain,
+        {
+          keypairId: fakePublicKeyId,
+          privateKeyString: fakePrivateKeyString,
+          expireTime: now.getTime() + 120000
+        }
+      );
+    });
+
+    it(`should invoke getSignedUrlExpireTime to get expire time`, () => {
+      const getSignedUrlExpireTimeSpy = sinon.spy(
+        utilities,
+        `getSignedUrlExpireTime`
+      );
+      const key = faker.datatype.uuid();
+      adapter.getSignedUrl(key, 5000);
+      sinon.assert.calledOnceWithExactly(getSignedUrlExpireTimeSpy, 5000);
+      getSignedUrlExpireTimeSpy.restore();
+    });
+
+    it(`should return signed url`, () => {
+      expect(adapter.getSignedUrl(faker.datatype.uuid(), 5000)).toBe(
+        fakeSignedUrl
+      );
     });
   });
 

@@ -10,3 +10,14 @@ export type MenS3PutObjectCommandOutput = {
   ServerSideEncryption: string;
   VersionId: string;
 };
+
+export type AwsCloudfrontSign = {
+  getSignedUrl: (
+    domain: string,
+    config: {
+      keypairId: string;
+      privateKeyString: string;
+      expireTime: number;
+    }
+  ) => string;
+};
