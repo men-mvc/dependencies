@@ -16,7 +16,10 @@ import {
   viewPublicS3ObjectRequestHandler,
   viewPublicS3ObjectRoute
 } from '../s3/viewPublicS3ObjectHandler';
-import {localFileSignedUrlHandler, viewLocalSignedUrlRoute} from "../localFileSignedUrlHandler";
+import {
+  localFileSignedUrlHandler,
+  viewLocalSignedUrlRoute
+} from '../localFileSignedUrlHandler';
 
 export const clearTempFiles = async (
   req: Request,
@@ -71,23 +74,23 @@ export const registerS3Routes = (
   return next();
 };
 
-// TODO: unit test
 export const registerLocalSignedUrlRoutes = (
-    req: Request,
-    res: Response,
-    next: NextFunction
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
   BaseApplication.getInstance().app.get(
-      viewLocalSignedUrlRoute,
-      asyncRequestHandler(localFileSignedUrlHandler)
+    viewLocalSignedUrlRoute,
+    asyncRequestHandler(localFileSignedUrlHandler)
   );
   return next();
-}
+};
 
 export const registerFilesystem = (app: Express) => {
   app.use(asyncRequestHandler(clearTempFiles));
   app.use(asyncRequestHandler(createStorageDirectoryIfNeeded));
   app.use(requestHandler(registerS3Routes));
+  app.use(requestHandler(registerLocalSignedUrlRoutes));
   app.use;
   app.use(
     fileUpload({

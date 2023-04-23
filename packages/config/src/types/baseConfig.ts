@@ -33,7 +33,7 @@ export interface BaseConfig {
     local?: {
       urlSignerSecret: string;
       signedUrlDurationInSeconds?: number;
-    }
+    };
   };
   logging?: {
     disabled?: boolean;
