@@ -26,12 +26,24 @@ import {
 import { MenS3Adapter } from '../src';
 import * as utilities from '../src/utilities';
 import { generateBaseConfig } from './testUtilities';
+import { AwsCloudfrontSign } from '../lib';
 
 const adapter = new MenS3Adapter();
 const fakeBucketName = `fake-bucket`;
+const mockCloudFrontSignClient: AwsCloudfrontSign = {
+  getSignedUrl: (
+    domain: string,
+    config: {
+      keypairId: string;
+      privateKeyString: string;
+      expireTime: number;
+    }
+  ) => faker.internet.url()
+};
 describe(`MenS3Adapter Utility`, () => {
   let getAwsBucketNameStub: SinonStub;
   let sendStub: SinonStub;
+  let getCloudFrontSignClientStub: SinonStub;
 
   beforeAll(() => {
     getAwsBucketNameStub = mockGetAwsS3Bucket();
@@ -41,7 +53,14 @@ describe(`MenS3Adapter Utility`, () => {
     getAwsBucketNameStub.restore();
   });
 
+  beforeEach(() => {
+    getCloudFrontSignClientStub = sinon
+      .stub(adapter, `getCloudFrontSignClient`)
+      .returns(mockCloudFrontSignClient);
+  });
+
   afterEach(() => {
+    getCloudFrontSignClientStub.restore();
     if (sendStub) {
       sendStub.restore();
     }
