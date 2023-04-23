@@ -26,7 +26,7 @@ import {
 import { MenS3Adapter } from '../src';
 import * as utilities from '../src/utilities';
 import { generateBaseConfig } from './testUtilities';
-import { AwsCloudfrontSign } from '../lib';
+import { AwsCloudfrontSign } from '../src';
 
 const adapter = new MenS3Adapter();
 const fakeBucketName = `fake-bucket`;
