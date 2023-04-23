@@ -90,9 +90,8 @@ export const getUploadFilesizeLimit = (): number =>
 
 export const generateUuid = _generateUuid;
 
-// TODO: unit test.
 export const getDriver = (): FileSystemDriver =>
-  baseConfig.fileSystem?.storageDriver ?? FileSystemDriver.local;
+  getBaseConfig().fileSystem?.storageDriver ?? FileSystemDriver.local;
 
 export const invokeAppRequestErrorHandler = (
   error: Error,

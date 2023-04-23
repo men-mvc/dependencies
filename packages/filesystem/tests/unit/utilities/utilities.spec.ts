@@ -1,4 +1,9 @@
-import { S3Config, setEnvVariable, unsetEnvVariable } from '@men-mvc/config';
+import {
+  FileSystemDriver,
+  S3Config,
+  setEnvVariable,
+  unsetEnvVariable
+} from '@men-mvc/config';
 import sinon, { createSandbox, SinonSandbox } from 'sinon';
 import path from 'path';
 import { faker } from '@faker-js/faker';
@@ -32,6 +37,30 @@ describe(`Filesystem - Utilities`, () => {
     unsetEnvVariable('FILESYSTEM_STORAGE_DIRECTORY');
     clearStorageDirectoryCache();
     sandbox.restore();
+  });
+
+  describe(`getDriver`, () => {
+    it(`should return the driver defined in the config`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            storageDriver: FileSystemDriver.s3
+          }
+        })
+      );
+
+      expect(utilities.getDriver()).toBe(FileSystemDriver.s3);
+    });
+
+    it(`should return local driver by default when there is no driver defined in the config`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: undefined
+        })
+      );
+
+      expect(utilities.getDriver()).toBe(FileSystemDriver.local);
+    });
   });
 
   describe(`getLocalUrlSignerSecret`, () => {
