@@ -7,7 +7,6 @@ import { FileSystem } from '.';
 
 export const viewLocalSignedUrlRoute = `/private-file/view/:filepath`;
 
-// TODO: register in the middleware and test it too.
 export const localFileSignedUrlHandler = async (
   req: Request,
   res: Response
