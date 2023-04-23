@@ -50,6 +50,7 @@ describe(`LocalStorage Utility`, () => {
   });
   afterEach(() => {
     sandbox.restore();
+    localStorage.clearInstance();
     localStorage.clearSignerClient();
     deleteDirectoryIfExists(testStorageDir);
   });

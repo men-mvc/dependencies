@@ -12,11 +12,7 @@ import {
   WriteFileResult
 } from './types';
 import { FileUploader } from './fileUploader';
-import {
-  getFileSystemDriver,
-  getPublicStorageDirname,
-  isPublicFilepath
-} from './utilities/utilities';
+import { getFileSystemDriver } from './utilities/utilities';
 import { LocalStorage } from './localStorage';
 import { S3Storage } from './s3/s3Storage';
 
@@ -80,6 +76,15 @@ export class FileSystem implements BaseFileSystem {
 
   public getAbsoluteTempUploadDirPath = (): string =>
     this.getUploaderInstance().getAbsoluteTempUploadDirPath();
+
+  public getPublicUrl = (pathOrKey: string): string =>
+    this.getStorageInstance().getPublicUrl(pathOrKey);
+
+  public getSignedUrl = (
+    pathOrKey: string,
+    durationInSeconds?: number
+  ): string =>
+    this.getStorageInstance().getSignedUrl(pathOrKey, durationInSeconds);
 
   public getAbsolutePath = (path: string) =>
     this.getStorageInstance().getAbsolutePath(path);

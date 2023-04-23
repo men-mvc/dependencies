@@ -3,6 +3,10 @@ import { DeepPartial, ErrorCodes, UploadedFile } from '@men-mvc/foundation';
 import { WriteFileOptions, ReadStream } from 'fs';
 
 export interface Storage {
+  getPublicUrl: (filePathOrKey: string) => string;
+
+  getSignedUrl: (filePathOrKey: string, durationInSeconds?: number) => string;
+
   readDir: (dir: string) => Promise<string[]>;
 
   getAbsolutePath: (path: string) => string;

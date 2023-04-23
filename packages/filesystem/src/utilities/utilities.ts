@@ -93,6 +93,7 @@ export const getFileSystemDriver = (): FileSystemDriver =>
 
 export const generateUuid = _generateUuid;
 
+// TODO: unit test.
 export const getDriver = (): FileSystemDriver =>
   baseConfig.fileSystem?.storageDriver ?? FileSystemDriver.local;
 

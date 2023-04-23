@@ -31,7 +31,7 @@ import { viewLocalSignedUrlRoute } from './localFileSignedUrlHandler';
  * - readDir recursive
  */
 export class LocalStorage implements Storage {
-  private static instance: LocalStorage;
+  private instance: LocalStorage | undefined;
   private signerClient: LocalUrlSignerClient | undefined;
 
   public getSignerClient = (): LocalUrlSignerClient => {
@@ -49,12 +49,16 @@ export class LocalStorage implements Storage {
     this.signerClient = undefined;
   };
 
-  public static getInstance = (): LocalStorage => {
-    if (!LocalStorage.instance) {
-      LocalStorage.instance = new LocalStorage();
+  public getInstance = (): LocalStorage => {
+    if (!this.instance) {
+      this.instance = new LocalStorage();
     }
 
-    return LocalStorage.instance;
+    return this.instance;
+  };
+
+  public clearInstance = () => {
+    this.instance = undefined;
   };
 
   public getPublicUrl = (filepath: string): string => {
