@@ -5,6 +5,7 @@ export const fileSystem = FileSystem.getInstance();
 export * from './types';
 export * from './fileSystem';
 export * from './localStorage';
+export * from './s3/s3Storage';
 export * from './fileUploader';
 export * from './utilities/utilities';
 export * from './utilities/validation';

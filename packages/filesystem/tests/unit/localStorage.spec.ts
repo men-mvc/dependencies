@@ -1,8 +1,10 @@
-import sinon, { SinonStub } from 'sinon';
+import sinon, { createSandbox, SinonSandbox, SinonStub } from 'sinon';
 import { faker } from '@faker-js/faker';
+import { FileSystemDriver } from '@men-mvc/config';
 import {
   getServerDirectory,
   readStreamAsBuffer,
+  replaceRouteParams,
   setServerDirectory
 } from '@men-mvc/foundation';
 import fs from 'fs';
@@ -14,14 +16,14 @@ import {
   getStorageDirectory,
   LocalStorage,
   ReadStreamOptions,
-  getPathInStorage
-} from '../../src';
-import * as utilities from '../../src/utilities/utilities';
-import * as foundation from '../../src/foundation';
-import {
+  getPathInStorage,
   getPrivateStorageDirectory,
   getPublicStorageDirectory
-} from '../../lib';
+} from '../../src';
+import { delay, generateBaseConfig } from '../testUtilities';
+import { viewLocalSignedUrlRoute } from '../../src/localFileSignedUrlHandler';
+import * as utilities from '../../src/utilities/utilities';
+import * as foundation from '../../src/foundation';
 
 const localStorage = new LocalStorage();
 const fakeFileContent: string = faker.lorem.paragraph();
@@ -29,6 +31,7 @@ const serverDirectoryBeforeTests = getServerDirectory();
 const testServerDir = process.cwd();
 const testStorageDir = path.join(testServerDir, `storage`);
 describe(`LocalStorage Utility`, () => {
+  let sandbox: SinonSandbox;
   beforeAll(() => {
     setServerDirectory(testServerDir);
   });
@@ -36,6 +39,7 @@ describe(`LocalStorage Utility`, () => {
     setServerDirectory(serverDirectoryBeforeTests);
   });
   beforeEach(() => {
+    sandbox = createSandbox();
     createDirectoryIfNotExist(testStorageDir);
     createDirectoryIfNotExist(
       path.join(testStorageDir, getPublicStorageDirname())
@@ -45,25 +49,184 @@ describe(`LocalStorage Utility`, () => {
     );
   });
   afterEach(() => {
+    sandbox.restore();
+    localStorage.clearInstance();
+    localStorage.clearSignerClient();
     deleteDirectoryIfExists(testStorageDir);
   });
 
+  describe(`getSignerClient`, () => {
+    it(`should always return the same instance`, () => {
+      expect(localStorage.getSignerClient()).toBe(
+        localStorage.getSignerClient()
+      );
+    });
+  });
+
+  describe(`buildUrlToBeSigned`, () => {
+    it(`should return app base url + route to view local signed url providing param placeholder with value`, () => {
+      const appBaseUrl = faker.internet.url();
+      const filepath = faker.system.filePath();
+      sandbox.stub(foundation, `getAppBaseUrl`).returns(appBaseUrl);
+      expect(localStorage.buildUrlToBeSigned(filepath)).toBe(
+        `${appBaseUrl}/private-file/view/${encodeURIComponent(filepath)}`
+      );
+    });
+  });
+
+  describe(`getSignedUrl`, () => {
+    const appBaseUrl = faker.internet.url();
+
+    beforeEach(() => {
+      sandbox.stub(foundation, `getAppBaseUrl`).returns(appBaseUrl);
+    });
+
+    it(`should return signed url`, () => {
+      const localSignerConfig = {
+        signedUrlDurationInSeconds: 120,
+        urlSignerSecret: `test-signer-secret`
+      };
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            storageDriver: FileSystemDriver.local,
+            local: localSignerConfig
+          }
+        })
+      );
+      const filepath = faker.system.filePath();
+
+      const result = localStorage.getSignedUrl(filepath, 150);
+
+      expect(
+        result.includes(
+          `${appBaseUrl}${replaceRouteParams(viewLocalSignedUrlRoute, {
+            filepath: encodeURIComponent(filepath)
+          })}`
+        )
+      ).toBeTruthy();
+      expect(result.includes(`?hash=`)).toBeTruthy();
+    });
+
+    it(`should use duration passed as the parameter`, () => {
+      const signSpy = sandbox.spy(localStorage.getSignerClient(), `sign`);
+      const localSignerConfig = {
+        signedUrlDurationInSeconds: 120,
+        urlSignerSecret: `test-signer-secret`
+      };
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            storageDriver: FileSystemDriver.local,
+            local: localSignerConfig
+          }
+        })
+      );
+      const filepath = faker.system.filePath();
+
+      localStorage.getSignedUrl(filepath, 150);
+
+      sinon.assert.calledOnceWithExactly(
+        signSpy,
+        localStorage.buildUrlToBeSigned(filepath),
+        {
+          method: `GET`,
+          ttl: 150
+        }
+      );
+    });
+
+    it(`should use duration from the config`, () => {
+      const signSpy = sandbox.spy(localStorage.getSignerClient(), `sign`);
+      const localSignerConfig = {
+        signedUrlDurationInSeconds: 130,
+        urlSignerSecret: `test-signer-secret`
+      };
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            storageDriver: FileSystemDriver.local,
+            local: localSignerConfig
+          }
+        })
+      );
+      const filepath = faker.system.filePath();
+
+      localStorage.getSignedUrl(filepath);
+
+      sinon.assert.calledOnceWithExactly(
+        signSpy,
+        localStorage.buildUrlToBeSigned(filepath),
+        {
+          method: `GET`,
+          ttl: 130
+        }
+      );
+    });
+
+    it(`should use the default duration`, () => {
+      const signSpy = sandbox.spy(localStorage.getSignerClient(), `sign`);
+      const localSignerConfig = {
+        signedUrlDurationInSeconds: undefined,
+        urlSignerSecret: `test-signer-secret`
+      };
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            storageDriver: FileSystemDriver.local,
+            local: localSignerConfig
+          }
+        })
+      );
+      const filepath = faker.system.filePath();
+
+      localStorage.getSignedUrl(filepath);
+      sinon.assert.calledOnceWithExactly(
+        signSpy,
+        localStorage.buildUrlToBeSigned(filepath),
+        {
+          method: `GET`,
+          ttl: 3600
+        }
+      );
+    });
+  });
+
+  describe(`verifySignedUrl`, () => {
+    const appBaseUrl = faker.internet.url();
+
+    beforeEach(() => {
+      sandbox.stub(foundation, `getAppBaseUrl`).returns(appBaseUrl);
+    });
+
+    it(`should return true when the signed url is valid`, () => {
+      const signedUrl = localStorage.getSignedUrl(faker.datatype.uuid(), 5);
+      expect(localStorage.verifySignedUrl(signedUrl)).toBeTruthy();
+    });
+
+    it(`should return false when the signed url is not a valid signed url`, () => {
+      const url = faker.internet.url();
+      expect(localStorage.verifySignedUrl(url)).toBeFalsy();
+    });
+
+    it(`should return false when the signed url is already expired`, async () => {
+      const signedUrl = localStorage.getSignedUrl(faker.datatype.uuid(), 1);
+      await delay(2000);
+      expect(localStorage.verifySignedUrl(signedUrl)).toBeFalsy();
+    });
+  });
+
   describe(`getPublicUrl`, () => {
-    it(`should return app base url + filename without ${getPublicStorageDirname()}`, () => {
+    it(`should return app base url + filepath`, () => {
       const baseUrl = `http://localhost`;
-      const filenameWithoutPublicIdentifier = `${faker.datatype.uuid()}.png`;
       const filename = path.join(
         getPublicStorageDirname(),
-        filenameWithoutPublicIdentifier
+        `${faker.datatype.uuid()}.png`
       );
-      const getAppBaseUrlStub = sinon
-        .stub(foundation, `getAppBaseUrl`)
-        .returns(baseUrl);
+      sandbox.stub(foundation, `getAppBaseUrl`).returns(baseUrl);
       expect(localStorage.getPublicUrl(filename)).toBe(
-        `${baseUrl}/${filenameWithoutPublicIdentifier}`
+        `${baseUrl}/${filename}`
       );
-
-      getAppBaseUrlStub.restore();
     });
   });
 
@@ -153,7 +316,7 @@ describe(`LocalStorage Utility`, () => {
     });
 
     it(`should pass the right ReadStreamOptions`, async () => {
-      const createReadStreamStub = sinon.stub(fs, `createReadStream`);
+      const createReadStreamStub = sandbox.stub(fs, `createReadStream`);
       const fakeCreateReadStreamFunc = jest
         .fn()
         .mockImplementation((filepath, options) => {
@@ -185,7 +348,6 @@ describe(`LocalStorage Utility`, () => {
       expect(funCall[0]).toBe(absoluteFilepath);
       expect(funCall[1].encoding).toBe(options.encoding);
       expect(funCall[1].highWaterMark).toBe(options.highWaterMark);
-      createReadStreamStub.restore();
     });
   });
 
@@ -222,7 +384,7 @@ describe(`LocalStorage Utility`, () => {
     });
 
     it(`should write files with the right options`, async () => {
-      const writeFileAsyncStub = sinon.stub(utilities, 'writeFileAsync');
+      const writeFileAsyncStub = sandbox.stub(utilities, 'writeFileAsync');
       const filename = `testing.txt`;
       const content = faker.lorem.words(4);
       const options = 'base64';
@@ -233,7 +395,6 @@ describe(`LocalStorage Utility`, () => {
         content,
         options
       );
-      writeFileAsyncStub.restore();
     });
 
     it(`should return expected result`, async () => {
@@ -289,7 +450,7 @@ describe(`LocalStorage Utility`, () => {
     });
 
     it(`should invoke writeFileAsync with the right options`, async () => {
-      const writeFileAsyncStub = sinon.stub(utilities, 'writeFileAsync');
+      const writeFileAsyncStub = sandbox.stub(utilities, 'writeFileAsync');
       const filename = `testing.txt`;
       const content = faker.lorem.words(4);
       const options = 'base64';
@@ -300,7 +461,6 @@ describe(`LocalStorage Utility`, () => {
         content,
         options
       );
-      writeFileAsyncStub.restore();
     });
   });
 
@@ -414,13 +574,12 @@ describe(`LocalStorage Utility`, () => {
     });
 
     it('should not invoke copyFileAsync when source and destination filenames are the same', async () => {
-      const copyFileAsyncSpy = sinon.spy(utilities, 'copyFileAsync');
+      const copyFileAsyncSpy = sandbox.spy(utilities, 'copyFileAsync');
       const from = 'from.txt';
       createFileInTestStorage(from);
       await localStorage.copy(from, from);
 
       sinon.assert.notCalled(copyFileAsyncSpy);
-      copyFileAsyncSpy.restore();
     });
   });
 
@@ -438,11 +597,13 @@ describe(`LocalStorage Utility`, () => {
     });
 
     it(`should remove leading path sep`, async () => {
-      const removeLeadingPathSpy = sinon.spy(utilities, `removeLeadingPathSep`);
+      const removeLeadingPathSpy = sandbox.spy(
+        utilities,
+        `removeLeadingPathSep`
+      );
       const dirname = faker.datatype.uuid();
       await localStorage.mkdir(dirname);
       sinon.assert.calledOnceWithExactly(removeLeadingPathSpy, dirname);
-      removeLeadingPathSpy.restore();
     });
 
     it(`should return the path without leading path sep`, async () => {
@@ -463,14 +624,13 @@ describe(`LocalStorage Utility`, () => {
     });
 
     it(`should remove leading file sep`, async () => {
-      const removeLeadingPathSepSpy = sinon.spy(
+      const removeLeadingPathSepSpy = sandbox.spy(
         utilities,
         `removeLeadingPathSep`
       );
       const dir = path.join(faker.datatype.uuid(), faker.datatype.uuid());
       await localStorage.mkdirPublic(dir);
       sinon.assert.calledOnceWithExactly(removeLeadingPathSepSpy, dir);
-      removeLeadingPathSepSpy.restore();
     });
 
     it(`should return path in storage`, async () => {
@@ -490,14 +650,13 @@ describe(`LocalStorage Utility`, () => {
     });
 
     it(`should remove leading file sep`, async () => {
-      const removeLeadingPathSepSpy = sinon.spy(
+      const removeLeadingPathSepSpy = sandbox.spy(
         utilities,
         `removeLeadingPathSep`
       );
       const dir = path.join(faker.datatype.uuid(), faker.datatype.uuid());
       await localStorage.mkdirPrivate(dir);
       sinon.assert.calledOnceWithExactly(removeLeadingPathSepSpy, dir);
-      removeLeadingPathSepSpy.restore();
     });
 
     it(`should return path in storage`, async () => {

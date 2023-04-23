@@ -3,6 +3,10 @@ import { DeepPartial, ErrorCodes, UploadedFile } from '@men-mvc/foundation';
 import { WriteFileOptions, ReadStream } from 'fs';
 
 export interface Storage {
+  getPublicUrl: (filePathOrKey: string) => string;
+
+  getSignedUrl: (filePathOrKey: string, durationInSeconds?: number) => string;
+
   readDir: (dir: string) => Promise<string[]>;
 
   getAbsolutePath: (path: string) => string;
@@ -118,6 +122,7 @@ export type MenS3PutObjectCommandOutput = {
 };
 
 export declare class MenS3Adapter {
+  public getSignedUrl: (key: string, expireTime?: number) => string;
   public createReadStream: (key: string) => Promise<ReadStream>;
   public copy: (fromKey: string, toKey: string) => Promise<void>;
   public rename: (fromKey: string, toKey: string) => Promise<void>;
@@ -135,6 +140,23 @@ export declare class MenS3Adapter {
   public isFile: (key: string) => Promise<boolean>;
   public isDir: (pathOrKey: string) => Promise<boolean>;
 }
+
+export type LocalUrlSignerClient = {
+  sign: (
+    url: string,
+    options: {
+      method: string;
+      ttl: number;
+    }
+  ) => string;
+
+  verify: (
+    signedUrl: string,
+    options: {
+      method: string;
+    }
+  ) => boolean;
+};
 
 export interface MultipartRequest<T> extends Request {
   parsedFormData?: T;

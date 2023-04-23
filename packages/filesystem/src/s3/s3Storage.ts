@@ -6,9 +6,11 @@ import {
   WriteFileResult
 } from '../types';
 import {
+  getCloudFrontDomain,
   getPathInStorage,
   getPrivateStorageDirname,
   getPublicStorageDirname,
+  isUsingCloudFront,
   removeLeadingPathSep
 } from '../utilities/utilities';
 import { getAppBaseUrl, replaceRouteParams } from '../foundation';
@@ -23,17 +25,6 @@ const showWarningForUsingOptions = () => {
 export class S3Storage implements Storage {
   private adapter: MenS3Adapter | undefined;
 
-  public getPublicUrl = (filepath: string): string => {
-    return `${getAppBaseUrl()}${replaceRouteParams(viewPublicS3ObjectRoute, {
-      key: encodeURIComponent(filepath)
-    })}`;
-  };
-
-  /**
-   * !  path will always have public storage or private storage prefix
-   */
-  public getAbsolutePath = (path: string): string => path;
-
   public getS3Adapter = (): MenS3Adapter => {
     try {
       if (this.adapter) {
@@ -47,6 +38,25 @@ export class S3Storage implements Storage {
       throw e;
     }
   };
+
+  public getPublicUrl = (key: string): string => {
+    if (isUsingCloudFront()) {
+      return `${getCloudFrontDomain()}/${removeLeadingPathSep(key)}`;
+    }
+
+    return `${getAppBaseUrl()}${replaceRouteParams(viewPublicS3ObjectRoute, {
+      key: encodeURIComponent(key)
+    })}`;
+  };
+
+  public getSignedUrl = (key: string, durationInSeconds?: number): string => {
+    return this.getS3Adapter().getSignedUrl(key, durationInSeconds);
+  };
+
+  /**
+   * !  path will always have public storage or private storage prefix
+   */
+  public getAbsolutePath = (path: string): string => path;
 
   public createReadStream = async (
     key: string,

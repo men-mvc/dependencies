@@ -3,4 +3,10 @@ export type S3Config = {
   region: string;
   accessKeyId: string;
   secretAccessKey: string;
+  cloudfront?: {
+    domainName: string;
+    publicKeyId: string;
+    privateKeyString: string;
+    signedUrlDurationInSeconds?: number;
+  };
 };

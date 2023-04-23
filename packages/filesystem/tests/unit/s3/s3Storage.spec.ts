@@ -10,6 +10,7 @@ import {
 import { Buffer } from 'buffer';
 import { ReadStream } from 'fs';
 import { Readable } from 'stream';
+import { S3Config } from '@men-mvc/config';
 import { S3Storage } from '../../../src/s3/s3Storage';
 import {
   getPrivateStorageDirname,
@@ -19,7 +20,7 @@ import {
 import { viewPublicS3ObjectRoute } from '../../../src/s3/viewPublicS3ObjectHandler';
 import * as foundation from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
-import { getPrivateStorageDirectory } from '../../../lib';
+import { generateBaseConfig } from '../../testUtilities';
 
 const storage = new S3Storage();
 const serverDirBeforeTests = getServerDirectory();
@@ -32,7 +33,74 @@ describe(`S3Storage`, () => {
     setServerDirectory(serverDirBeforeTests);
   });
 
+  describe(`getSignedUrl`, () => {
+    it(`should generate signed url invoking the adapter's getSignedUrl function with the right parameters`, () => {
+      const fakeSignedUrl = `${faker.internet.url()}?hash=${faker.datatype.uuid()}`;
+      const adapterGetSignedUrlStub = sinon
+        .stub(storage.getS3Adapter(), `getSignedUrl`)
+        .returns(fakeSignedUrl);
+      const duration = 120;
+      const key = faker.datatype.uuid();
+      const result = storage.getS3Adapter().getSignedUrl(key, duration);
+      expect(result).toBe(fakeSignedUrl);
+      sinon.assert.calledOnceWithExactly(
+        adapterGetSignedUrlStub,
+        key,
+        duration
+      );
+      adapterGetSignedUrlStub.restore();
+    });
+  });
+
   describe(`getPublicUrl`, () => {
+    const fakeCloudfrontDomain = `https://cloudfront.example.com`;
+    let getBaseConfigStub: SinonStub;
+    afterEach(() => {
+      if (getBaseConfigStub) {
+        getBaseConfigStub.restore();
+      }
+    });
+
+    it(`should return cloudfront domain + filepath when it is using cloudfront`, () => {
+      getBaseConfigStub = sinon.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              cloudfront: {
+                domainName: fakeCloudfrontDomain
+              }
+            } as S3Config
+          }
+        })
+      );
+      const key = faker.datatype.uuid();
+      expect(storage.getPublicUrl(key)).toBe(`${fakeCloudfrontDomain}/${key}`);
+    });
+
+    it(`should remove leading slash from the key`, () => {
+      const removeLeadingPathSepStub = sinon.spy(
+        utilities,
+        `removeLeadingPathSep`
+      );
+      getBaseConfigStub = sinon.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              cloudfront: {
+                domainName: fakeCloudfrontDomain
+              }
+            } as S3Config
+          }
+        })
+      );
+      const key = faker.datatype.uuid();
+      expect(storage.getPublicUrl(`/${key}`)).toBe(
+        `${fakeCloudfrontDomain}/${key}`
+      );
+      sinon.assert.calledOnceWithExactly(removeLeadingPathSepStub, `/${key}`);
+      removeLeadingPathSepStub.restore();
+    });
+
     /**
      * ! this test also ensures that the key is URL encoded.
      */
