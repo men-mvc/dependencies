@@ -12,7 +12,7 @@ import {
   WriteFileResult
 } from './types';
 import { FileUploader } from './fileUploader';
-import { getFileSystemDriver } from './utilities/utilities';
+import { getDriver } from './utilities/utilities';
 import { LocalStorage } from './localStorage';
 import { S3Storage } from './s3/s3Storage';
 
@@ -23,10 +23,9 @@ export class FileSystem implements BaseFileSystem {
   private storageInstance: Storage | undefined;
   private uploaderInstance: BaseFileUploader | undefined;
 
-  // TODO: unit test if this return the right instance
   public getStorageInstance = (): Storage => {
     if (!this.storageInstance) {
-      if (getFileSystemDriver() === FileSystemDriver.s3) {
+      if (getDriver() === FileSystemDriver.s3) {
         this.storageInstance = new S3Storage();
       } else {
         this.storageInstance = new LocalStorage();

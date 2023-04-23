@@ -88,9 +88,6 @@ export const removeLeadingPathSep = (filepath: string) => {
 export const getUploadFilesizeLimit = (): number =>
   baseConfig.fileSystem.maxUploadLimit;
 
-export const getFileSystemDriver = (): FileSystemDriver =>
-  baseConfig.fileSystem.storageDriver;
-
 export const generateUuid = _generateUuid;
 
 // TODO: unit test.

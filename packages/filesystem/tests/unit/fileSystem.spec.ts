@@ -1,11 +1,20 @@
 import { faker } from '@faker-js/faker';
-import sinon from 'sinon';
+import sinon, { createSandbox, SinonSandbox } from 'sinon';
 import { generateUploadedFile } from '@men-mvc/test';
-import { FileSystem } from '../../src';
+import { FileSystemDriver } from '@men-mvc/config';
+import { FileSystem, LocalStorage, S3Storage } from '../../src';
+import * as utilities from '../../src/utilities/utilities';
 
 describe(`FileSystem`, () => {
+  let sandbox: SinonSandbox;
+
   beforeEach(() => {
     FileSystem.resetInstance();
+    sandbox = createSandbox();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   describe(`getInstance`, () => {
@@ -157,6 +166,20 @@ describe(`FileSystem`, () => {
       expect(fileSystem.getStorageInstance()).toBe(
         fileSystem.getStorageInstance()
       );
+    });
+
+    it(`should return instance of LocalStorage`, () => {
+      sandbox.stub(utilities, `getDriver`).returns(FileSystemDriver.local);
+      const fileSystem = new FileSystem();
+      expect(
+        fileSystem.getStorageInstance() instanceof LocalStorage
+      ).toBeTruthy();
+    });
+
+    it(`should return instance of S3Storage`, () => {
+      sandbox.stub(utilities, `getDriver`).returns(FileSystemDriver.s3);
+      const fileSystem = new FileSystem();
+      expect(fileSystem.getStorageInstance() instanceof S3Storage).toBeTruthy();
     });
   });
 });
