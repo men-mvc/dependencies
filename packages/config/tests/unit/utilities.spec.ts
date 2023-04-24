@@ -11,7 +11,6 @@ import {
 import * as utilities from '../../src/utilities';
 import * as process from 'process';
 
-const envVariablesBeforeTest = process.env;
 describe(`Config utilities`, () => {
   let sandbox: SinonSandbox;
 
