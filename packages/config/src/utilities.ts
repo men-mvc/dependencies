@@ -34,17 +34,6 @@ export const setEnvVariable = (key: string, value: string): void => {
   process.env[key] = value;
 };
 
-export const syncEnvVariables = (
-  appProjectEnvVars: Record<string, string | undefined>
-) => {
-  for (const prop in appProjectEnvVars) {
-    const val = appProjectEnvVars[prop];
-    if (val) {
-      setEnvVariable(prop, val);
-    }
-  }
-};
-
 export const unsetEnvVariable = (key: string): void => {
   if (!envVars) {
     envVars = getEnvVariables();

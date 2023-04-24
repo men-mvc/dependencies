@@ -1,6 +1,5 @@
 import { createSandbox, SinonSandbox } from 'sinon';
 import {
-  syncEnvVariables,
   getEnvVariable,
   getAppEnv,
   setEnvVariable,
@@ -22,7 +21,6 @@ describe(`Config utilities`, () => {
 
   afterEach(() => {
     clearEnvVarsCache();
-    syncEnvVariables(envVariablesBeforeTest);
     sandbox.restore();
   });
 
@@ -127,18 +125,6 @@ describe(`Config utilities`, () => {
       expect(isRunningFrameworkTests()).toBeFalsy();
 
       process.env.CORE_TEST = '1';
-    });
-  });
-
-  describe(`syncEnvVariables`, () => {
-    it(`should set the env variables`, () => {
-      syncEnvVariables({
-        APP_NAME: 'test app name',
-        TEST_VARIABLE: 'test variable'
-      });
-
-      expect(getEnvVariable('APP_NAME')).toBe(`test app name`);
-      expect(getEnvVariable('TEST_VARIABLE')).toBe(`test variable`);
     });
   });
 });
