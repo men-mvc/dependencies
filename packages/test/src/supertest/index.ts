@@ -1,3 +1,3 @@
-import supertest from "supertest";
+import supertest from 'supertest';
 
 export default supertest;
