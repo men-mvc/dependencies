@@ -2,11 +2,13 @@ import findUpOne from 'findup-sync';
 import { appProjectConfigDir } from './globals';
 import { EnvVarDeclaration, isEnvVarDeclaration } from './types';
 
-// TODO: write tests for the utility functions inside this file
-
 export const getAppEnv = () => getEnvVariable(`NODE_ENV`, `local`);
 
-let envVars: Record<string, string | undefined>;
+let envVars: Record<string, string | undefined> | undefined; // TODO: should we remove this?
+
+export const clearEnvVarsCache = () => {
+  envVars = undefined;
+};
 
 export const getEnvVariables = () => {
   if (!envVars) {
@@ -32,12 +34,23 @@ export const setEnvVariable = (key: string, value: string): void => {
   process.env[key] = value;
 };
 
+export const syncEnvVariables = (
+  appProjectEnvVars: Record<string, string | undefined>
+) => {
+  for (const prop in appProjectEnvVars) {
+    const val = appProjectEnvVars[prop];
+    if (val) {
+      setEnvVariable(prop, val);
+    }
+  }
+};
+
 export const unsetEnvVariable = (key: string): void => {
   if (!envVars) {
     envVars = getEnvVariables();
   }
-  delete envVars[key];
   delete process.env[key];
+  delete envVars[key];
 };
 
 export const isTestEnvironment = (): boolean => getAppEnv() === 'test';
@@ -45,12 +58,12 @@ export const isTestEnvironment = (): boolean => getAppEnv() === 'test';
 /**
  * the functions inside this file are available within the core package only
  */
-export const isRunningFrameworkTests = (): boolean =>
-  process.env.CORE_TEST ? true : false;
+export const isRunningFrameworkTests = (): boolean => !!process.env.CORE_TEST;
 
 /**
  * return the list of config key from a given env-specific JSON config file.. eg, app.name, auth.secretKey, etc
  * @deprecated - TODO: remove this function since this is not used.
+ * ! no unit test
  */
 export const getConfigKeyList = (
   configJson: Record<string, any>,
@@ -72,6 +85,7 @@ export const getConfigKeyList = (
 };
 
 /**
+ * ! there is no dedicated unit test for this but this function is already covered as part of testing other components
  * return
  * [
  *    'app.name' => 'APP_NAME',
@@ -124,6 +138,9 @@ export const getConfigKeyEnvVarNameMappings = (
   return maps;
 };
 
+/**
+ * ! there is no dedicated unit test but the functionality is already covered with tests for other components
+ */
 let cachedAppProjectConfigDir: string | null = null;
 export const getAppProjectConfigDirectory = (): string | null => {
   if (cachedAppProjectConfigDir) {
