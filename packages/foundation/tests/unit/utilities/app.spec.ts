@@ -1,3 +1,4 @@
+import express, { Request } from 'express';
 import {
   setEnvVariable,
   srcDirectory,
@@ -14,6 +15,18 @@ import {
   setServerDirectory
 } from '../../../src';
 import { BaseApplication } from '../../../src';
+
+class TestApplication extends BaseApplication {
+  initialise = () => {};
+
+  initialisePreMiddlewares = () => {};
+
+  registerRoutes = () => {};
+
+  initialisePostMiddlewares = () => {};
+
+  start = () => {};
+}
 
 describe(`App Utility`, () => {
   afterEach(() => {
@@ -36,15 +49,12 @@ describe(`App Utility`, () => {
     it(`should return protocol + host`, () => {
       const protocol = 'https';
       const host = 'localhost:8000';
-      const mockApplication = {
-        app: {
-          request: {
-            protocol,
-            get: (name: string) => host
-          }
-        }
-      } as unknown as BaseApplication;
-      BaseApplication.init(mockApplication);
+      const request = {
+        protocol,
+        get: (name: string) => host
+      } as Request;
+      const app = BaseApplication.init(new TestApplication(express()));
+      app.setCurrentRequest(request);
       expect(getAppBaseUrl()).toBe(`${protocol}://${host}`);
     });
   });

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request } from 'express';
 import sinon, { SinonSandbox } from 'sinon';
 import { BaseApplication, ApplicationEvents } from '../../../src';
 
@@ -53,6 +53,26 @@ describe(`BaseApplication`, () => {
       const app = BaseApplication.init(new TestApplication(expressApp));
       expect(TestApplication.getInstance()).toBe(app);
       expect(TestApplication.getInstance()).toBe(app);
+    });
+  });
+
+  describe(`getCurrentRequest & setCurrentRequest`, () => {
+    it(`should set and get current request`, () => {
+      const app = BaseApplication.init(new TestApplication(expressApp));
+      const request = {
+        body: {
+          name: `test`
+        }
+      } as Request;
+      app.setCurrentRequest(request);
+      expect(app.getCurrentRequest()).toBe(request);
+    });
+
+    it(`should throw error when current request is not set yet`, () => {
+      const app = BaseApplication.init(new TestApplication(expressApp));
+      expect(() => {
+        app.getCurrentRequest();
+      }).toThrow(`Request has not been initialised.`);
     });
   });
 
