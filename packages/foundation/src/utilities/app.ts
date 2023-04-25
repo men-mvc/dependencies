@@ -76,7 +76,7 @@ export const getAppBaseUrl = (): string => {
     return getEnvVariable(`APP_BASE_URL`) as string;
   }
 
-  const req = BaseApplication.getInstance().app.request;
+  const req = BaseApplication.getInstance().getCurrentRequest();
 
   return req.protocol + '://' + req.get('host');
 };

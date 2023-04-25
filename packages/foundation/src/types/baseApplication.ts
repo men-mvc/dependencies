@@ -1,4 +1,4 @@
-import { Express } from 'express';
+import { Express, Request } from 'express';
 import EventEmitter from 'events';
 import { ApplicationEvents } from './applicationEvents';
 import { ApplicationNotInitialisedError } from './applicationNotInitialisedError';
@@ -7,11 +7,24 @@ export abstract class BaseApplication {
   constructor(public app: Express) {}
   private static eventEmitter: EventEmitter | null;
   private static instance: BaseApplication | null;
+  private currentRequest: Request | null = null;
 
   public static init = <T extends BaseApplication>(application: T): T => {
     BaseApplication.instance = application;
 
     return BaseApplication.instance as T;
+  };
+
+  public setCurrentRequest = (currentRequest: Request) => {
+    this.currentRequest = currentRequest;
+  };
+
+  public getCurrentRequest = (): Request => {
+    if (!this.currentRequest) {
+      throw new Error(`Request has not been initialised.`);
+    }
+
+    return this.currentRequest;
   };
 
   public static getInstance = (): BaseApplication => {
