@@ -1,10 +1,6 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import fileUpload from 'express-fileupload';
-import {
-  asyncRequestHandler,
-  BaseApplication,
-  requestHandler
-} from '@men-mvc/foundation';
+import { asyncRequestHandler } from '@men-mvc/foundation';
 import { existsAsync, getUploadFilesizeLimit } from '../utilities/utilities';
 import { FileSystem, fileSystem, getPrivateStorageDirectory } from '..';
 import {
@@ -62,35 +58,9 @@ export const createStorageDirectoryIfNeeded = async (
   return next();
 };
 
-export const registerS3Routes = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  BaseApplication.getInstance().app.get(
-    viewPublicS3ObjectRoute,
-    asyncRequestHandler(viewPublicS3ObjectRequestHandler)
-  );
-  return next();
-};
-
-export const registerLocalSignedUrlRoutes = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  BaseApplication.getInstance().app.get(
-    viewLocalSignedUrlRoute,
-    asyncRequestHandler(localFileSignedUrlHandler)
-  );
-  return next();
-};
-
 export const registerFilesystem = (app: Express) => {
-  app.use(asyncRequestHandler(clearTempFiles));
   app.use(asyncRequestHandler(createStorageDirectoryIfNeeded));
-  app.use(requestHandler(registerS3Routes));
-  app.use(requestHandler(registerLocalSignedUrlRoutes));
+  app.use(asyncRequestHandler(clearTempFiles));
   app.use;
   app.use(
     fileUpload({
@@ -105,5 +75,13 @@ export const registerFilesystem = (app: Express) => {
       // responseOnLimit: `File size limit has been reached`,
       // debug: true
     })
+  );
+  app.get(
+      viewPublicS3ObjectRoute,
+      asyncRequestHandler(viewPublicS3ObjectRequestHandler)
+  );
+  app.get(
+      viewLocalSignedUrlRoute,
+      asyncRequestHandler(localFileSignedUrlHandler)
   );
 };
