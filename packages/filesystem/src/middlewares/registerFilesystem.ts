@@ -1,4 +1,4 @@
-import { Express, Request, Response, NextFunction } from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
 import fileUpload from 'express-fileupload';
 import { asyncRequestHandler } from '@men-mvc/foundation';
 import { existsAsync, getUploadFilesizeLimit } from '../utilities/utilities';
@@ -59,6 +59,8 @@ export const createStorageDirectoryIfNeeded = async (
 };
 
 export const registerFilesystem = (app: Express) => {
+  // ! TODO - unit test/ unit test suite dedicated for this registerFilesystem only.
+  app.use(express.static(getPublicStorageDirectory())); // for sharing/ serve files publicly
   app.use(asyncRequestHandler(createStorageDirectoryIfNeeded));
   app.use(asyncRequestHandler(clearTempFiles));
   app.use;
