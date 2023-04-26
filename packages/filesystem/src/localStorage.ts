@@ -125,7 +125,7 @@ export class LocalStorage implements Storage {
   ): Promise<fs.ReadStream> => {
     const stream = fs.createReadStream(this.getAbsolutePath(filepath), {
       highWaterMark: options?.highWaterMark,
-      encoding: options?.encoding ?? `utf-8`
+      encoding: options?.encoding
     });
 
     return stream;
