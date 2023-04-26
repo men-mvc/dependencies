@@ -8,6 +8,7 @@ import {
 import { faker } from '@faker-js/faker';
 import sinon, { SinonSandbox, SinonStub } from 'sinon';
 import url from 'url';
+import { ReadStream } from 'fs';
 import * as queryString from 'querystring';
 import { localFileSignedUrlHandler } from '../../src/localFileSignedUrlHandler';
 import * as foundation from '../../src/foundation';
@@ -18,7 +19,6 @@ import {
   delay,
   deleteStorageDirectory
 } from '../testUtilities';
-import { ReadStream } from 'fs';
 
 const fileContent = faker.datatype.uuid();
 const localStorage = new LocalStorage();
@@ -52,7 +52,8 @@ describe(`localFileSignedUrlHandler`, () => {
     const errorResponseStub = sandbox.stub(foundation, `errorResponse`);
     await localFileSignedUrlHandler(
       {
-        params: {}
+        params: {},
+        query: {}
       } as Request,
       res
     );
@@ -77,7 +78,8 @@ describe(`localFileSignedUrlHandler`, () => {
       {
         params: {
           filepath
-        }
+        },
+        query: {}
       } as unknown as Request,
       res
     );
@@ -104,7 +106,9 @@ describe(`localFileSignedUrlHandler`, () => {
     const result = await localFileSignedUrlHandler(
       {
         params: {
-          filepath: encodeURIComponent(filepath),
+          filepath
+        },
+        query: {
           hash
         }
       } as unknown as Request,
@@ -130,7 +134,9 @@ describe(`localFileSignedUrlHandler`, () => {
     await localFileSignedUrlHandler(
       {
         params: {
-          filepath: encodeURIComponent(filepath),
+          filepath
+        },
+        query: {
           hash
         }
       } as unknown as Request,
@@ -155,7 +161,9 @@ describe(`localFileSignedUrlHandler`, () => {
     await localFileSignedUrlHandler(
       {
         params: {
-          filepath: encodeURIComponent(filepath),
+          filepath
+        },
+        query: {
           hash
         }
       } as unknown as Request,

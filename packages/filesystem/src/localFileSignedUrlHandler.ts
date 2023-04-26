@@ -14,14 +14,17 @@ export const localFileSignedUrlHandler = async (
   if (getDriver() !== FileSystemDriver.local) {
     throw new Error(`Filesystem is not using local driver.`);
   }
-  const { filepath, hash } = req.params;
+  const { filepath } = req.params;
+  const { hash } = req.query;
   if (!filepath) {
     return errorResponse(res, `Filepath is missing.`, StatusCodes.BAD_REQUEST);
   }
   const fileSystem = FileSystem.getInstance() as FileSystem;
   const localStorage = fileSystem.getStorageInstance() as LocalStorage;
   const valid = localStorage.verifySignedUrl(
-    `${getAppBaseUrl()}/private-file/view/${filepath}?hash=${hash}`
+    `${getAppBaseUrl()}/private-file/view/${encodeURIComponent(
+      filepath
+    )}?hash=${hash}`
   );
   if (!valid) {
     return errorResponse(
@@ -31,12 +34,10 @@ export const localFileSignedUrlHandler = async (
     );
   }
 
-  const decodedFilepath = decodeURIComponent(filepath);
-
-  const mimeType = getMimeType(decodedFilepath);
+  const mimeType = getMimeType(filepath);
   if (mimeType) {
     res.contentType(mimeType);
   }
 
-  return (await fileSystem.createReadStream(decodedFilepath)).pipe(res);
+  return (await fileSystem.createReadStream(filepath)).pipe(res);
 };
