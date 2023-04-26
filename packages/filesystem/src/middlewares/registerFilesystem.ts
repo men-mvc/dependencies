@@ -79,11 +79,11 @@ export const registerFilesystem = (app: Express) => {
     })
   );
   app.get(
-      viewPublicS3ObjectRoute,
-      asyncRequestHandler(viewPublicS3ObjectRequestHandler)
+    viewPublicS3ObjectRoute,
+    asyncRequestHandler(viewPublicS3ObjectRequestHandler)
   );
   app.get(
-      viewLocalSignedUrlRoute,
-      asyncRequestHandler(localFileSignedUrlHandler)
+    viewLocalSignedUrlRoute,
+    asyncRequestHandler(localFileSignedUrlHandler)
   );
 };

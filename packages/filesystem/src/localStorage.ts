@@ -21,7 +21,8 @@ import {
   writeFileAsync,
   removeLeadingPathSep,
   getLocalUrlSignerSecret,
-  getBaseConfig
+  getBaseConfig,
+  removePublicStorageDirnameFrom
 } from './utilities/utilities';
 import { getAppBaseUrl, replaceRouteParams } from './foundation';
 import { viewLocalSignedUrlRoute } from './localFileSignedUrlHandler';
@@ -62,7 +63,7 @@ export class LocalStorage implements Storage {
   };
 
   public getPublicUrl = (filepath: string): string => {
-    return `${getAppBaseUrl()}/${filepath}`;
+    return `${getAppBaseUrl()}/${removePublicStorageDirnameFrom(filepath)}`;
   };
 
   public verifySignedUrl = (signedUrl: string): boolean =>

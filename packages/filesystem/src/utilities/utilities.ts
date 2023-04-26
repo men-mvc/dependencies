@@ -123,7 +123,7 @@ export const getMimeType = (filePathOrName: string): string | null => {
   return mimeType ? mimeType : null;
 };
 
-export const removePublicStorageIdentifierFrom = (
+export const removePublicStorageDirnameFrom = (
   filePathOrKey: string
 ): string => {
   if (!isPublicFilepath(filePathOrKey)) {

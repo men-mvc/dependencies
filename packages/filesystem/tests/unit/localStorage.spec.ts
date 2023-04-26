@@ -18,7 +18,8 @@ import {
   ReadStreamOptions,
   getPathInStorage,
   getPrivateStorageDirectory,
-  getPublicStorageDirectory
+  getPublicStorageDirectory,
+  removePublicStorageDirnameFrom
 } from '../../src';
 import { delay, generateBaseConfig } from '../testUtilities';
 import { viewLocalSignedUrlRoute } from '../../src/localFileSignedUrlHandler';
@@ -225,7 +226,7 @@ describe(`LocalStorage Utility`, () => {
       );
       sandbox.stub(foundation, `getAppBaseUrl`).returns(baseUrl);
       expect(localStorage.getPublicUrl(filename)).toBe(
-        `${baseUrl}/${filename}`
+        `${baseUrl}/${removePublicStorageDirnameFrom(filename)}`
       );
     });
   });

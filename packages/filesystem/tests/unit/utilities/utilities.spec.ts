@@ -14,7 +14,7 @@ import {
   parseMultiFormBooleanInput,
   getPublicStorageDirectory,
   isPublicFilepath,
-  removePublicStorageIdentifierFrom,
+  removePublicStorageDirnameFrom,
   getPrivateStorageDirectory,
   removeLeadingPathSep,
   getPathInStorage,
@@ -176,10 +176,10 @@ describe(`Filesystem - Utilities`, () => {
     });
   });
 
-  describe(`removePublicStorageIdentifierFrom`, () => {
+  describe(`removePublicStorageDirnameFrom`, () => {
     it(`should return argument filepath as is when the file is not public`, async () => {
       const filepath = faker.system.filePath();
-      expect(removePublicStorageIdentifierFrom(filepath)).toBe(filepath);
+      expect(removePublicStorageDirnameFrom(filepath)).toBe(filepath);
     });
 
     it(`should replace the first occurrence of ${getPublicStorageDirname()}`, async () => {
@@ -193,7 +193,7 @@ describe(`Filesystem - Utilities`, () => {
         filepathWithoutPublicFileIdentifier
       );
 
-      expect(removePublicStorageIdentifierFrom(filepath)).toBe(
+      expect(removePublicStorageDirnameFrom(filepath)).toBe(
         filepathWithoutPublicFileIdentifier
       );
     });
