@@ -245,7 +245,7 @@ describe(`MenS3Adapter Utility`, () => {
         Expiration: faker.datatype.datetime().toDateString(),
         ServerSideEncryption: `AES256`
       } as PutObjectCommandOutput);
-      const key = faker.datatype.uuid();
+      const key = `${faker.datatype.uuid()}.png`;
       const content = faker.lorem.paragraph();
 
       await adapter.writeFile(key, content);
@@ -257,6 +257,25 @@ describe(`MenS3Adapter Utility`, () => {
       expect(command.input.Bucket).toBe(fakeBucketName);
       expect(command.input.Key).toBe(key);
       expect(command.input.Body).toBe(content);
+      expect(command.input.ContentType).toBe(`image/png`);
+    });
+
+    it(`should not pass mime type when it cannot find the mime path for the key`, async () => {
+      sendStub = mockSend({
+        ETag: faker.datatype.uuid(),
+        $metadata: {
+          label: faker.lorem.word()
+        }
+      } as PutObjectCommandOutput);
+      const key = faker.datatype.uuid();
+      const content = faker.lorem.paragraph();
+
+      await adapter.writeFile(key, content);
+
+      sinon.assert.calledOnce(sendStub);
+      const sendCall = sendStub.getCalls()[0];
+      const command = sendCall.args[0] as PutObjectCommand;
+      expect(command.input.ContentType).toBeUndefined();
     });
 
     it(`should return the created object data`, async () => {

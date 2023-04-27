@@ -11,6 +11,7 @@ import {
   DeleteObjectsCommandInput,
   DeleteObjectsCommand
 } from '@aws-sdk/client-s3';
+import { getMimeType } from '@men-mvc/foundation';
 import {
   getAwsS3Bucket,
   getAwsS3Credentials,
@@ -106,6 +107,7 @@ export class MenS3Adapter {
     const command = new PutObjectCommand({
       Bucket: getAwsS3Bucket(),
       Key: key,
+      ContentType: getMimeType(key) ?? undefined, // TODO: unit test
       Body: data
     });
 
