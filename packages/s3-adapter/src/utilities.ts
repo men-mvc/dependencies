@@ -28,8 +28,12 @@ export const getCloudFrontDomain = (): string => {
 export const getCloudFrontConfig = () => ({
   domainName: getCloudFrontDomain(),
   publicKeyId: getBaseConfig().fileSystem?.s3?.cloudfront?.publicKeyId ?? ``,
-  privateKeyString:
-    getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString ?? ``,
+  privateKeyString: getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString
+    ? Buffer.from(
+        getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString as string,
+        'base64'
+      ).toString('ascii')
+    : ``,
   signedUrlDurationInSeconds:
     getBaseConfig().fileSystem?.s3?.cloudfront?.signedUrlDurationInSeconds
 });
