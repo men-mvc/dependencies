@@ -6,7 +6,6 @@ import {
   WriteFileResult
 } from '../types';
 import {
-  getCloudFrontDomain,
   getPathInStorage,
   getPrivateStorageDirname,
   getPublicStorageDirname,
@@ -41,7 +40,9 @@ export class S3Storage implements Storage {
 
   public getPublicUrl = (key: string): string => {
     if (isUsingCloudFront()) {
-      return `${getCloudFrontDomain()}/${removeLeadingPathSep(key)}`;
+      return `${this.getS3Adapter().getCloudFrontDomain()}/${removeLeadingPathSep(
+        key
+      )}`;
     }
 
     return `${getAppBaseUrl()}${replaceRouteParams(viewPublicS3ObjectRoute, {

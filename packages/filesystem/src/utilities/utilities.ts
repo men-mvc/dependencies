@@ -16,10 +16,8 @@ import { getAppRootDirectory } from '../foundation';
 
 export const getBaseConfig = (): BaseConfig => baseConfig;
 
-export const getCloudFrontDomain = () =>
-  getBaseConfig().fileSystem?.s3?.cloudfront?.domainName ?? ``;
-
-export const isUsingCloudFront = () => !!getCloudFrontDomain();
+export const isUsingCloudFront = (): boolean =>
+  !!getBaseConfig().fileSystem?.s3?.cloudfront?.domainName;
 
 export const getDefaultAppStorageDirectory = (): string =>
   path.join(getAppRootDirectory(), `storage`);

@@ -80,26 +80,6 @@ describe(`Filesystem - Utilities`, () => {
     });
   });
 
-  describe(`getCloudFrontDomain`, () => {
-    it(`should return cloudfront domain set in the config`, () => {
-      sandbox.stub(utilities, `getBaseConfig`).returns(
-        generateBaseConfig({
-          fileSystem: {
-            s3: {
-              cloudfront: {
-                domainName: `https://cloudfront.example.com`
-              }
-            } as S3Config
-          }
-        })
-      );
-
-      expect(utilities.getCloudFrontDomain()).toBe(
-        `https://cloudfront.example.com`
-      );
-    });
-  });
-
   describe(`isUsingCloudFront`, () => {
     it(`should return true when cloudfront domain name is set`, () => {
       sandbox.stub(utilities, `getBaseConfig`).returns(

@@ -23,10 +23,9 @@ import {
   readReadableAsString,
   S3Config
 } from '@men-mvc/foundation';
-import { MenS3Adapter } from '../src';
-import * as utilities from '../src/utilities';
+import { MenS3Adapter, AwsCloudfrontSign } from '../src';
 import { generateBaseConfig } from './testUtilities';
-import { AwsCloudfrontSign } from '../src';
+import * as utilities from '../src/utilities';
 
 const adapter = new MenS3Adapter();
 const fakeBucketName = `fake-bucket`;
@@ -69,6 +68,33 @@ describe(`MenS3Adapter Utility`, () => {
   describe(`getS3Client`, () => {
     it(`should always return the same instance`, () => {
       expect(adapter.getS3Client()).toBe(adapter.getS3Client());
+    });
+  });
+
+  describe(`getCloudFrontDomain`, () => {
+    it(`should get CloudFront domain invoking getCloudFrontDomain in utilities`, () => {
+      const getCloudFrontDomainSpy = sinon.spy(
+        utilities,
+        `getCloudFrontDomain`
+      );
+      const getBaseConfigStub = sinon.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              cloudfront: {
+                domainName: `test-domain-name`
+              }
+            } as S3Config
+          }
+        })
+      );
+
+      const domain = adapter.getCloudFrontDomain();
+
+      expect(getCloudFrontDomainSpy.calledOnce).toBe(true);
+      expect(domain).toBe(`https://test-domain-name`);
+      getBaseConfigStub.restore();
+      getCloudFrontDomainSpy.restore();
     });
   });
 

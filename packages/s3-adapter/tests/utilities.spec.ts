@@ -64,6 +64,56 @@ describe(`S3 Adapter Utilities`, () => {
     });
   });
 
+  describe(`getCloudFrontDomain`, () => {
+    it(`should return empty string if no domain is specified`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              bucket: `test-bucket`
+            } as S3Config
+          }
+        })
+      );
+
+      expect(utilities.getCloudFrontDomain()).toBe(``);
+    });
+
+    it(`should return cloudfront domain as it when it starts with http`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              bucket: `test-bucket`,
+              cloudfront: {
+                domainName: `http://test-domain.com`
+              }
+            } as S3Config
+          }
+        })
+      );
+
+      expect(utilities.getCloudFrontDomain()).toBe(`http://test-domain.com`);
+    });
+
+    it(`should prepend https to cloudfront domain when it does not start with http`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              bucket: `test-bucket`,
+              cloudfront: {
+                domainName: `test-domain.com`
+              }
+            } as S3Config
+          }
+        })
+      );
+
+      expect(utilities.getCloudFrontDomain()).toBe(`https://test-domain.com`);
+    });
+  });
+
   describe(`getCloudFrontConfig`, () => {
     it(`should return the values specified in the base config`, () => {
       sandbox.stub(utilities, `getBaseConfig`).returns(

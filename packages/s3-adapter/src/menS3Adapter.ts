@@ -16,6 +16,7 @@ import {
   getAwsS3Bucket,
   getAwsS3Credentials,
   getCloudFrontConfig,
+  getCloudFrontDomain,
   getSignedUrlExpireTime
 } from './utilities';
 import { AwsCloudfrontSign, MenS3PutObjectCommandOutput } from './types';
@@ -42,6 +43,8 @@ export class MenS3Adapter {
 
     return this.s3Client;
   };
+
+  public getCloudFrontDomain = (): string => getCloudFrontDomain();
 
   public getCloudFrontSignClient = (): AwsCloudfrontSign => {
     try {

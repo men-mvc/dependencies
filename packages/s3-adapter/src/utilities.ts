@@ -11,8 +11,20 @@ export const getAwsS3Credentials = () => ({
   secretAccessKey: getBaseConfig().fileSystem?.s3?.secretAccessKey ?? ``
 });
 
+export const getCloudFrontDomain = (): string => {
+  const configDomain =
+    getBaseConfig().fileSystem?.s3?.cloudfront?.domainName ?? ``;
+  if (!configDomain) {
+    return ``;
+  }
+
+  return configDomain.startsWith(`http`)
+    ? configDomain
+    : `https://${configDomain}`;
+};
+
 export const getCloudFrontConfig = () => ({
-  domainName: getBaseConfig().fileSystem?.s3?.cloudfront?.domainName ?? ``,
+  domainName: getCloudFrontDomain(),
   publicKeyId: getBaseConfig().fileSystem?.s3?.cloudfront?.publicKeyId ?? ``,
   privateKeyString:
     getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString ?? ``,

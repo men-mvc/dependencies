@@ -122,6 +122,7 @@ export type MenS3PutObjectCommandOutput = {
 };
 
 export declare class MenS3Adapter {
+  public getCloudFrontDomain: () => string;
   public getSignedUrl: (key: string, expireTime?: number) => string;
   public createReadStream: (key: string) => Promise<ReadStream>;
   public copy: (fromKey: string, toKey: string) => Promise<void>;
