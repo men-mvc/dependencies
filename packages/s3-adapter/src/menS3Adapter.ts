@@ -63,11 +63,14 @@ export class MenS3Adapter {
   public getSignedUrl = (key: string, durationInSeconds?: number): string => {
     const config = getCloudFrontConfig();
 
-    return this.getCloudFrontSignClient().getSignedUrl(config.domainName, {
-      keypairId: config.publicKeyId,
-      privateKeyString: config.privateKeyString,
-      expireTime: getSignedUrlExpireTime(durationInSeconds)
-    });
+    return this.getCloudFrontSignClient().getSignedUrl(
+      `${config.domainName}/${key}`,
+      {
+        keypairId: config.publicKeyId,
+        privateKeyString: config.privateKeyString,
+        expireTime: getSignedUrlExpireTime(durationInSeconds)
+      }
+    );
   };
 
   public createReadStream = async (key: string): Promise<ReadStream> => {

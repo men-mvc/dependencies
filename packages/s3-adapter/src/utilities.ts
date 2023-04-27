@@ -18,9 +18,11 @@ export const getCloudFrontDomain = (): string => {
     return ``;
   }
 
-  return configDomain.startsWith(`http`)
+  const domain = configDomain.startsWith(`http`)
     ? configDomain
     : `https://${configDomain}`;
+
+  return domain.endsWith('/') ? domain.slice(0, -1) : domain;
 };
 
 export const getCloudFrontConfig = () => ({

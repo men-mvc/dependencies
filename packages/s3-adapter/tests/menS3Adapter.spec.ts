@@ -155,7 +155,7 @@ describe(`MenS3Adapter Utility`, () => {
       adapter.getSignedUrl(key, 120);
       sinon.assert.calledOnceWithExactly(
         clientGetSignedUrlStub,
-        fakeCloudfrontDomain,
+        `${fakeCloudfrontDomain}/${key}`,
         {
           keypairId: fakePublicKeyId,
           privateKeyString: fakePrivateKeyString,

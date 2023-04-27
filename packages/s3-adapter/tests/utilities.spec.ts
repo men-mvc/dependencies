@@ -112,6 +112,23 @@ describe(`S3 Adapter Utilities`, () => {
 
       expect(utilities.getCloudFrontDomain()).toBe(`https://test-domain.com`);
     });
+
+    it(`should remove the trailing slash from the cloudfront domain`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            s3: {
+              bucket: `test-bucket`,
+              cloudfront: {
+                domainName: `test-domain.com/`
+              }
+            } as S3Config
+          }
+        })
+      );
+
+      expect(utilities.getCloudFrontDomain()).toBe(`https://test-domain.com`);
+    });
   });
 
   describe(`getCloudFrontConfig`, () => {
