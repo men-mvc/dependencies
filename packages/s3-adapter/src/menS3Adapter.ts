@@ -107,7 +107,7 @@ export class MenS3Adapter {
     const command = new PutObjectCommand({
       Bucket: getAwsS3Bucket(),
       Key: key,
-      ContentType: getMimeType(key) ?? undefined, // TODO: unit test
+      ContentType: getMimeType(key) ?? undefined,
       Body: data
     });
 
