@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { FileSystemDriver, StatusCodes } from '@men-mvc/foundation';
-import { getAppBaseUrl, errorResponse } from './foundation';
+import { getAppBaseUrl, errorResponse, getMimeType } from './foundation';
 import { LocalStorage } from './localStorage';
-import { getDriver, getMimeType } from './utilities/utilities';
+import { getDriver } from './utilities/utilities';
 import { FileSystem } from '.';
 
 export const viewLocalSignedUrlRoute = `/private-file/view/:filepath`;

@@ -5,7 +5,6 @@ import {
   FileSystemDriver,
   getEnvVariable
 } from '@men-mvc/config';
-import mimeTypes from 'mime-types';
 import {
   generateUuid as _generateUuid,
   invokeRequestErrorHandler
@@ -116,11 +115,6 @@ export const isPublicFilepath = (storageFilepath: string) => {
   storageFilepath = removeLeadingPathSep(storageFilepath);
 
   return storageFilepath.startsWith(getPublicStorageDirname());
-};
-
-export const getMimeType = (filePathOrName: string): string | null => {
-  const mimeType = mimeTypes.lookup(filePathOrName);
-  return mimeType ? mimeType : null;
 };
 
 export const removePublicStorageDirnameFrom = (

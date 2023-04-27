@@ -28,13 +28,11 @@
   },
   "dependencies": {
     "@men-mvc/foundation": "^0.104.0",
-    "mime-types": "^2.1.35",
     "signed-url": "^1.0.3"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@types/jest": "^29.2.4",
-    "@types/mime-types": "^2.1.1",
     "@types/node": "^18.11.16",
     "@types/sinon": "^10.0.13",
     "jest": "^29.3.1",

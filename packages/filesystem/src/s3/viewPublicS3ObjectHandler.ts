@@ -1,12 +1,8 @@
 import { Request, Response } from 'express';
 import { FileNotPublicError, FileSystemDriver } from '@men-mvc/foundation';
-import {
-  getDriver,
-  getMimeType,
-  isPublicFilepath
-} from '../utilities/utilities';
+import { getDriver, isPublicFilepath } from '../utilities/utilities';
 import { FileSystem } from '..';
-import { notFoundResponse } from '../foundation';
+import { notFoundResponse, getMimeType } from '../foundation';
 
 export const viewPublicS3ObjectRoute = `/filesystem/s3/:key`;
 
