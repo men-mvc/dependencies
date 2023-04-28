@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/s3-adapter",
-  "version": "0.107.0",
+  "version": "0.108.0",
   "description": "AWS S3 adapter for MEN MVC framework.",
   "private": false,
   "type": "commonjs",
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.289.0",
-    "@men-mvc/foundation": "^0.107.0"
+    "@men-mvc/foundation": "^0.108.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
