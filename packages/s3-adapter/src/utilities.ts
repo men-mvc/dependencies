@@ -25,14 +25,24 @@ export const getCloudFrontDomain = (): string => {
   return domain.endsWith('/') ? domain.slice(0, -1) : domain;
 };
 
+// TODO: test when privateKey prop is not specified
+// TODO: also test when json is not valid
+const getPrivateKeyString = (): string => {
+  const configPrivateKey =
+    getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString;
+  if (!configPrivateKey) {
+    return ``;
+  }
+  const json = JSON.parse(configPrivateKey);
+
+  return json && json.privateKey ? json.privateKey : ``;
+};
+
 export const getCloudFrontConfig = () => ({
   domainName: getCloudFrontDomain(),
   publicKeyId: getBaseConfig().fileSystem?.s3?.cloudfront?.publicKeyId ?? ``,
   privateKeyString: getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString
-    ? Buffer.from(
-        getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString as string,
-        'base64'
-      ).toString('ascii')
+    ? getPrivateKeyString()
     : ``,
   signedUrlDurationInSeconds:
     getBaseConfig().fileSystem?.s3?.cloudfront?.signedUrlDurationInSeconds

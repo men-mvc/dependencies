@@ -124,8 +124,7 @@ describe(`MenS3Adapter Utility`, () => {
               cloudfront: {
                 domainName: fakeCloudfrontDomain,
                 publicKeyId: fakePublicKeyId,
-                privateKeyString:
-                  Buffer.from(fakePrivateKeyString).toString(`base64`)
+                privateKeyString: `{"privateKey": "${fakePrivateKeyString}"}`
               }
             } as S3Config
           }
