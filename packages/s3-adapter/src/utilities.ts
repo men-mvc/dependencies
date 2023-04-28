@@ -25,7 +25,14 @@ export const getCloudFrontDomain = (): string => {
   return domain.endsWith('/') ? domain.slice(0, -1) : domain;
 };
 
-const getPrivateKeyString = (): string => getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString ?? ``;
+export const getMaxRetryAttempts = (): number =>
+  getBaseConfig().fileSystem?.s3?.maxRetryAttempts ?? 3;
+
+export const getRetryMode = (): string | undefined =>
+  getBaseConfig().fileSystem?.s3?.retryMode;
+
+const getPrivateKeyString = (): string =>
+  getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString ?? ``;
 
 export const getCloudFrontConfig = () => ({
   domainName: getCloudFrontDomain(),

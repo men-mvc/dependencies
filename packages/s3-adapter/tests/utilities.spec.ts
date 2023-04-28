@@ -14,6 +14,54 @@ describe(`S3 Adapter Utilities`, () => {
     sandbox.restore();
   });
 
+  describe(`getMaxRetryAttempts`, () => {
+    it(`should return 3 by default`, () => {
+      const config = generateBaseConfig({
+        fileSystem: {}
+      });
+      sandbox.stub(utilities, `getBaseConfig`).returns(config);
+
+      expect(utilities.getMaxRetryAttempts()).toBe(3);
+    });
+
+    it(`should return value defined in the config`, () => {
+      const config = generateBaseConfig({
+        fileSystem: {
+          s3: {
+            maxRetryAttempts: 10
+          } as unknown as S3Config
+        }
+      });
+      sandbox.stub(utilities, `getBaseConfig`).returns(config);
+
+      expect(utilities.getMaxRetryAttempts()).toBe(10);
+    });
+  });
+
+  describe(`getRetryMode`, () => {
+    it(`should return undefined by default`, () => {
+      const config = generateBaseConfig({
+        fileSystem: {}
+      });
+      sandbox.stub(utilities, `getBaseConfig`).returns(config);
+
+      expect(utilities.getRetryMode()).toBeUndefined();
+    });
+
+    it(`should return value defined in the config`, () => {
+      const config = generateBaseConfig({
+        fileSystem: {
+          s3: {
+            retryMode: `standard`
+          } as S3Config
+        }
+      });
+      sandbox.stub(utilities, `getBaseConfig`).returns(config);
+
+      expect(utilities.getRetryMode()).toBe(`standard`);
+    });
+  });
+
   describe(`getAwsS3Bucket`, () => {
     it(`should return aws bucket`, () => {
       sandbox.stub(utilities, `getBaseConfig`).returns(

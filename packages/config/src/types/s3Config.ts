@@ -3,6 +3,8 @@ export type S3Config = {
   region: string;
   accessKeyId: string;
   secretAccessKey: string;
+  retryMode?: string;
+  maxRetryAttempts?: number;
   cloudfront?: {
     domainName: string;
     publicKeyId: string;

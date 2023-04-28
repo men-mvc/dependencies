@@ -16,7 +16,8 @@ import {
   ListObjectsV2Command,
   ListObjectsV2CommandOutput,
   PutObjectCommand,
-  PutObjectCommandOutput
+  PutObjectCommandOutput,
+  S3Client
 } from '@aws-sdk/client-s3';
 import {
   ReadableString,
@@ -65,9 +66,50 @@ describe(`MenS3Adapter Utility`, () => {
     }
   });
 
+  describe(`getS3ClientConfig`, () => {
+    it(`should return config defined in the config`, () => {
+      const s3Config = {
+        bucket: `fake-bucket`,
+        region: `us-east-1`,
+        maxRetryAttempts: 5,
+        retryMode: `standard`,
+        secretAccessKey: faker.datatype.uuid(),
+        accessKeyId: faker.datatype.uuid()
+      };
+      const config = generateBaseConfig({
+        fileSystem: {
+          s3: s3Config
+        }
+      });
+      const getBaseConfigStub = sinon
+        .stub(utilities, `getBaseConfig`)
+        .returns(config);
+      const result = adapter.getS3ClientConfig();
+
+      expect(result.region).toBe(s3Config.region);
+      expect(result.credentials.secretAccessKey).toBe(s3Config.secretAccessKey);
+      expect(result.credentials.accessKeyId).toBe(s3Config.accessKeyId);
+      expect(result.retryMode).toBe(s3Config.retryMode);
+      expect(result.maxAttempts).toBe(s3Config.maxRetryAttempts);
+
+      getBaseConfigStub.restore();
+    });
+  });
+
   describe(`getS3Client`, () => {
     it(`should always return the same instance`, () => {
       expect(adapter.getS3Client()).toBe(adapter.getS3Client());
+    });
+
+    it(`should invoke getS3ClientConfig`, () => {
+      const getS3ClientConfigSpy = sinon.spy(adapter, `getS3ClientConfig`);
+      adapter.getS3Client();
+      sinon.assert.calledOnce(getS3ClientConfigSpy);
+      getS3ClientConfigSpy.restore();
+    });
+
+    it(`should return s3 client instance`, () => {
+      expect(adapter.getS3Client() instanceof S3Client).toBeTruthy();
     });
   });
 

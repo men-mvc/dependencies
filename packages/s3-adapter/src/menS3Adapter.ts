@@ -17,6 +17,8 @@ import {
   getAwsS3Credentials,
   getCloudFrontConfig,
   getCloudFrontDomain,
+  getMaxRetryAttempts,
+  getRetryMode,
   getSignedUrlExpireTime
 } from './utilities';
 import { AwsCloudfrontSign, MenS3PutObjectCommandOutput } from './types';
@@ -26,20 +28,27 @@ export class MenS3Adapter {
   private s3Client: S3Client | undefined;
   private signClient: AwsCloudfrontSign | undefined;
 
-  public getS3Client = (): S3Client => {
-    if (this.s3Client) {
-      return this.s3Client;
-    }
-
+  // TODO: unit test
+  public getS3ClientConfig = () => {
     const bucketConfig = getAwsS3Credentials();
 
-    this.s3Client = new S3Client({
+    return {
+      retryMode: getRetryMode(),
+      maxAttempts: getMaxRetryAttempts(),
       region: bucketConfig.region,
       credentials: {
         accessKeyId: bucketConfig.accessKeyId,
         secretAccessKey: bucketConfig.secretAccessKey
       }
-    });
+    };
+  };
+
+  public getS3Client = (): S3Client => {
+    if (this.s3Client) {
+      return this.s3Client;
+    }
+
+    this.s3Client = new S3Client(this.getS3ClientConfig());
 
     return this.s3Client;
   };
