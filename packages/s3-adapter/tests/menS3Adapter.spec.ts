@@ -60,6 +60,7 @@ describe(`MenS3Adapter Utility`, () => {
   });
 
   afterEach(() => {
+    adapter.clearS3Client();
     getCloudFrontSignClientStub.restore();
     if (sendStub) {
       sendStub.restore();

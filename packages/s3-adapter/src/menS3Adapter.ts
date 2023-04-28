@@ -52,6 +52,10 @@ export class MenS3Adapter {
     return this.s3Client;
   };
 
+  public clearS3Client = () => {
+    this.s3Client = undefined;
+  }
+
   public getCloudFrontDomain = (): string => getCloudFrontDomain();
 
   public getCloudFrontSignClient = (): AwsCloudfrontSign => {
