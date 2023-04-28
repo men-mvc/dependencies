@@ -25,18 +25,7 @@ export const getCloudFrontDomain = (): string => {
   return domain.endsWith('/') ? domain.slice(0, -1) : domain;
 };
 
-// TODO: test when privateKey prop is not specified
-// TODO: also test when json is not valid
-const getPrivateKeyString = (): string => {
-  const configPrivateKey =
-    getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString;
-  if (!configPrivateKey) {
-    return ``;
-  }
-  const json = JSON.parse(configPrivateKey);
-
-  return json && json.privateKey ? json.privateKey : ``;
-};
+const getPrivateKeyString = (): string => getBaseConfig().fileSystem?.s3?.cloudfront?.privateKeyString ?? ``;
 
 export const getCloudFrontConfig = () => ({
   domainName: getCloudFrontDomain(),

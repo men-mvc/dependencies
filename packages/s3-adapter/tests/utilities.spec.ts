@@ -140,7 +140,7 @@ describe(`S3 Adapter Utilities`, () => {
               cloudfront: {
                 domainName: `http://cloudfront.example.com`,
                 publicKeyId: `test-public-key-id`,
-                privateKeyString: `{"privateKey": "test-private-key"}`,
+                privateKeyString: `test-private-key`,
                 signedUrlDurationInSeconds: 987654
               }
             } as S3Config
