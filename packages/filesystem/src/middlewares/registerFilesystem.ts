@@ -1,13 +1,12 @@
 import express, { Express, Request, Response, NextFunction } from 'express';
 import fileUpload from 'express-fileupload';
 import { asyncRequestHandler } from '@men-mvc/foundation';
-import { existsAsync, getUploadFilesizeLimit } from '../utilities/utilities';
-import { FileSystem, fileSystem, getPrivateStorageDirectory } from '..';
 import {
-  getStorageDirectory,
-  getPublicStorageDirectory,
-  mkdirAsync
+  createStorageDirectoryIfNotExists,
+  getUploadFilesizeLimit
 } from '../utilities/utilities';
+import { FileSystem, fileSystem } from '..';
+import { getPublicStorageDirectory } from '../utilities/utilities';
 import {
   viewPublicS3ObjectRequestHandler,
   viewPublicS3ObjectRoute
@@ -37,21 +36,7 @@ export const createStorageDirectoryIfNeeded = async (
     return next();
   }
 
-  if (!(await existsAsync(getStorageDirectory()))) {
-    await mkdirAsync(getStorageDirectory(), {
-      recursive: true
-    });
-  }
-  if (!(await existsAsync(getPublicStorageDirectory()))) {
-    await mkdirAsync(getPublicStorageDirectory(), {
-      recursive: true
-    });
-  }
-  if (!(await existsAsync(getPrivateStorageDirectory()))) {
-    await mkdirAsync(getPrivateStorageDirectory(), {
-      recursive: true
-    });
-  }
+  await createStorageDirectoryIfNotExists();
 
   FileSystem.storageDirCreated = true;
 

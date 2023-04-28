@@ -121,6 +121,27 @@ export const isPrivateFilepath = (storageFilepath: string) => {
   return storageFilepath.startsWith(getPrivateStorageDirname());
 };
 
+/**
+ * ! there is no dedicated unit test for this function. But this is tested in the integration test for registerFilesystem middleware
+ */
+export const createStorageDirectoryIfNotExists = async () => {
+  if (!(await existsAsync(getStorageDirectory()))) {
+    await mkdirAsync(getStorageDirectory(), {
+      recursive: true
+    });
+  }
+  if (!(await existsAsync(getPublicStorageDirectory()))) {
+    await mkdirAsync(getPublicStorageDirectory(), {
+      recursive: true
+    });
+  }
+  if (!(await existsAsync(getPrivateStorageDirectory()))) {
+    await mkdirAsync(getPrivateStorageDirectory(), {
+      recursive: true
+    });
+  }
+};
+
 export const removePublicStorageDirnameFrom = (
   filePathOrKey: string
 ): string => {

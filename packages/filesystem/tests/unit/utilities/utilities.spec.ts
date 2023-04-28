@@ -7,6 +7,8 @@ import {
 import sinon, { createSandbox, SinonSandbox } from 'sinon';
 import path from 'path';
 import { faker } from '@faker-js/faker';
+import { getServerDirectory, setServerDirectory } from '@men-mvc/foundation';
+import fs from 'fs';
 import {
   clearStorageDirectoryCache,
   getStorageDirectory,
@@ -20,12 +22,14 @@ import {
   getPathInStorage,
   getPrivateStorageDirname,
   getPublicStorageDirname,
-  isPrivateFilepath
+  isPrivateFilepath,
+  createStorageDirectoryIfNotExists
 } from '../../../src';
 import * as foundation from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
 import { generateBaseConfig } from '../../testUtilities';
 
+const serverDirectoryBeforeTests = getServerDirectory();
 describe(`Filesystem - Utilities`, () => {
   let sandbox: SinonSandbox;
 
@@ -38,6 +42,29 @@ describe(`Filesystem - Utilities`, () => {
     unsetEnvVariable('FILESYSTEM_STORAGE_DIRECTORY');
     clearStorageDirectoryCache();
     sandbox.restore();
+  });
+
+  describe(`createStorageDirectoryIfNotExists`, () => {
+    beforeAll(() => {
+      setServerDirectory(process.cwd());
+    });
+
+    afterAll(() => {
+      setServerDirectory(serverDirectoryBeforeTests);
+    });
+
+    it(`should create storage directory and its child directories`, async () => {
+      if (fs.existsSync(getStorageDirectory())) {
+        fs.rmdirSync(getStorageDirectory(), { recursive: true });
+      }
+      expect(fs.existsSync(getStorageDirectory())).toBeFalsy();
+      expect(fs.existsSync(getPrivateStorageDirectory())).toBeFalsy();
+      expect(fs.existsSync(getPublicStorageDirectory())).toBeFalsy();
+      await createStorageDirectoryIfNotExists();
+      expect(fs.existsSync(getStorageDirectory())).toBeTruthy();
+      expect(fs.existsSync(getPrivateStorageDirectory())).toBeTruthy();
+      expect(fs.existsSync(getPublicStorageDirectory())).toBeTruthy();
+    });
   });
 
   describe(`getDriver`, () => {
