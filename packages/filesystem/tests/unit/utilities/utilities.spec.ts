@@ -19,7 +19,8 @@ import {
   removeLeadingPathSep,
   getPathInStorage,
   getPrivateStorageDirname,
-  getPublicStorageDirname
+  getPublicStorageDirname,
+  isPrivateFilepath
 } from '../../../src';
 import * as foundation from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
@@ -180,7 +181,7 @@ describe(`Filesystem - Utilities`, () => {
   });
 
   describe(`isPublicFilepath`, () => {
-    it(`should return true when path starts with public storage identifier`, () => {
+    it(`should return true when path starts with public storage dirname`, () => {
       expect(
         isPublicFilepath(
           path.join(getPublicStorageDirname(), faker.system.filePath())
@@ -188,7 +189,7 @@ describe(`Filesystem - Utilities`, () => {
       ).toBeTruthy();
     });
 
-    it(`should return false when path does not stat with public storage identifier`, () => {
+    it(`should return false when path does not stat with public storage dirname`, () => {
       expect(isPublicFilepath(faker.system.filePath())).toBeFalsy();
     });
 
@@ -198,6 +199,28 @@ describe(`Filesystem - Utilities`, () => {
         faker.system.filePath()
       )}`;
       expect(isPublicFilepath(filepath)).toBeTruthy();
+    });
+  });
+
+  describe(`isPrivateFilepath`, () => {
+    it(`should return true when path starts with private storage dirname`, () => {
+      expect(
+        isPrivateFilepath(
+          path.join(getPrivateStorageDirname(), faker.system.filePath())
+        )
+      ).toBeTruthy();
+    });
+
+    it(`should return false when path does not stat with private storage dirname`, () => {
+      expect(isPrivateFilepath(faker.system.filePath())).toBeFalsy();
+    });
+
+    it(`should ignore leading path separator`, () => {
+      const filepath = `${path.sep}${path.join(
+        getPrivateStorageDirname(),
+        faker.system.filePath()
+      )}`;
+      expect(isPrivateFilepath(filepath)).toBeTruthy();
     });
   });
 

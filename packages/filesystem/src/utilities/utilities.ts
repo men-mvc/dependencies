@@ -115,6 +115,12 @@ export const isPublicFilepath = (storageFilepath: string) => {
   return storageFilepath.startsWith(getPublicStorageDirname());
 };
 
+export const isPrivateFilepath = (storageFilepath: string) => {
+  storageFilepath = removeLeadingPathSep(storageFilepath);
+
+  return storageFilepath.startsWith(getPrivateStorageDirname());
+};
+
 export const removePublicStorageDirnameFrom = (
   filePathOrKey: string
 ): string => {
