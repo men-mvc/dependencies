@@ -28,7 +28,6 @@ export class MenS3Adapter {
   private s3Client: S3Client | undefined;
   private signClient: AwsCloudfrontSign | undefined;
 
-  // TODO: unit test
   public getS3ClientConfig = () => {
     const bucketConfig = getAwsS3Credentials();
 
