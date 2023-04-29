@@ -30,12 +30,12 @@ export abstract class BaseApplication {
     return this.currentRequest;
   };
 
-  public static getInstance = (): BaseApplication => {
+  public static getInstance = <T extends BaseApplication>(): T => {
     if (!BaseApplication.instance) {
       throw new ApplicationNotInitialisedError();
     }
 
-    return BaseApplication.instance;
+    return BaseApplication.instance as T;
   };
 
   public setUp = async () => {
@@ -76,6 +76,8 @@ export abstract class BaseApplication {
   public static clearInstance = () => {
     BaseApplication.instance = null;
   };
+
+  abstract getController: <T>(token: string) => T;
 
   abstract initialise: () => Promise<void> | void;
 

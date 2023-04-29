@@ -9,6 +9,10 @@ export class TestApplication extends BaseApplication {
     super(app);
   }
 
+  getController = <T>(token: string): T => {
+    return {} as T;
+  };
+
   public initialise = async () => {};
 
   public initialisePreMiddlewares = () => {
