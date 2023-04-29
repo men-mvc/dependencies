@@ -6,7 +6,7 @@ import {
   Mailer,
   NodemailerMailSender
 } from '../../../src';
-import * as mailUtilities from '../../../src/mailer/utilities';
+import * as mailUtilities from '../../../src/utilities';
 
 describe(`Mailer`, () => {
   describe(`getInstance`, () => {

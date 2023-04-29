@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { generateUuid } from '@men-mvc/foundation';
+import { generateUuid } from './str';
 
 export const hashPassword = async (
   plainTextPassword: string

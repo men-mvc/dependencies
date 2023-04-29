@@ -1,5 +1,5 @@
 {
-  "name": "@men-mvc/essentials",
+  "name": "@men-mvc/mail",
   "version": "0.118.0",
   "description": "Package that contain essential components/ helper functions for Men MVC framework.",
   "private": false,

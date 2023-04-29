@@ -3,7 +3,7 @@ import {
   generateVerificationToken,
   hashPassword,
   validatePassword
-} from '../../../src';
+} from '../../../src/utilities/auth';
 
 describe(`Auth Utility`, () => {
   describe(`hashPassword`, () => {

@@ -3,7 +3,7 @@ import path from 'path';
 import {
   getServerDirectory,
   getAppRootDirectory
-} from '../utilities/foundation';
+} from './foundation';
 
 // exposing the function just to be able to mock in the test.
 export const getMailConfig = (): MailConfig => baseConfig.mail;

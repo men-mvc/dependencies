@@ -7,3 +7,4 @@ export * from './error';
 export * from './app';
 export * from './route';
 export * from './file';
+export * from './auth';

@@ -13,8 +13,8 @@ import {
   TemplateSendMailOptions,
   SendMailOptions
 } from '../../../src';
-import { getServerDirectory, setServerDirectory } from '../../../src';
-import * as mailUtilities from '../../../src/mailer/utilities';
+import { getServerDirectory, setServerDirectory } from '../../../src/foundation';
+import * as mailUtilities from '../../../src/utilities';
 
 const serverDirectoryBeforeTests = getServerDirectory();
 describe(`NodemailerMailSender`, () => {
