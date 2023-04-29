@@ -13,6 +13,5 @@ export * from './statusCodes';
 export * from './uploadedFile';
 export * from './validationErrorResponse';
 export * from './requestValidator';
-export * from './applicationEvents';
 export * from './applicationNotInitialisedError';
 export * from './fileNotPublicError';

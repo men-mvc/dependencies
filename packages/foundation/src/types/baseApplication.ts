@@ -1,11 +1,13 @@
 import { Express, Request } from 'express';
 import EventEmitter from 'events';
-import { ApplicationEvents } from './applicationEvents';
 import { ApplicationNotInitialisedError } from './applicationNotInitialisedError';
 
-// TODO: remove eventEmitter and ApplicationEvents type
 export abstract class BaseApplication {
   constructor(public app: Express) {}
+
+  /**
+   * TODO: add functionalities
+   */
   private static eventEmitter: EventEmitter | null;
   private static instance: BaseApplication | null;
   private currentRequest: Request | null = null;
@@ -39,15 +41,7 @@ export abstract class BaseApplication {
   public setUp = async () => {
     this.initialiseEventEmitter();
     await this.initialise();
-    BaseApplication.getEventEmitter().emit(
-      ApplicationEvents.beforePreMiddlewareRegistered,
-      this.app
-    );
     await this.initialisePreMiddlewares();
-    BaseApplication.getEventEmitter().emit(
-      ApplicationEvents.beforeRoutesRegistered,
-      this.app
-    );
     await this.registerRoutes();
     await this.initialisePostMiddlewares();
   };
