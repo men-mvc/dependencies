@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/filesystem",
-  "version": "0.117.0",
+  "version": "0.118.0",
   "description": "Package that includes shared variables, types and utility functions for MEN MVC framework.",
   "private": false,
   "type": "commonjs",
@@ -27,7 +27,7 @@
     "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
-    "@men-mvc/foundation": "^0.117.0",
+    "@men-mvc/foundation": "^0.118.0",
     "signed-url": "^1.0.3"
   },
   "devDependencies": {
