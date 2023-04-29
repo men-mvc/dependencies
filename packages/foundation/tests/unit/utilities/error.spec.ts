@@ -1,11 +1,12 @@
-import { getServerDirectory, setServerDirectory } from '@men-mvc/essentials'; // TODO: foundation should not import essentials
+import { Request, Response } from 'express';
 import path from 'path';
 import sinon, { SinonSpy } from 'sinon';
 import * as mockRequestErrorHandler from './mocks/errors/requestErrorHandler';
-import { Request, Response } from 'express';
 import {
   getApplicationErrorHandlerModulePath,
-  invokeRequestErrorHandler
+  invokeRequestErrorHandler,
+  getServerDirectory,
+  setServerDirectory
 } from '../../../src';
 import { requestErrorHandler } from './mocks/errors/requestErrorHandler';
 

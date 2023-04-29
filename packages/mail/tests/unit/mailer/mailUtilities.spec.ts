@@ -6,12 +6,14 @@ import path from 'path';
 import {
   clearCachedMailLogsDirname,
   getMailLogsDir,
-  getServerDirectory,
-  setServerDirectory,
   getMailTemplatesDir
 } from '../../../src';
-import * as foundationUtilities from '../../../src/utilities/foundation';
-import * as mailUtilities from '../../../src/mailer/utilities';
+import {
+  getServerDirectory,
+  setServerDirectory
+} from '../../../src/foundation';
+import * as foundationUtilities from '../../../src/foundation';
+import * as mailUtilities from '../../../src/utilities';
 
 const serverDirectoryBeforeTests = getServerDirectory();
 

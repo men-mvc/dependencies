@@ -3,7 +3,7 @@ import path from 'path';
 import {
   FileLogMailSender,
   mailLogDirectory
-} from '../../../src/mailer/fileLogMailSender';
+} from '../../../src';
 import { generateSendMailData } from './testUtilities';
 
 describe(`FileLogMailSender`, () => {

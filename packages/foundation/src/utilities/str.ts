@@ -25,6 +25,7 @@ const readReadableAsStringPromise = (readable: Readable): Promise<string> => {
   });
 };
 
+// TODO: unit test even thought this is already tested in the tests for other components
 export const readReadableAsString = async (
   readable: Readable
 ): Promise<string> => {

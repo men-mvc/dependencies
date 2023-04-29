@@ -1,6 +1,9 @@
-import { MailTemplateBuilder } from '../../../src/mailer/mailTemplateBuilder';
+import { MailTemplateBuilder } from '../../../src/mailTemplateBuilder';
 import { faker } from '@faker-js/faker';
-import { getServerDirectory, setServerDirectory } from '../../../src';
+import {
+  getServerDirectory,
+  setServerDirectory
+} from '../../../src/foundation';
 import path from 'path';
 
 const templateBuilder: MailTemplateBuilder = MailTemplateBuilder.getInstance();
