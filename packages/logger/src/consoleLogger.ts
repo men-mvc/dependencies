@@ -16,11 +16,7 @@ export class ConsoleLogger implements LoggerContract {
    * ! no unit test as it is not needed.
    */
   init = (): void => {
-    if (isLoggingDisabled()) {
-      return;
-    }
-
-    console.warn(`Using console logger is not recommended for production.`);
+    // does nothing
   };
 
   logError = (error: unknown | Error) => this.log(error);
