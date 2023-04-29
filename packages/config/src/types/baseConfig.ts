@@ -2,6 +2,7 @@ import { CacheDriver } from './cacheDriver';
 import { MailConfig } from './mailConfig';
 import { FileSystemDriver } from './fileSystemDriver';
 import { S3Config } from './s3Config';
+import { LoggerConfig } from './loggerConfig';
 
 export interface BaseConfig {
   app: {
@@ -35,7 +36,5 @@ export interface BaseConfig {
       signedUrlDurationInSeconds?: number;
     };
   };
-  logging?: {
-    disabled?: boolean;
-  };
+  logging?: LoggerConfig;
 }

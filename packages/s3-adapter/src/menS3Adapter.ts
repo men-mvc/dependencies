@@ -54,7 +54,7 @@ export class MenS3Adapter {
 
   public clearS3Client = () => {
     this.s3Client = undefined;
-  }
+  };
 
   public getCloudFrontDomain = (): string => getCloudFrontDomain();
 

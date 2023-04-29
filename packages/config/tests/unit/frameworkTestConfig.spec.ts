@@ -1,5 +1,8 @@
-import { FrameworkTestConfig } from '../../src/frameworkTestConfig';
-import { BaseConfig, frameworkTestConfig } from '../../src';
+import {
+  FrameworkTestConfig,
+  BaseConfig,
+  frameworkTestConfig
+} from '../../src';
 
 describe(`FrameworkTestConfig`, () => {
   describe(`getConfig`, () => {

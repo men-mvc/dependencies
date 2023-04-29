@@ -1,5 +1,15 @@
 export interface LoggerContract {
-  logError: <T>(error: Error | T) => void;
+  init: () => void;
+
+  logError: (error: unknown | Error) => void;
 
   logMessage: (message: string) => void;
 }
+
+export type SentryAdapter = {
+  init: (options: { dsn: string; tracesSampleRate: number }) => void;
+
+  captureException: (error: unknown | Error) => void;
+
+  captureMessage: (message: string) => void;
+};
