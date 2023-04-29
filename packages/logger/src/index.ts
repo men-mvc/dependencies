@@ -7,3 +7,4 @@ export * from './consoleLogger';
 export * from './types';
 export * from './logger';
 export * from './utilities';
+export * from './sentryLogger';

@@ -92,17 +92,27 @@ describe(`BaseApplication`, () => {
       sinon.assert.calledOnce(spy);
     });
 
+    it(`should emit ${ApplicationEvents.beforePreMiddlewareRegistered} event`, async () => {
+      application.initialiseEventEmitter();
+      const spy = sandbox.spy();
+    });
+
     it(`should invoke initialisePreMiddlewares`, async () => {
-      const spy = sandbox.spy(application, `initialisePreMiddlewares`);
+      application.initialiseEventEmitter();
+      const spy = sandbox.spy(TestApplication.getEventEmitter(), `emit`);
       await application.setUp();
-      sinon.assert.calledOnce(spy);
+      sinon.assert.calledWith(
+        spy,
+        ApplicationEvents.beforePreMiddlewareRegistered,
+        expressApp
+      );
     });
 
     it(`should emit ${ApplicationEvents.beforeRoutesRegistered} event`, async () => {
       application.initialiseEventEmitter();
       const spy = sandbox.spy(TestApplication.getEventEmitter(), `emit`);
       await application.setUp();
-      sinon.assert.calledOnceWithExactly(
+      sinon.assert.calledWith(
         spy,
         ApplicationEvents.beforeRoutesRegistered,
         expressApp

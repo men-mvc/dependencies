@@ -2,8 +2,7 @@ import { stub, SinonStub } from 'sinon';
 import { faker } from '@faker-js/faker';
 import * as path from 'path';
 import * as utilities from '../../src/utilities';
-import { AppProjectConfig } from '../../src/appProjectConfig';
-import { BaseConfig, appProjectConfigDir } from '../../src';
+import { AppProjectConfig, BaseConfig, appProjectConfigDir } from '../../src';
 import {
   mockGetAppEnv,
   mockGetAppProjectConfigDirectory,

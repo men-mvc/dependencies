@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import path from 'path';
-import { Config, frameworkTestConfig } from '../../src';
+import { faker } from '@faker-js/faker';
 import {
   mockGetAppEnv,
   mockGetAppProjectConfigDirectory,
@@ -9,6 +9,8 @@ import {
   mockIsTestEnvironment
 } from './testUtilities';
 import {
+  Config,
+  frameworkTestConfig,
   BaseConfig,
   MailAuthType,
   MailDriver,
@@ -16,7 +18,6 @@ import {
   FileSystemDriver,
   appProjectConfigDir
 } from '../../src';
-import { faker } from '@faker-js/faker';
 
 const testEnvVarsWithValidEnumValues = {
   MAIL_DRIVER: MailDriver.mail,
