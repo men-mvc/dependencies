@@ -1,18 +1,11 @@
-import {
-  FileSystemDriver,
-  S3Config,
-  setEnvVariable,
-  unsetEnvVariable
-} from '@men-mvc/config';
+import { FileSystemDriver, S3Config } from '@men-mvc/config';
 import sinon, { createSandbox, SinonSandbox } from 'sinon';
 import path from 'path';
 import { faker } from '@faker-js/faker';
 import { getServerDirectory, setServerDirectory } from '@men-mvc/foundation';
 import fs from 'fs';
 import {
-  clearStorageDirectoryCache,
   getStorageDirectory,
-  getDefaultAppStorageDirectory,
   parseMultiFormBooleanInput,
   getPublicStorageDirectory,
   isPublicFilepath,
@@ -25,7 +18,6 @@ import {
   isPrivateFilepath,
   createStorageDirectoryIfNotExists
 } from '../../../src';
-import * as foundation from '../../../src/foundation';
 import * as utilities from '../../../src/utilities/utilities';
 import { generateBaseConfig } from '../../testUtilities';
 
@@ -33,26 +25,44 @@ const serverDirectoryBeforeTests = getServerDirectory();
 describe(`Filesystem - Utilities`, () => {
   let sandbox: SinonSandbox;
 
+  beforeAll(() => {
+    setServerDirectory(process.cwd());
+  });
+
+  afterAll(() => {
+    setServerDirectory(serverDirectoryBeforeTests);
+  });
+
   beforeEach(() => {
     sandbox = createSandbox();
   });
 
   afterEach(() => {
-    unsetEnvVariable('SERVER_DIRECTORY');
-    unsetEnvVariable('FILESYSTEM_STORAGE_DIRECTORY');
-    clearStorageDirectoryCache();
     sandbox.restore();
   });
 
+  describe(`getStorageDirname`, () => {
+    it(`should return dirname in the config`, () => {
+      const dirname = faker.system.directoryPath();
+      const baseConfig = generateBaseConfig({
+        fileSystem: {
+          storageDirname: dirname
+        }
+      });
+      sandbox.stub(utilities, 'getBaseConfig').returns(baseConfig);
+      expect(utilities.getStorageDirname()).toEqual(dirname);
+    });
+
+    it(`should return storage by default`, () => {
+      const baseConfig = generateBaseConfig({
+        fileSystem: {}
+      });
+      sandbox.stub(utilities, 'getBaseConfig').returns(baseConfig);
+      expect(utilities.getStorageDirname()).toEqual(`storage`);
+    });
+  });
+
   describe(`createStorageDirectoryIfNotExists`, () => {
-    beforeAll(() => {
-      setServerDirectory(process.cwd());
-    });
-
-    afterAll(() => {
-      setServerDirectory(serverDirectoryBeforeTests);
-    });
-
     it(`should create storage directory and its child directories`, async () => {
       if (fs.existsSync(getStorageDirectory())) {
         fs.rmdirSync(getStorageDirectory(), { recursive: true });
@@ -253,20 +263,16 @@ describe(`Filesystem - Utilities`, () => {
 
   describe(`getPublicStorageDirectory`, () => {
     it(`should return storage + men-public`, () => {
-      const fakeStorageDir = faker.system.directoryPath();
-      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
       expect(getPublicStorageDirectory()).toBe(
-        path.join(fakeStorageDir, 'men-public')
+        path.join(path.join(process.cwd(), `storage`), 'men-public')
       );
     });
   });
 
   describe(`getPrivateStorageDirectory`, () => {
     it(`should return storage + men-private`, () => {
-      const fakeStorageDir = faker.system.directoryPath();
-      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
       expect(getPrivateStorageDirectory()).toBe(
-        path.join(fakeStorageDir, 'men-private')
+        path.join(path.join(process.cwd(), `storage`), 'men-private')
       );
     });
   });
@@ -294,40 +300,20 @@ describe(`Filesystem - Utilities`, () => {
     });
   });
 
-  describe(`getDefaultAppStorageDirectory`, () => {
-    it(`should return app root directory + dirname`, () => {
-      const appRootDir = faker.system.filePath();
-      const getAppRootDirectoryStub = sinon
-        .stub(foundation, `getAppRootDirectory`)
-        .returns(appRootDir);
-
-      expect(getDefaultAppStorageDirectory()).toBe(
-        path.join(appRootDir, 'storage')
-      );
-      getAppRootDirectoryStub.restore();
-    });
-  });
-
   describe(`getStorageDirectory`, () => {
-    afterAll(() => {
-      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
-    });
+    it(`should return app root directory + storage dirname`, () => {
+      const storageDirname = `testStorage`;
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          fileSystem: {
+            storageDirname
+          }
+        })
+      );
 
-    it(`should return value of FILESYSTEM_STORAGE_DIRECTORY env variable when var is set`, () => {
-      const fakeStorageDir = `~/home/custom_storage`;
-      setEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, fakeStorageDir);
-      const storageDir = getStorageDirectory();
-      expect(storageDir).toBe(fakeStorageDir);
-    });
-
-    it(`should return default storage directory if the FILESYSTEM_STORAGE_DIRECTORY var is not set`, () => {
-      unsetEnvVariable('FILESYSTEM_STORAGE_DIRECTORY');
-      const fakeDefaultStorageDirectory = faker.system.directoryPath();
-      const getDefaultAppStorageDirectoryStub = sinon
-        .stub(utilities, `getDefaultAppStorageDirectory`)
-        .returns(fakeDefaultStorageDirectory);
-      expect(getStorageDirectory()).toBe(fakeDefaultStorageDirectory);
-      getDefaultAppStorageDirectoryStub.restore();
+      expect(utilities.getStorageDirectory()).toBe(
+        path.join(process.cwd(), storageDirname)
+      );
     });
   });
 });

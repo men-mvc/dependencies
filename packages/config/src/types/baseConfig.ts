@@ -28,6 +28,7 @@ export interface BaseConfig {
     };
   };
   fileSystem: {
+    storageDirname?: string;
     storageDriver: FileSystemDriver;
     maxUploadLimit: number; // in bytes
     s3?: S3Config;

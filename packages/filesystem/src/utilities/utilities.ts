@@ -19,26 +19,11 @@ export const getBaseConfig = (): BaseConfig => baseConfig;
 export const isUsingCloudFront = (): boolean =>
   !!getBaseConfig().fileSystem?.s3?.cloudfront?.domainName;
 
-export const getDefaultAppStorageDirectory = (): string =>
-  path.join(getAppRootDirectory(), `storage`);
+export const getStorageDirname = () =>
+  getBaseConfig().fileSystem?.storageDirname ?? `storage`;
 
-let storageDirectoryCache: string | null = null;
-export const getStorageDirectory = (): string => {
-  if (storageDirectoryCache) {
-    return storageDirectoryCache;
-  }
-  let storageDirectory: string;
-  const envVarStorageDir = getEnvVariable(`FILESYSTEM_STORAGE_DIRECTORY`, ``);
-  if (envVarStorageDir) {
-    storageDirectory = envVarStorageDir;
-  } else {
-    storageDirectory = getDefaultAppStorageDirectory();
-  }
-
-  storageDirectoryCache = storageDirectory;
-
-  return storageDirectoryCache;
-};
+export const getStorageDirectory = (): string =>
+  path.join(getAppRootDirectory(), getStorageDirname());
 
 // ! if we are to add more logic in the future, unit test
 export const getPublicStorageDirname = () => {
@@ -55,10 +40,6 @@ export const getPublicStorageDirectory = (): string =>
 
 export const getPrivateStorageDirectory = (): string =>
   path.join(getStorageDirectory(), getPrivateStorageDirname());
-
-export const clearStorageDirectoryCache = () => {
-  storageDirectoryCache = null;
-};
 
 export const getPathInStorage = (clientFilepath: string, isPublic = false) => {
   clientFilepath = removeLeadingPathSep(clientFilepath);
