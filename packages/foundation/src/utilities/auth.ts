@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { generateUuid } from './str';
+import { InsufficientPermissionError } from '../types';
 
 export const hashPassword = async (
   plainTextPassword: string
@@ -16,3 +17,21 @@ export const validatePassword = async (
 
 export const generateVerificationToken = (): string =>
   `${generateUuid()}-${crypto.randomBytes(32).toString('hex')}`;
+
+export const authorizeSync = (
+  authFunc: () => boolean,
+  error?: string
+): void => {
+  if (!authFunc()) {
+    throw new InsufficientPermissionError(error);
+  }
+};
+
+export const authorizeAsync = async (
+  authFunc: () => Promise<boolean>,
+  error?: string
+): Promise<void> => {
+  if (!(await authFunc())) {
+    throw new InsufficientPermissionError(error);
+  }
+};

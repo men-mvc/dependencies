@@ -1,6 +1,6 @@
 import { Express, Request } from 'express';
 import EventEmitter from 'events';
-import { ApplicationNotInitialisedError } from './applicationNotInitialisedError';
+import { ApplicationNotInitialisedError } from './errors/applicationNotInitialisedError';
 
 export abstract class BaseApplication {
   constructor(public app: Express) {}

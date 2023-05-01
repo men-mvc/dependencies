@@ -1,4 +1,4 @@
-import { ValidationError } from './validationError';
+import { ValidationError } from './errors/validationError';
 import { ErrorResponse } from './errorResponse';
 
 export class ValidationErrorResponse extends ErrorResponse<{
