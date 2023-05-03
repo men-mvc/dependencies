@@ -191,5 +191,47 @@ describe(`MailTemplateBuilder`, () => {
         templateBuilder.build('multiLayerComponentsHolder', data, 'layout')
       ).toBe(expectedHtml);
     });
+
+    it(`should render re-usable component within the loop`, async () => {
+      const expectedHtml = `<html>
+  <head>
+    <title>Email Template</title>
+  </head>
+  <body>
+    <h3>Items</h3>
+  <div>
+  <h4>Item: id-1</h4>
+  <h4>Name: item 1</h4>
+  <h4>Price: 12.5</h4>
+</div>
+  <div>
+  <h4>Item: id-2</h4>
+  <h4>Name: item 2</h4>
+  <h4>Price: 12.1</h4>
+</div>
+
+  </body>
+</html>`;
+      expect(
+        templateBuilder.build(
+          'loop',
+          {
+            items: [
+              {
+                id: `id-1`,
+                name: `item 1`,
+                price: `12.5`
+              },
+              {
+                id: `id-2`,
+                name: `item 2`,
+                price: `12.1`
+              }
+            ]
+          },
+          'layout'
+        )
+      ).toBe(expectedHtml);
+    });
   });
 });

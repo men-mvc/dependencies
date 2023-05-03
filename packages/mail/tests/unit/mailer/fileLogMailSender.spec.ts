@@ -1,9 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import {
-  FileLogMailSender,
-  mailLogDirectory
-} from '../../../src';
+import { FileLogMailSender, mailLogDirectory } from '../../../src';
 import { generateSendMailData } from './testUtilities';
 
 describe(`FileLogMailSender`, () => {

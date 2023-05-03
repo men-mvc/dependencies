@@ -1,9 +1,6 @@
 import { baseConfig, MailConfig, MailDriver } from '@men-mvc/config';
 import path from 'path';
-import {
-  getServerDirectory,
-  getAppRootDirectory
-} from './foundation';
+import { getServerDirectory, getAppRootDirectory } from './foundation';
 
 // exposing the function just to be able to mock in the test.
 export const getMailConfig = (): MailConfig => baseConfig.mail;

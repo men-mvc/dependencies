@@ -84,9 +84,13 @@ export class MailTemplateBuilder {
 
   private initialise = () => {
     // helper function for including partial templates/ views
-    handlebars.registerHelper('include', (template, data) =>
-      this.getTemplateHtml(template, data.data.root)
-    );
+    handlebars.registerHelper('include', (template, data) => {
+      // TODO: mention this in documentation - (data?.data?.root)? data.data.root: data)
+      return this.getTemplateHtml(
+        template,
+        data?.data?.root ? data.data.root : data
+      );
+    });
   };
 
   private getTemplateDir = () => {
