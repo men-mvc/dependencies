@@ -5,10 +5,6 @@ import { BaseApplication } from '../../../src';
 class TestApplication extends BaseApplication {
   initialise = () => {};
 
-  getController = <T>(token: string) => {
-    return {} as T;
-  };
-
   registerRoutes = () => {
     // do nothing
   };
