@@ -77,8 +77,6 @@ export abstract class BaseApplication {
     BaseApplication.instance = null;
   };
 
-  abstract getController: <T>(token: string) => T;
-
   abstract initialise: () => Promise<void> | void;
 
   abstract initialisePreMiddlewares: () => Promise<void> | void;

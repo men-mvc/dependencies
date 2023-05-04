@@ -19,10 +19,6 @@ import { BaseApplication } from '../../../src';
 class TestApplication extends BaseApplication {
   initialise = () => {};
 
-  getController = <T>(token: string): T => {
-    return {} as T;
-  };
-
   initialisePreMiddlewares = () => {};
 
   registerRoutes = () => {};
