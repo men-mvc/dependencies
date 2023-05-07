@@ -15,7 +15,7 @@ export class ConsoleLogger implements LoggerContract {
   /**
    * ! no unit test as it is not needed.
    */
-  init = (): void => {
+  init = async (): Promise<void> => {
     // does nothing
   };
 

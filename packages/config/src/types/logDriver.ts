@@ -1,4 +1,5 @@
 export enum LogDriver {
   console = 'console',
-  sentry = 'sentry'
+  sentry = 'sentry',
+  cloudwatch = 'cloudwatch'
 }

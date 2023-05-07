@@ -12,6 +12,46 @@ describe(`Logger Utilities`, () => {
     sandbox.restore();
   });
 
+  describe(`getCloudwatchConfig`, () => {
+    it(`should return the values from the config`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          logging: {
+            cloudwatch: {
+              accessKeyId: `test-access-key-id`,
+              secretAccessKey: `test-access-key-secret`,
+              region: `eu-west-1`,
+              logGroupName: `test-log-group-name`,
+              logStreamPrefix: `test-log-stream-prefix`
+            }
+          }
+        })
+      );
+
+      const result = utilities.getCloudwatchConfig();
+      expect(result.accessKeyId).toBe(`test-access-key-id`);
+      expect(result.secretAccessKey).toBe(`test-access-key-secret`);
+      expect(result.region).toBe(`eu-west-1`);
+      expect(result.logStreamPrefix).toBe(`test-log-stream-prefix`);
+      expect(result.logGroupName).toBe(`test-log-group-name`);
+    });
+
+    it(`should return the default values`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          logging: {}
+        })
+      );
+
+      const result = utilities.getCloudwatchConfig();
+      expect(result.accessKeyId).toBe(``);
+      expect(result.secretAccessKey).toBe(``);
+      expect(result.region).toBe(``);
+      expect(result.logStreamPrefix).toBe(`men`);
+      expect(result.logGroupName).toBe(``);
+    });
+  });
+
   describe(`isLoggingDisabled`, () => {
     it(`should return true if logging is disabled`, () => {
       sandbox.stub(utilities, `getBaseConfig`).returns(

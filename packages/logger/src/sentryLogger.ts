@@ -1,7 +1,9 @@
 import { LoggerContract, SentryAdapter } from './types';
 import { getSentryConfig } from './utilities';
 
-// TODO: unit test.
+/**
+ * ! dependency - @sentry/node
+ */
 export class SentryLogger implements LoggerContract {
   private client: SentryAdapter | undefined;
 
@@ -19,7 +21,7 @@ export class SentryLogger implements LoggerContract {
     this.client = undefined;
   };
 
-  public init = (): void => {
+  public init = async (): Promise<void> => {
     const sentryConfig = getSentryConfig();
     this.getSentryClient().init(sentryConfig);
   };
