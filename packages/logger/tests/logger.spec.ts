@@ -1,8 +1,8 @@
 import { createSandbox, SinonSandbox } from 'sinon';
 import { LogDriver } from '@men-mvc/config';
-import { Logger, ConsoleLogger, SentryLogger } from '../src';
-import * as utilities from '../src/utilities';
+import { Logger, ConsoleLogger, SentryLogger, CloudWatchLogger } from '../src';
 import { generateBaseConfig } from './testUtilities';
+import * as utilities from '../src/utilities';
 
 describe(`Logger`, () => {
   let sandbox: SinonSandbox;
@@ -25,8 +25,7 @@ describe(`Logger`, () => {
           }
         })
       );
-      const instance = Logger.getInstance();
-      expect(instance instanceof ConsoleLogger).toBeTruthy();
+      expect(Logger.getInstance()).toBeInstanceOf(ConsoleLogger);
     });
 
     it(`should return the instance of the sentry logger`, () => {
@@ -37,11 +36,21 @@ describe(`Logger`, () => {
           }
         })
       );
-      const instance = Logger.getInstance();
-      expect(instance instanceof SentryLogger).toBeTruthy();
+      expect(Logger.getInstance()).toBeInstanceOf(SentryLogger);
     });
 
-    it(`should return the same instance`, () => {
+    it(`should return the instance of the cloudwatch logger`, () => {
+      sandbox.stub(utilities, `getBaseConfig`).returns(
+        generateBaseConfig({
+          logging: {
+            driver: LogDriver.cloudwatch
+          }
+        })
+      );
+      expect(Logger.getInstance()).toBeInstanceOf(CloudWatchLogger);
+    });
+
+    it(`should always return the same instance`, () => {
       const instance1 = Logger.getInstance();
       const instance2 = Logger.getInstance();
       expect(instance1).toBe(instance2);
