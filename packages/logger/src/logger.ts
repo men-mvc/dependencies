@@ -4,12 +4,10 @@ import { ConsoleLogger } from './consoleLogger';
 import { getLogDriver } from './utilities';
 import { SentryLogger } from './sentryLogger';
 import { CloudWatchLogger } from './cloudWatchLogger';
-import * as console from 'console';
 
 export class Logger {
   private static instance: LoggerContract | null;
 
-  // TODO: unit test for singleton and returning the right instance
   public static getInstance = (): LoggerContract => {
     if (Logger.instance) {
       return Logger.instance;
