@@ -132,9 +132,7 @@ export const removePublicStorageDirnameFrom = (
 
   // replace the first occurrence
   let finalPath = filePathOrKey.replace(getPublicStorageDirname(), '');
-  if (finalPath.startsWith(path.sep)) {
-    finalPath = finalPath.substring(1);
-  }
+  finalPath = removeLeadingPathSep(finalPath);
 
   return finalPath;
 };
