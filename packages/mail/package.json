@@ -1,6 +1,6 @@
 {
   "name": "@men-mvc/mail",
-  "version": "0.124.0",
+  "version": "0.125.0",
   "description": "Package that contain essential components/ helper functions for Men MVC framework.",
   "private": false,
   "publishConfig": {
@@ -23,7 +23,7 @@
     "jest": "CORE_TEST=1 jest"
   },
   "dependencies": {
-    "@men-mvc/foundation": "^0.124.0",
+    "@men-mvc/foundation": "^0.125.0",
     "bcryptjs": "^2.4.3",
     "express-fileupload": "^1.4.0",
     "handlebars": "^4.7.7",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
-    "@men-mvc/test": "^0.124.0",
+    "@men-mvc/test": "^0.125.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/express-fileupload": "^1.4.1",
     "@types/handlebars": "^4.1.0",
