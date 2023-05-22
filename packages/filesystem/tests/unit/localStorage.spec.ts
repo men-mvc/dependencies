@@ -229,6 +229,18 @@ describe(`LocalStorage Utility`, () => {
         `${baseUrl}/${removePublicStorageDirnameFrom(filename)}`
       );
     });
+
+    it(`should remove leading file separator`, () => {
+      const baseUrl = `http://localhost`;
+      const filename = path.join(
+        getPublicStorageDirname(),
+        `${faker.datatype.uuid()}.png`
+      );
+      sandbox.stub(foundation, `getAppBaseUrl`).returns(baseUrl);
+      expect(localStorage.getPublicUrl(`/${filename}`)).toBe(
+        `${baseUrl}/${removePublicStorageDirnameFrom(filename)}`
+      );
+    });
   });
 
   describe(`getAbsolutePath`, () => {

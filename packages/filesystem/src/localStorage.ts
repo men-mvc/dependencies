@@ -63,6 +63,8 @@ export class LocalStorage implements Storage {
   };
 
   public getPublicUrl = (filepath: string): string => {
+    filepath = removeLeadingPathSep(filepath);
+
     return `${getAppBaseUrl()}/${removePublicStorageDirnameFrom(filepath)}`;
   };
 
