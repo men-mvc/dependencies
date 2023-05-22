@@ -25,6 +25,7 @@ import { delay, generateBaseConfig } from '../testUtilities';
 import { viewLocalSignedUrlRoute } from '../../src/localFileSignedUrlHandler';
 import * as utilities from '../../src/utilities/utilities';
 import * as foundation from '../../src/foundation';
+import { removeLeadingPathSep } from '../../lib';
 
 const localStorage = new LocalStorage();
 const fakeFileContent: string = faker.lorem.paragraph();
@@ -226,7 +227,9 @@ describe(`LocalStorage Utility`, () => {
       );
       sandbox.stub(foundation, `getAppBaseUrl`).returns(baseUrl);
       expect(localStorage.getPublicUrl(filename)).toBe(
-        `${baseUrl}/${removePublicStorageDirnameFrom(filename)}`
+        `${baseUrl}/${removeLeadingPathSep(
+          removePublicStorageDirnameFrom(filename)
+        )}`
       );
     });
 
@@ -239,6 +242,15 @@ describe(`LocalStorage Utility`, () => {
       sandbox.stub(foundation, `getAppBaseUrl`).returns(baseUrl);
       expect(localStorage.getPublicUrl(`/${filename}`)).toBe(
         `${baseUrl}/${removePublicStorageDirnameFrom(filename)}`
+      );
+    });
+
+    it(`should remove leading file separator even if the file is not public`, async () => {
+      const baseUrl = `http://localhost`;
+      const filename = `${faker.datatype.uuid()}.png`;
+      sandbox.stub(foundation, `getAppBaseUrl`).returns(baseUrl);
+      expect(localStorage.getPublicUrl(`/${filename}`)).toBe(
+        `${baseUrl}/${filename}`
       );
     });
   });

@@ -63,7 +63,9 @@ export class LocalStorage implements Storage {
   };
 
   public getPublicUrl = (filepath: string): string => {
-    return `${getAppBaseUrl()}/${removePublicStorageDirnameFrom(filepath)}`;
+    return `${getAppBaseUrl()}/${removeLeadingPathSep(
+      removePublicStorageDirnameFrom(filepath)
+    )}`;
   };
 
   public verifySignedUrl = (signedUrl: string): boolean =>
