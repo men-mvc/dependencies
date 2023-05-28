@@ -403,6 +403,12 @@ describe(`MenS3Adapter Utility`, () => {
         )
       );
     });
+
+    it(`should not invoke send when keys is empty`, async () => {
+      sendStub = mockSend({} as DeleteObjectsCommandOutput);
+      await adapter.deleteFiles([]);
+      sinon.assert.notCalled(sendStub);
+    });
   });
 
   describe(`exists`, () => {

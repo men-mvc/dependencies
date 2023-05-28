@@ -144,6 +144,10 @@ export class MenS3Adapter {
   };
 
   public deleteFiles = async (pathsOrKeys: string[]): Promise<void> => {
+    if (pathsOrKeys.length < 1) {
+      return;
+    }
+
     const command = new DeleteObjectsCommand({
       Bucket: getAwsS3Bucket(),
       Delete: {
