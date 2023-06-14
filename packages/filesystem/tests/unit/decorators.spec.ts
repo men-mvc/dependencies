@@ -7,11 +7,13 @@ import { faker } from '@faker-js/faker';
 import {
   ValidateMultipartRequest,
   ValidateMultipartRequestAsync,
-  MultipartRequest
+  MultipartRequest,
+  ParseFormData
 } from '../../src';
 import * as decorators from '../../src/decorators';
 import * as utilities from '../../src/utilities/utilities';
-import { validateImage } from '../../src';
+import { validateImage, FileSystem } from '../../src';
+import { invokeAppRequestErrorHandler } from '../../lib';
 
 type MultiForm = {
   name: string;
@@ -86,6 +88,11 @@ class MockController {
   ) {
     return req.parsedFormData;
   }
+
+  @ParseFormData()
+  public async parseFormData(req: MultipartRequest<MultiForm>, res: Response) {
+    return req.parsedFormData;
+  }
 }
 
 const controller = new MockController();
@@ -106,6 +113,7 @@ describe(`Decorators`, () => {
   });
 
   afterEach(() => {
+    FileSystem.resetInstance();
     if (buildValidationErrorResponseStub) {
       buildValidationErrorResponseStub.restore();
     }
@@ -517,6 +525,80 @@ describe(`Decorators`, () => {
         mockRequestObject.body.name
       );
       expect((callArgs[2] as Response).statusCode).toBe(422);
+    });
+  });
+
+  describe(`parseFormData`, () => {
+    it(`should parse the form data with uploaded file`, async () => {
+      const mockRequestObject = {
+        files: {
+          photoFile: generateExpressUploadedFile()
+        },
+        body: {
+          name: faker.name.fullName()
+        }
+      };
+
+      const result = await controller.parseFormData(
+        mockRequestObject as unknown as MultipartRequest<MultiForm>,
+        {} as Response
+      );
+
+      expect(result).not.toBeUndefined();
+      if (!result) {
+        return;
+      }
+      expect(result.photoFile?.originalFilename).toBe(
+        mockRequestObject.files.photoFile.name
+      );
+      expect(result.photoFile?.filepath).toBe(
+        mockRequestObject.files.photoFile.tempFilePath
+      );
+      expect(result.name).toBe(mockRequestObject.body.name);
+    });
+
+    it(`should set field field to undefined when the field is not present in the form data`, async () => {
+      const mockRequestObject = {
+        files: {},
+        body: {
+          name: faker.name.fullName()
+        }
+      };
+
+      const result = await controller.parseFormData(
+        mockRequestObject as unknown as MultipartRequest<MultiForm>,
+        {} as Response
+      );
+      expect(result).not.toBeUndefined();
+      if (!result) {
+        return;
+      }
+      expect(result.name).toBe(mockRequestObject.body.name);
+      expect(result.photoFile).toBeUndefined();
+    });
+
+    it(`should invoke app request error handle when there is an error parsing the form data`, async () => {
+      FileSystem.resetInstance();
+      const parseFormDataStub = sinon
+        .stub(FileSystem.getInstance(), 'parseFormData')
+        .throws(new Error('Unable to parse form data.'));
+      const mockRequestObject = {
+        files: {},
+        body: {
+          name: faker.name.fullName()
+        }
+      };
+
+      const result = await controller.parseFormData(
+        mockRequestObject as unknown as MultipartRequest<MultiForm>,
+        {} as Response
+      );
+
+      expect(result).toBeUndefined();
+      sinon.assert.calledOnce(invokeRequestErrorHandlerStub);
+      const callArgs = invokeRequestErrorHandlerStub.getCalls()[0].args;
+      expect((callArgs[0] as Error).message).toBe(`Unable to parse form data.`);
+      parseFormDataStub.restore();
     });
   });
 
