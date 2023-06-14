@@ -96,3 +96,29 @@ export const ValidateMultipartRequest = (
     return descriptor;
   };
 };
+
+export const ParseFormData = () => {
+  return (
+    target: unknown,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) => {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (
+      req: MultipartRequest<Record<string, unknown>>,
+      res: Response,
+      ...args: unknown[]
+    ) {
+      try {
+        req.parsedFormData = await FileSystem.getInstance().parseFormData(req);
+      } catch (e: unknown) {
+        return invokeAppRequestErrorHandler(e as Error, req, res);
+      }
+
+      return originalMethod.apply(this, [req, res, ...args]);
+    };
+
+    return descriptor;
+  };
+};
