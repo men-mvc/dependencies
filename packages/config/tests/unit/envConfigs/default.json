@@ -13,11 +13,13 @@
   },
   "mail": {
     "driver": "",
-    "user": "",
-    "password": "",
-    "host": "smtp.mailtrap.io",
-    "port": 2525,
-    "service": "Gmail"
+    "nodemailer": {
+      "user": "",
+      "password": "",
+      "host": "smtp.mailtrap.io",
+      "port": 2525,
+      "service": "Gmail"
+    }
   },
   "cache": {
     "driver": "redis",

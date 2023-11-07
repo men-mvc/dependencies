@@ -14,11 +14,13 @@ export const frameworkTestConfig: BaseConfig = {
     emailVerificationLinkDuration: 60 * 60 * 2
   },
   mail: {
-    user: `test-mail@test.com`,
-    password: `Testing123!`,
-    host: `testhost.com`,
-    port: 1234,
-    service: `TestService`
+    nodemailer: {
+      user: `test-mail@test.com`,
+      password: `Testing123!`,
+      host: `testhost.com`,
+      port: 1234,
+      service: `TestService`
+    }
   },
   cache: {
     driver: CacheDriver.inMemory,

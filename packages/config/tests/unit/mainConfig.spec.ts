@@ -68,8 +68,12 @@ describe(`Config`, () => {
       const config = Config.getConfig<BaseConfig>();
 
       expect(config.app.name).toBe(testStagingConfig.app.name);
-      expect(config.mail.user).toBe(testStagingConfig.mail.user);
-      expect(config.mail.password).toBe(testStagingConfig.mail.password);
+      expect(config.mail.nodemailer?.user).toBe(
+        testStagingConfig.mail.nodemailer.user
+      );
+      expect(config.mail.nodemailer?.password).toBe(
+        testStagingConfig.mail.nodemailer.password
+      );
     });
 
     it(`should return the same instance`, () => {
@@ -188,7 +192,7 @@ describe(`Config`, () => {
           });
           const config = Config.getConfig<BaseConfig>();
 
-          expect(config.mail.authType).toBe(expectedAuthType);
+          expect(config.mail.nodemailer?.authType).toBe(expectedAuthType);
         });
       });
 

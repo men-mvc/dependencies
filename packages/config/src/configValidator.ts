@@ -11,7 +11,7 @@ export class ConfigValidator {
   constructor(private config: BaseConfig) {}
 
   private hasValidMailAuthType = (): boolean => {
-    if (!this.config.mail?.authType) {
+    if (!this.config.mail?.nodemailer?.authType) {
       return true;
     }
 
@@ -19,7 +19,8 @@ export class ConfigValidator {
       .map((tuple) => tuple[1])
       .some(
         (type) =>
-          type.toLowerCase() === this.config.mail.authType?.toLowerCase()
+          type.toLowerCase() ===
+          this.config.mail?.nodemailer?.authType?.toLowerCase()
       );
   };
 

@@ -6,8 +6,10 @@
     "port": 9000
   },
   "mail": {
-    "user": "staging-user",
-    "password": "staging-password"
+    "nodemailer": {
+      "user": "staging-user",
+      "password": "staging-password"
+    }
   },
   "cache": {
     "redis": {
