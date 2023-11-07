@@ -139,7 +139,9 @@ describe(`AppProjectConfig`, () => {
       });
       const actualConfig = instance.getConfig<BaseConfig>();
 
-      expect(actualConfig.mail.user).toBe(testStagingConfigJson.mail.user);
+      expect(actualConfig.mail?.nodemailer?.user).toBe(
+        testStagingConfigJson.mail.nodemailer.user
+      );
     });
 
     it(`should allow to define complex array value in JSON config files`, () => {
@@ -477,13 +479,21 @@ describe(`AppProjectConfig`, () => {
       testDefaultConfigJson.auth.passwordResetLinkDuration
     );
     expect(actualConfig.mail.driver).toBe(testDefaultConfigJson.mail.driver);
-    expect(actualConfig.mail.user).toBe(testDefaultConfigJson.mail.user);
-    expect(actualConfig.mail.password).toBe(
-      testDefaultConfigJson.mail.password
+    expect(actualConfig.mail.nodemailer?.user).toBe(
+      testDefaultConfigJson.mail.nodemailer.user
     );
-    expect(actualConfig.mail.host).toBe(testDefaultConfigJson.mail.host);
-    expect(actualConfig.mail.port).toBe(testDefaultConfigJson.mail.port);
-    expect(actualConfig.mail.service).toBe(testDefaultConfigJson.mail.service);
+    expect(actualConfig.mail.nodemailer?.password).toBe(
+      testDefaultConfigJson.mail.nodemailer.password
+    );
+    expect(actualConfig.mail.nodemailer?.host).toBe(
+      testDefaultConfigJson.mail.nodemailer.host
+    );
+    expect(actualConfig.mail.nodemailer?.port).toBe(
+      testDefaultConfigJson.mail.nodemailer.port
+    );
+    expect(actualConfig.mail.nodemailer?.service).toBe(
+      testDefaultConfigJson.mail.nodemailer.service
+    );
     expect(actualConfig.cache.driver).toBe(testDefaultConfigJson.cache.driver);
     expect(actualConfig.cache.redis?.port).toBe(
       testDefaultConfigJson.cache.redis.port
@@ -508,9 +518,11 @@ describe(`AppProjectConfig`, () => {
   const assertStagingOnlyConfig = (actualConfig: BaseConfig) => {
     expect(actualConfig.app.name).toBe(testStagingConfigJson.app.name);
     expect(actualConfig.server.port).toBe(testStagingConfigJson.server.port);
-    expect(actualConfig.mail.user).toBe(testStagingConfigJson.mail.user);
-    expect(actualConfig.mail.password).toBe(
-      testStagingConfigJson.mail.password
+    expect(actualConfig.mail.nodemailer?.user).toBe(
+      testStagingConfigJson.mail.nodemailer.user
+    );
+    expect(actualConfig.mail.nodemailer?.password).toBe(
+      testStagingConfigJson.mail.nodemailer.password
     );
     expect(actualConfig.cache.redis?.host).toBe(
       testStagingConfigJson.cache.redis.host
@@ -537,8 +549,10 @@ describe(`AppProjectConfig`, () => {
     expect(actualConfig.auth.secret).toBe(
       testEnvVariables.AUTH_TOKEN_SECRET_KEY
     );
-    expect(actualConfig.mail.user).toBe(testEnvVariables.MAIL_USER);
-    expect(actualConfig.mail.password).toBe(testEnvVariables.MAIL_PASSWORD);
+    expect(actualConfig.mail.nodemailer?.user).toBe(testEnvVariables.MAIL_USER);
+    expect(actualConfig.mail.nodemailer?.password).toBe(
+      testEnvVariables.MAIL_PASSWORD
+    );
     // ensure that default and env-specific does not override
     expect(actualConfig.fileSystem).toBeUndefined();
   };
@@ -559,11 +573,19 @@ describe(`AppProjectConfig`, () => {
       testDefaultConfigJson.auth.emailVerificationLinkDuration
     );
     expect(actualConfig.mail.driver).toBe(testDefaultConfigJson.mail.driver);
-    expect(actualConfig.mail.user).toBe(testEnvVariables.MAIL_USER);
-    expect(actualConfig.mail.password).toBe(testEnvVariables.MAIL_PASSWORD);
-    expect(actualConfig.mail.host).toBe(testDefaultConfigJson.mail.host);
-    expect(actualConfig.mail.port).toBe(testDefaultConfigJson.mail.port);
-    expect(actualConfig.mail.service).toBe(testDefaultConfigJson.mail.service);
+    expect(actualConfig.mail.nodemailer?.user).toBe(testEnvVariables.MAIL_USER);
+    expect(actualConfig.mail.nodemailer?.password).toBe(
+      testEnvVariables.MAIL_PASSWORD
+    );
+    expect(actualConfig.mail.nodemailer?.host).toBe(
+      testDefaultConfigJson.mail.nodemailer.host
+    );
+    expect(actualConfig.mail.nodemailer?.port).toBe(
+      testDefaultConfigJson.mail.nodemailer.port
+    );
+    expect(actualConfig.mail.nodemailer?.service).toBe(
+      testDefaultConfigJson.mail.nodemailer.service
+    );
     expect(actualConfig.cache.driver).toBe(testDefaultConfigJson.cache.driver);
     expect(actualConfig.cache.redis?.port).toBe(
       testStagingConfigJson.cache.redis.port

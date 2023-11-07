@@ -1,8 +1,7 @@
 import { MailAuthType } from './mailAuthType';
 import { MailDriver } from './mailDriver';
 
-export type MailConfig = {
-  driver?: MailDriver;
+export type NodemailerMailConfig = {
   user: string;
   password?: string;
   host?: string;
@@ -17,4 +16,16 @@ export type MailConfig = {
   refreshToken?: string;
   accessToken?: string;
   expires?: number;
+};
+
+export type SesMailConfig = {
+  region?: string;
+  accessKeyId?: string;
+  secretAccessKey?: string;
+};
+
+export type MailConfig = {
+  driver?: MailDriver;
+  nodemailer?: NodemailerMailConfig;
+  ses?: SesMailConfig;
 };

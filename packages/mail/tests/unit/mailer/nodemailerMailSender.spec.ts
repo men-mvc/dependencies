@@ -184,7 +184,10 @@ describe(`NodemailerMailSender`, () => {
 
     it(`should return login transport options when authType is empty`, () => {
       const fakeMailConfig: MailConfig = generateMailConfig({
-        authType: undefined
+        nodemailer: {
+          user: '',
+          authType: undefined
+        }
       });
       getMailConfigStub = mockGetMailConfig(fakeMailConfig);
       const transportOptions = mailer._getTransportOptions();
@@ -194,7 +197,10 @@ describe(`NodemailerMailSender`, () => {
 
     it(`should return login transport options when authType is LOGIN`, () => {
       const fakeMailConfig: MailConfig = generateMailConfig({
-        authType: MailAuthType.Login
+        nodemailer: {
+          user: '',
+          authType: MailAuthType.Login
+        }
       });
       getMailConfigStub = mockGetMailConfig(fakeMailConfig);
       const transportOptions = mailer._getTransportOptions();
@@ -204,7 +210,10 @@ describe(`NodemailerMailSender`, () => {
 
     it(`should return OAuth2 transport options when authType is OAuth2`, () => {
       const fakeMailConfig: MailConfig = generateMailConfig({
-        authType: MailAuthType.OAuth2
+        nodemailer: {
+          user: '',
+          authType: MailAuthType.OAuth2
+        }
       });
       getMailConfigStub = mockGetMailConfig(fakeMailConfig);
       const transportOptions = mailer._getTransportOptions();
@@ -223,13 +232,15 @@ describe(`NodemailerMailSender`, () => {
       transportOptions: TransportOptions,
       fakeMailConfig: MailConfig
     ) => {
-      expect(transportOptions.host).toBe(fakeMailConfig.host);
-      expect(transportOptions.port).toBe(fakeMailConfig.port);
-      expect(transportOptions.secure).toBe(fakeMailConfig.secure);
-      expect(transportOptions.tls?.ciphers).toBe(fakeMailConfig.tlsCiphers);
-      expect(transportOptions.service).toBe(fakeMailConfig.service);
+      expect(transportOptions.host).toBe(fakeMailConfig.nodemailer?.host);
+      expect(transportOptions.port).toBe(fakeMailConfig.nodemailer?.port);
+      expect(transportOptions.secure).toBe(fakeMailConfig.nodemailer?.secure);
+      expect(transportOptions.tls?.ciphers).toBe(
+        fakeMailConfig.nodemailer?.tlsCiphers
+      );
+      expect(transportOptions.service).toBe(fakeMailConfig.nodemailer?.service);
       expect(transportOptions.tls?.rejectUnauthorized).toBe(
-        fakeMailConfig.tlsRejectUnauthorized
+        fakeMailConfig.nodemailer?.tlsRejectUnauthorized
       );
     };
 
@@ -239,8 +250,12 @@ describe(`NodemailerMailSender`, () => {
     ) => {
       assertCommonTransportOptions(transportOptions, fakeMailConfig);
       if (transportOptions.auth?.type === undefined) {
-        expect(transportOptions.auth.user).toBe(fakeMailConfig.user);
-        expect(transportOptions.auth.pass).toBe(fakeMailConfig.password);
+        expect(transportOptions.auth.user).toBe(
+          fakeMailConfig.nodemailer?.user
+        );
+        expect(transportOptions.auth.pass).toBe(
+          fakeMailConfig.nodemailer?.password
+        );
       } else {
         throw new Error(`Transport type is not LOGIN.`);
       }
@@ -253,18 +268,26 @@ describe(`NodemailerMailSender`, () => {
       assertCommonTransportOptions(transportOptions, fakeMailConfig);
       if (transportOptions.auth?.type === MailAuthType.OAuth2) {
         expect(transportOptions.auth.type).toBe(MailAuthType.OAuth2);
-        expect(transportOptions.auth.user).toBe(fakeMailConfig.user);
-        expect(transportOptions.auth.pass).toBe(fakeMailConfig.password);
-        expect(transportOptions.auth.expires).toBe(fakeMailConfig.expires);
+        expect(transportOptions.auth.user).toBe(
+          fakeMailConfig.nodemailer?.user
+        );
+        expect(transportOptions.auth.pass).toBe(
+          fakeMailConfig.nodemailer?.password
+        );
+        expect(transportOptions.auth.expires).toBe(
+          fakeMailConfig.nodemailer?.expires
+        );
         expect(transportOptions.auth.accessToken).toBe(
-          fakeMailConfig.accessToken
+          fakeMailConfig.nodemailer?.accessToken
         );
         expect(transportOptions.auth.refreshToken).toBe(
-          fakeMailConfig.refreshToken
+          fakeMailConfig.nodemailer?.refreshToken
         );
-        expect(transportOptions.auth.clientId).toBe(fakeMailConfig.clientId);
+        expect(transportOptions.auth.clientId).toBe(
+          fakeMailConfig.nodemailer?.clientId
+        );
         expect(transportOptions.auth.clientSecret).toBe(
-          fakeMailConfig.clientSecret
+          fakeMailConfig.nodemailer?.clientSecret
         );
       } else {
         throw new Error(`Transport type is not OAuth2.`);

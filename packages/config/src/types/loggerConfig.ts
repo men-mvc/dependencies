@@ -13,5 +13,5 @@ export type LoggerConfig = {
     accessKeyId: string;
     secretAccessKey: string;
     logStreamPrefix?: string;
-  }
+  };
 };
