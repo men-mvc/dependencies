@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { MailAuthType } from '@men-mvc/config';
+import { MailAuthType, NodemailerMailConfig } from '@men-mvc/config';
 import {
   CommonTransportOptions,
   isHtmlSendMailOptions,
@@ -45,13 +45,13 @@ export class NodemailerMailSender implements MailSender {
     const mailConfig = getMailConfig();
 
     return {
-      host: mailConfig.host,
-      port: mailConfig.port,
-      secure: mailConfig.secure,
-      service: mailConfig.service,
+      host: mailConfig.nodemailer?.host,
+      port: mailConfig.nodemailer?.port,
+      secure: mailConfig.nodemailer?.secure,
+      service: mailConfig.nodemailer?.service,
       tls: {
-        ciphers: mailConfig.tlsCiphers,
-        rejectUnauthorized: mailConfig.tlsRejectUnauthorized
+        ciphers: mailConfig.nodemailer?.tlsCiphers,
+        rejectUnauthorized: mailConfig.nodemailer?.tlsRejectUnauthorized
       }
     };
   };
@@ -64,13 +64,13 @@ export class NodemailerMailSender implements MailSender {
       ...commonOptions,
       auth: {
         type: MailAuthType.OAuth2,
-        user: mailConfig.user,
-        pass: mailConfig.password,
-        clientId: mailConfig.clientId,
-        clientSecret: mailConfig.clientSecret,
-        refreshToken: mailConfig.refreshToken,
-        accessToken: mailConfig.accessToken,
-        expires: mailConfig.expires
+        user: mailConfig.nodemailer?.user ?? '',
+        pass: mailConfig.nodemailer?.password,
+        clientId: mailConfig.nodemailer?.clientId,
+        clientSecret: mailConfig.nodemailer?.clientSecret,
+        refreshToken: mailConfig.nodemailer?.refreshToken,
+        accessToken: mailConfig.nodemailer?.accessToken,
+        expires: mailConfig.nodemailer?.expires
       }
     };
   };
@@ -82,8 +82,8 @@ export class NodemailerMailSender implements MailSender {
     return {
       ...commonOptions,
       auth: {
-        user: mailConfig.user,
-        pass: mailConfig.password ?? ``
+        user: mailConfig.nodemailer?.user ?? ``,
+        pass: mailConfig.nodemailer?.password ?? ``
       }
     };
   };
@@ -94,7 +94,7 @@ export class NodemailerMailSender implements MailSender {
     }
     const mailConfig = getMailConfig();
     let transportOptions: TransportOptions;
-    if (mailConfig.authType?.toLowerCase() === 'oauth2') {
+    if (mailConfig.nodemailer?.authType?.toLowerCase() === 'oauth2') {
       transportOptions = this.getOAuth2TransportOptions();
     } else {
       // login - default

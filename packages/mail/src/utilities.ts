@@ -9,11 +9,11 @@ export const getMailDriver = (): MailDriver | undefined =>
   getMailConfig().driver;
 
 export const isOAuth2AuthType = (): boolean =>
-  getMailConfig().authType?.toLowerCase() === 'oauth2';
+  getMailConfig().nodemailer?.authType?.toLowerCase() === 'oauth2';
 
 export const isLoginAuthType = (): boolean =>
-  getMailConfig().authType?.toLowerCase() === 'login' ||
-  !getMailConfig().authType; // default.
+  getMailConfig().nodemailer?.authType?.toLowerCase() === 'login' ||
+  !getMailConfig().nodemailer?.authType; // default.
 
 // TODO: add custom method auth type
 

@@ -15,26 +15,25 @@ export const generateMailConfig = (
 ): MailConfig => {
   const defaultConfig: MailConfig = {
     driver: _.sample(Object.entries(MailDriver).map((tuple) => tuple[1])),
-    user: faker.datatype.uuid(),
-    password: faker.datatype.uuid(),
-    host: faker.internet.url(),
-    port: faker.internet.port(),
-    service: faker.lorem.word(),
-    secure: faker.datatype.boolean(),
-    authType: _.sample(Object.entries(MailAuthType).map((tuple) => tuple[1])),
-    tlsCiphers: faker.lorem.word(),
-    tlsRejectUnauthorized: faker.datatype.boolean(),
-    clientId: faker.datatype.uuid(),
-    clientSecret: faker.datatype.uuid(),
-    refreshToken: faker.datatype.uuid(),
-    accessToken: faker.datatype.uuid(),
-    expires: faker.datatype.number()
+    nodemailer: {
+      user: faker.datatype.uuid(),
+      password: faker.datatype.uuid(),
+      host: faker.internet.url(),
+      port: faker.internet.port(),
+      service: faker.lorem.word(),
+      secure: faker.datatype.boolean(),
+      authType: _.sample(Object.entries(MailAuthType).map((tuple) => tuple[1])),
+      tlsCiphers: faker.lorem.word(),
+      tlsRejectUnauthorized: faker.datatype.boolean(),
+      clientId: faker.datatype.uuid(),
+      clientSecret: faker.datatype.uuid(),
+      refreshToken: faker.datatype.uuid(),
+      accessToken: faker.datatype.uuid(),
+      expires: faker.datatype.number()
+    }
   };
 
-  return {
-    ...defaultConfig,
-    ...override
-  };
+  return _.merge(defaultConfig, override);
 };
 
 export const generateLoginTransportOptions = (): LoginTransportOptions => ({

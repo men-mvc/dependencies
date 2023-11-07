@@ -12,11 +12,13 @@ import { NodemailerMailSender } from './nodemailerMailSender';
  */
 const loginAuthMailConfig: MailConfig = {
   driver: MailDriver.mail,
-  host: `sandbox.smtp.mailtrap.io`,
-  port: 25,
-  user: `xxx`,
-  password: `xxx`,
-  authType: MailAuthType.Login
+  nodemailer: {
+    host: `sandbox.smtp.mailtrap.io`,
+    port: 25,
+    user: `xxx`,
+    password: `xxx`,
+    authType: MailAuthType.Login
+  }
 };
 
 /**
@@ -37,12 +39,14 @@ const loginAuthMailConfig: MailConfig = {
  */
 const gmailOAuth2Config: MailConfig = {
   driver: MailDriver.mail,
-  authType: MailAuthType.OAuth2,
-  user: `test@gmail.com`,
-  accessToken: `xxx`,
-  refreshToken: `xxx`,
-  clientId: `xxx`,
-  clientSecret: `xxx`
+  nodemailer: {
+    authType: MailAuthType.OAuth2,
+    user: `test@gmail.com`,
+    accessToken: `xxx`,
+    refreshToken: `xxx`,
+    clientId: `xxx`,
+    clientSecret: `xxx`
+  }
 };
 
 let mailer = new NodemailerMailSender();

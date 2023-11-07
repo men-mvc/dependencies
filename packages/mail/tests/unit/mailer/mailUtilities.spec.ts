@@ -31,7 +31,10 @@ describe(`Mail Utilities`, () => {
     it(`should return true if authType is ${MailAuthType.OAuth2}`, () => {
       getMailConfigStub = sinon.stub(mailUtilities, `getMailConfig`).returns(
         generateMailConfig({
-          authType: MailAuthType.OAuth2
+          nodemailer: {
+            user: '',
+            authType: MailAuthType.OAuth2
+          }
         })
       );
       expect(mailUtilities.isOAuth2AuthType()).toBeTruthy();
@@ -40,7 +43,10 @@ describe(`Mail Utilities`, () => {
     it(`should return false if authType is not ${MailAuthType.OAuth2}`, () => {
       getMailConfigStub = sinon.stub(mailUtilities, `getMailConfig`).returns(
         generateMailConfig({
-          authType: MailAuthType.Login
+          nodemailer: {
+            user: '',
+            authType: MailAuthType.Login
+          }
         })
       );
       expect(mailUtilities.isOAuth2AuthType()).toBeFalsy();
@@ -49,9 +55,12 @@ describe(`Mail Utilities`, () => {
     it(`should be case insensitive`, () => {
       getMailConfigStub = sinon.stub(mailUtilities, `getMailConfig`).returns(
         generateMailConfig({
-          authType: (
-            MailAuthType.OAuth2 as string
-          ).toUpperCase() as MailAuthType
+          nodemailer: {
+            user: '',
+            authType: (
+              MailAuthType.OAuth2 as string
+            ).toUpperCase() as MailAuthType
+          }
         })
       );
       expect(mailUtilities.isOAuth2AuthType()).toBeTruthy();
@@ -62,7 +71,10 @@ describe(`Mail Utilities`, () => {
     it(`should return true if authType is ${MailAuthType.Login}`, () => {
       getMailConfigStub = sinon.stub(mailUtilities, `getMailConfig`).returns(
         generateMailConfig({
-          authType: MailAuthType.Login
+          nodemailer: {
+            user: '',
+            authType: MailAuthType.Login
+          }
         })
       );
       expect(mailUtilities.isLoginAuthType()).toBeTruthy();
@@ -71,7 +83,10 @@ describe(`Mail Utilities`, () => {
     it(`should return false if authType is not ${MailAuthType.Login}`, () => {
       getMailConfigStub = sinon.stub(mailUtilities, `getMailConfig`).returns(
         generateMailConfig({
-          authType: MailAuthType.OAuth2
+          nodemailer: {
+            user: '',
+            authType: MailAuthType.OAuth2
+          }
         })
       );
       expect(mailUtilities.isLoginAuthType()).toBeFalsy();
@@ -80,7 +95,12 @@ describe(`Mail Utilities`, () => {
     it(`should be case sensitive`, () => {
       getMailConfigStub = sinon.stub(mailUtilities, `getMailConfig`).returns(
         generateMailConfig({
-          authType: (MailAuthType.Login as string).toUpperCase() as MailAuthType
+          nodemailer: {
+            user: '',
+            authType: (
+              MailAuthType.Login as string
+            ).toUpperCase() as MailAuthType
+          }
         })
       );
       expect(mailUtilities.isLoginAuthType()).toBeTruthy();
@@ -123,8 +143,10 @@ describe(`Mail Utilities`, () => {
     config: DeepPartial<MailConfig> = {}
   ): MailConfig => {
     const defaultConfig: MailConfig = {
-      user: faker.datatype.uuid(),
-      password: faker.datatype.uuid()
+      nodemailer: {
+        user: faker.datatype.uuid(),
+        password: faker.datatype.uuid()
+      }
     };
 
     return {
